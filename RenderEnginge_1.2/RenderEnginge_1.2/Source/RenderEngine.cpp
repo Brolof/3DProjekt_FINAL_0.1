@@ -63,6 +63,7 @@ bool RenderEngine::Init(){
 
 	CreatePlaneDataAndBuffers();
 
+
 	//Set Camera values
 	//fpsCam.SetPosition(0.0f, 0.4f, -6.0f);
 	camPosition = Vector4(-1.10f, 10.70f, -20.2f, 0.0f);
@@ -82,6 +83,11 @@ bool RenderEngine::Init(){
 	intArrayTex = theCustomImporter.GetindexArray();
 	renderObjects = theCustomImporter.GetObjects();
 	TextureFunc();
+
+	for (int i = 0; i < renderObjects.size(); i++) //skapar boundingboxar för objecten
+	{
+		renderObjects[i]->CreateBBOXVertexBuffer(gDevice);
+	}
 	
 	//ImportHeightmap("Textures/8x8Map.bmp", L"Textures/stone.dds", L"Textures/grass.dds", L"Textures/hippo.dds", L"Textures/splatmap.dds");
 	//ImportHeightmap("Textures/JäkligtFinHeightmap.bmp", L"Textures/stone.dds", L"Textures/grass.dds", L"Textures/hippo.dds", L"Textures/splatmap.dds");
@@ -911,6 +917,20 @@ void RenderEngine::Render(){
 		gDeviceContext->Draw(renderObjects[i]->nrElements * 3, 0);
 	}
 
+	//WIREFRAME!!!
+	gDeviceContext->VSSetShader(gWireFrameVertexShader, nullptr, 0);
+	gDeviceContext->PSSetShader(gWireFramePixelShader, nullptr, 0);
+	gDeviceContext->IASetInputLayout(gWireFrameLayout);
+	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
+	UINT32 vertexWireFrameSize = sizeof(float) * 3;
+
+	for (int i = 0; i < renderObjects.size(); i++)
+	{
+		//tex = intArrayTex[renderObjects[i]->indexT];
+		gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->boundingBoxVertexBuffer, &vertexWireFrameSize, &offset2);
+
+		gDeviceContext->Draw(16, 0);
+	}
 
 
 	//////////////////////////// Draw Terrain Onto Map
