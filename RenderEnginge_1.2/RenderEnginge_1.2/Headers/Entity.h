@@ -21,38 +21,26 @@ protected:
 	bool isStatic;
 	XMMATRIX rot;
 	XMMATRIX scale;
-
-
-
-	
+	XMMATRIX pos;	
 
 public:
-	XMMATRIX pos;
-	float xPos;
-	float yPos;
-
+	XMMATRIX world;
+	XMFLOAT3 center; //xyz, vart den är i maya världen förhållande till center punkten (origo)
 
 	int indexT;
 
 
-	Entity(XMFLOAT3 pos, bool isActive, bool isStatic){
+	Entity(XMFLOAT3 center, bool isActive, bool isStatic){
 		this->isActive = isActive;
 		this->isStatic = isStatic;
-		this->xPos = pos.x;
-		this->yPos = pos.y;
-
-
-		if (pos.x < 0.000001f && pos.x > -0.0000001f && pos.y < 0.000001f && pos.y > -0.0000001f){
-			this->pos = XMMatrixIdentity();
-			this->world = XMMatrixIdentity();
-		}
-		else
-			Translate(pos.x, pos.y, pos.z);
-
+		this->center = center;
+		
+	
+		pos = XMMatrixIdentity();
 		rot = XMMatrixIdentity(); //den rotationen och skalningen som den importeras in som kommer vara standard värdet
 		scale = XMMatrixIdentity();
 
-
+		CalculateWorld();
 
 
 	}
@@ -61,10 +49,10 @@ public:
 
 	}
 
-	XMMATRIX world;
+	
 
 	void Translate(float x, float y, float z){
-		pos = XMMatrixTranslation(this->xPos + x, this->yPos + y, z);
+		pos = XMMatrixTranslation(x, y, z);
 	}
 
 	void TranslateExact(float x, float y, float z){

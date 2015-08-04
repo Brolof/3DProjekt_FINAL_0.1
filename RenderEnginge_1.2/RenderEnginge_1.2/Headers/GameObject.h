@@ -39,17 +39,62 @@ struct MaterialProperties
 
 class GameObjects : public Entity{
 public:
+	BoundingBox bbox;
+
+	bool isTransparent;
+
+
+	// frustum culling
+	bool visibleThisFrame = false; //ska användas för ifall flera boxes säger olika om hurvida denna ska renderas eller inte
+	ID3D11Buffer *boundingBoxVertexBuffer;
+	void CreateBBOXVertexBuffer(ID3D11Device* gDevice){
+		BoundingBox box = bbox;
+		std::vector<XMFLOAT3> boxVertPoints;
+
+		boxVertPoints.push_back(XMFLOAT3(box.Center.x - box.Extents.x, box.Center.y - box.Extents.y, box.Center.z - box.Extents.z)); //0,0,0
+		boxVertPoints.push_back(XMFLOAT3(box.Center.x + box.Extents.x, box.Center.y - box.Extents.y, box.Center.z - box.Extents.z)); //1,0,0
+		boxVertPoints.push_back(XMFLOAT3(box.Center.x + box.Extents.x, box.Center.y + box.Extents.y, box.Center.z - box.Extents.z)); //1,1,0
+		boxVertPoints.push_back(XMFLOAT3(box.Center.x - box.Extents.x, box.Center.y + box.Extents.y, box.Center.z - box.Extents.z)); //0,1,0
+		boxVertPoints.push_back(XMFLOAT3(box.Center.x - box.Extents.x, box.Center.y - box.Extents.y, box.Center.z - box.Extents.z)); //0,0,0
+
+		boxVertPoints.push_back(XMFLOAT3(box.Center.x - box.Extents.x, box.Center.y - box.Extents.y, box.Center.z + box.Extents.z)); //0,0,1
+		boxVertPoints.push_back(XMFLOAT3(box.Center.x + box.Extents.x, box.Center.y - box.Extents.y, box.Center.z + box.Extents.z)); //1,0,1
+		boxVertPoints.push_back(XMFLOAT3(box.Center.x + box.Extents.x, box.Center.y + box.Extents.y, box.Center.z + box.Extents.z)); //1,1,1
+		boxVertPoints.push_back(XMFLOAT3(box.Center.x - box.Extents.x, box.Center.y + box.Extents.y, box.Center.z + box.Extents.z)); //0,1,1
+		boxVertPoints.push_back(XMFLOAT3(box.Center.x - box.Extents.x, box.Center.y - box.Extents.y, box.Center.z + box.Extents.z)); //0,0,1
+
+		boxVertPoints.push_back(XMFLOAT3(box.Center.x + box.Extents.x, box.Center.y - box.Extents.y, box.Center.z + box.Extents.z)); //1,0,1
+		boxVertPoints.push_back(XMFLOAT3(box.Center.x + box.Extents.x, box.Center.y - box.Extents.y, box.Center.z - box.Extents.z)); //1,0,0
+		boxVertPoints.push_back(XMFLOAT3(box.Center.x + box.Extents.x, box.Center.y + box.Extents.y, box.Center.z - box.Extents.z)); //1,1,0
+		boxVertPoints.push_back(XMFLOAT3(box.Center.x + box.Extents.x, box.Center.y + box.Extents.y, box.Center.z + box.Extents.z)); //1,1,1
+		boxVertPoints.push_back(XMFLOAT3(box.Center.x - box.Extents.x, box.Center.y + box.Extents.y, box.Center.z + box.Extents.z)); //0,1,1
+		boxVertPoints.push_back(XMFLOAT3(box.Center.x - box.Extents.x, box.Center.y + box.Extents.y, box.Center.z - box.Extents.z)); //0,1,0
+
+
+		D3D11_BUFFER_DESC bDesc;
+		ZeroMemory(&bDesc, sizeof(D3D11_BUFFER_DESC));
+		bDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		bDesc.Usage = D3D11_USAGE_DEFAULT;
+		bDesc.ByteWidth = sizeof(XMFLOAT3)* (boxVertPoints.size());
+
+		D3D11_SUBRESOURCE_DATA data;
+		data.pSysMem = boxVertPoints.data();//<--------
+		HRESULT VertexBufferChecker = gDevice->CreateBuffer(&bDesc, &data, &boundingBoxVertexBuffer);
+	}
+
 	int texIndex;
-	GameObjects(ID3D11Buffer *b, XMFLOAT3 pos, bool isActive, bool isStatic) : Entity(pos, isActive, isStatic){
+	GameObjects(ID3D11Buffer *b, BoundingBox bb, bool transparent, XMFLOAT3 center, bool isActive, bool isStatic) : Entity(center, isActive, isStatic){
 		this->vertexBuffer = b;
+		this->bbox = bb;
+		this->isTransparent = transparent;
 
 	}
 
 	GameObjects(){}
 
 	~GameObjects(){
-		//vertexBuffer->Release();
-		//indexBuffer->Release();
+		vertexBuffer->Release();
+		indexBuffer->Release();
 	}
 
 	ID3D11Buffer* GetVertexBuffer(){
@@ -63,6 +108,10 @@ public:
 	ID3D11Buffer* GetIndexBuffer(){
 		return indexBuffer;
 	}
+	/**
+	XMFLOAT3 GetPosition(){
+		return position;
+	}**/
 
 	int nrElements;
 
@@ -74,10 +123,7 @@ public:
 
 
 protected:
-	struct Triangle{
-		XMVECTOR x, y, z;
-	};
-	//texture
+	
 	
 };
 
