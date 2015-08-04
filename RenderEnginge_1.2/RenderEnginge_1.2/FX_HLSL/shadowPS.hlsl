@@ -122,7 +122,7 @@ float4 PS_main(VS_OUT input) : SV_TARGET
 	float4 textureColor2 = depthMapTexture.Sample(sampWrap, input.tex);
 
 	// Combine the light and texture color.
-	color = color * textureColor;
+	color =  textureColor;
 	return float4(color);
 	return float4(1.0f,0.0f,0.0f,1.0f);
 }

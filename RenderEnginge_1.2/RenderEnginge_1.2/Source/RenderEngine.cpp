@@ -913,94 +913,94 @@ void RenderEngine::Render(){
 
 
 
-	////////////////////////// Draw Terrain Onto Map
-	// Here we will draw our map, which is just the terrain from the mapCam's view
+	//////////////////////////// Draw Terrain Onto Map
+	//// Here we will draw our map, which is just the terrain from the mapCam's view
 
-	// Set our maps Render Target
-	gDeviceContext->OMSetRenderTargets(1, &renderTargetViewMap, gDepthStencilView);
+	//// Set our maps Render Target
+	//gDeviceContext->OMSetRenderTargets(1, &renderTargetViewMap, gDepthStencilView);
 
-	// Now clear the render target
-	gDeviceContext->ClearRenderTargetView(renderTargetViewMap, clearColor);
-	gDeviceContext->RSSetViewports(1, &shadowVP);
-	// Update the map's camera
-	XMVECTOR mapCamPosition = XMVectorSet(5.0f, 5.0f, 5.0f, 0.0f);
-	XMVECTOR mapCamTarget = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
-	XMVECTOR mapCamUp = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
-
-
-	//Set the View matrix
-	mapView = XMMatrixLookAtLH(mapCamPosition, mapCamTarget, mapCamUp);
-	mapProjection = XMMatrixOrthographicLH(SHADOWMAP_WIDTH, SHADOWMAP_HEIGHT, 1.0f, 100.0f);
-	// Since we just drew the terrain, and all the states are already set the way we want them
-	// (besides the render target) we just need to provide the shaders with the new WVP and draw the terrain again
-	XMStoreFloat4x4(&WorldMatrix1.View, XMMatrixTranspose(CamView));
-	XMStoreFloat4x4(&WorldMatrix1.Projection, XMMatrixTranspose(CamProjection));
-	XMStoreFloat4x4(&WorldMatrix1.WorldSpace, XMMatrixTranspose(identityM));
-	XMStoreFloat4x4(&WorldMatrix1.InvWorld, XMMatrixTranspose(WorldInv));
-	XMStoreFloat4x4(&WorldMatrix1.lightView, XMMatrixTranspose(CamView));
-	XMStoreFloat4x4(&WorldMatrix1.lightProjection, XMMatrixTranspose(CamProjection));
+	//// Now clear the render target
+	//gDeviceContext->ClearRenderTargetView(renderTargetViewMap, clearColor);
+	//gDeviceContext->RSSetViewports(1, &shadowVP);
+	//// Update the map's camera
+	//XMVECTOR mapCamPosition = XMVectorSet(5.0f, 5.0f, 5.0f, 0.0f);
+	//XMVECTOR mapCamTarget = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+	//XMVECTOR mapCamUp = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
 
 
-	XMStoreFloat4x4(&WorldMatrix1.WVP, XMMatrixTranspose(CamView*CamProjection*identityM));
-
-	gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
-	gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
-	UINT32 vertexSize3 = sizeof(float) * 8;
-	UINT32 offset3 = 0;
-
-	tex = 0;
-	gDeviceContext->IASetInputLayout(gVertexLayout);
-	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	gDeviceContext->VSSetShader(dVertexShader, nullptr, 0);
-	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
-	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
-	gDeviceContext->PSSetShader(dPixelShader, nullptr, 0);
-	// Set the sampler states to the pixel shader.
-	gDeviceContext->PSSetSamplers(0, 1, &sampState1);
-	gDeviceContext->PSSetSamplers(1, 1, &sampState2);
-
-	//BACKFACE CULLING
-	//if (Bculling == TRUE)
-	//else if (Bculling == FALSE)
-	//	gDeviceContext->GSSetShader(nullptr, nullptr, 0);
-
-	//gDeviceContext->GSSetShader(gBackFaceShader, nullptr, 0);
-
-	for (int i = 0; i < renderObjects.size(); i++)
-	{
-		tex = intArrayTex[renderObjects[i]->indexT];
-		gDeviceContext->PSSetShaderResources(0, 1, &RSWArray[tex]);
-		gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->vertexBuffer, &vertexSize3, &offset3);
-
-		gDeviceContext->Draw(renderObjects[i]->nrElements * 3, 0);
-	}
-
-	// DRAW FROM MAP PERSPECTIVE
+	////Set the View matrix
+	//mapView = XMMatrixLookAtLH(mapCamPosition, mapCamTarget, mapCamUp);
+	//mapProjection = XMMatrixOrthographicLH(SHADOWMAP_WIDTH, SHADOWMAP_HEIGHT, 1.0f, 100.0f);
+	//// Since we just drew the terrain, and all the states are already set the way we want them
+	//// (besides the render target) we just need to provide the shaders with the new WVP and draw the terrain again
+	//XMStoreFloat4x4(&WorldMatrix1.View, XMMatrixTranspose(CamView));
+	//XMStoreFloat4x4(&WorldMatrix1.Projection, XMMatrixTranspose(CamProjection));
+	//XMStoreFloat4x4(&WorldMatrix1.WorldSpace, XMMatrixTranspose(identityM));
+	//XMStoreFloat4x4(&WorldMatrix1.InvWorld, XMMatrixTranspose(WorldInv));
+	//XMStoreFloat4x4(&WorldMatrix1.lightView, XMMatrixTranspose(CamView));
+	//XMStoreFloat4x4(&WorldMatrix1.lightProjection, XMMatrixTranspose(CamProjection));
 
 
+	//XMStoreFloat4x4(&WorldMatrix1.WVP, XMMatrixTranspose(CamView*CamProjection*identityM));
 
-	gDeviceContext->OMSetRenderTargets(1, &gBackRufferRenderTargetView, gDepthStencilView);
+	//gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
+	//gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
+	//UINT32 vertexSize3 = sizeof(float) * 8;
+	//UINT32 offset3 = 0;
 
-	//RENDER TestPlane 2 Tris 
-	UINT32 vertexSize = sizeof(float)* 8;
-	UINT32 offset = 0;
-	 WorldGun = XMMatrixScaling(0.5f, 0.5f, 0.0f) * XMMatrixTranslation(0.5f, -0.5f, 0.0f);
-	 XMStoreFloat4x4(&WorldMatrix1.WVP, XMMatrixTranspose(WorldGun));
-	gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
-	gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
+	//tex = 0;
+	//gDeviceContext->IASetInputLayout(gVertexLayout);
+	//gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	//gDeviceContext->VSSetShader(dVertexShader, nullptr, 0);
+	//gDeviceContext->HSSetShader(nullptr, nullptr, 0);
+	//gDeviceContext->DSSetShader(nullptr, nullptr, 0);
+	//gDeviceContext->PSSetShader(dPixelShader, nullptr, 0);
+	//// Set the sampler states to the pixel shader.
+	//gDeviceContext->PSSetSamplers(0, 1, &sampState1);
+	//gDeviceContext->PSSetSamplers(1, 1, &sampState2);
+
+	////BACKFACE CULLING
+	////if (Bculling == TRUE)
+	////else if (Bculling == FALSE)
+	////	gDeviceContext->GSSetShader(nullptr, nullptr, 0);
+
+	////gDeviceContext->GSSetShader(gBackFaceShader, nullptr, 0);
+
+	//for (int i = 0; i < renderObjects.size(); i++)
+	//{
+	//	tex = intArrayTex[renderObjects[i]->indexT];
+	//	gDeviceContext->PSSetShaderResources(0, 1, &RSWArray[tex]);
+	//	gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->vertexBuffer, &vertexSize3, &offset3);
+
+	//	gDeviceContext->Draw(renderObjects[i]->nrElements * 3, 0);
+	//}
+
+	//// DRAW FROM MAP PERSPECTIVE
 
 
-	gDeviceContext->IASetInputLayout(gVertexLayout);
-	gDeviceContext->IASetVertexBuffers(0, 1, &gVertexBuffer, &vertexSize, &offset);
-	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-	gDeviceContext->VSSetShader(shader2DVS, nullptr, 0);
-	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
-	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
-	gDeviceContext->PSSetShader(shader2DPS, nullptr, 0);
-	gDeviceContext->PSSetShaderResources(0, 1, &RSWArray[tex]);
 
-	gDeviceContext->Draw(4, 0);
+	//gDeviceContext->OMSetRenderTargets(1, &gBackRufferRenderTargetView, gDepthStencilView);
+
+	////RENDER TestPlane 2 Tris 
+	//UINT32 vertexSize = sizeof(float)* 8;
+	//UINT32 offset = 0;
+	// WorldGun = XMMatrixScaling(0.5f, 0.5f, 0.0f) * XMMatrixTranslation(0.5f, -0.5f, 0.0f);
+	// XMStoreFloat4x4(&WorldMatrix1.WVP, XMMatrixTranspose(WorldGun));
+	//gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
+	//gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
+
+
+	//gDeviceContext->IASetInputLayout(gVertexLayout);
+	//gDeviceContext->IASetVertexBuffers(0, 1, &gVertexBuffer, &vertexSize, &offset);
+	//gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	//gDeviceContext->VSSetShader(shader2DVS, nullptr, 0);
+	//gDeviceContext->HSSetShader(nullptr, nullptr, 0);
+	//gDeviceContext->DSSetShader(nullptr, nullptr, 0);
+	//gDeviceContext->PSSetShader(shader2DPS, nullptr, 0);
+	//gDeviceContext->PSSetShaderResources(0, 1, &RSWArray[tex]);
+
+	//gDeviceContext->Draw(4, 0);
 
 	//växla back/front buffer
 	gSwapChain->Present(0, 0); 
