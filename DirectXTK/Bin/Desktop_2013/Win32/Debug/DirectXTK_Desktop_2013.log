@@ -1,0 +1,67 @@
+﻿Build started 30.06.2015 17:40:14.
+     1>Project "C:\OSKAR\3DProjectet_1.2\DirectXTK\DirectXTK_Desktop_2013.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /IC:\OSKAR\3DProjectet_1.2\DirectXTK\Inc /ZI /nologo /W4 /WX- /Od /Oy- /D _WIN32_WINNT=0x0600 /D _WIN7_PLATFORM_UPDATE /D WIN32 /D _DEBUG /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /arch:SSE2 /fp:fast /Zc:wchar_t /Zc:forScope /Yc"pch.h" /Fp"Bin\Desktop_2013\Win32\Debug\DirectXTK.pch" /Fo"Bin\Desktop_2013\Win32\Debug\\" /Fd"Bin\Desktop_2013\Win32\Debug\DirectXTK.pdb" /Gd /TP /analyze- /errorReport:prompt Src\pch.cpp
+         pch.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /IC:\OSKAR\3DProjectet_1.2\DirectXTK\Inc /ZI /nologo /W4 /WX- /Od /Oy- /D _WIN32_WINNT=0x0600 /D _WIN7_PLATFORM_UPDATE /D WIN32 /D _DEBUG /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /arch:SSE2 /fp:fast /Zc:wchar_t /Zc:forScope /Yu"pch.h" /Fp"Bin\Desktop_2013\Win32\Debug\DirectXTK.pch" /Fo"Bin\Desktop_2013\Win32\Debug\\" /Fd"Bin\Desktop_2013\Win32\Debug\DirectXTK.pdb" /Gd /TP /analyze- /errorReport:prompt Src\AlphaTestEffect.cpp Src\BasicEffect.cpp Src\CommonStates.cpp Src\DDSTextureLoader.cpp Src\DGSLEffect.cpp Src\DGSLEffectFactory.cpp Src\DualTextureEffect.cpp Src\BinaryReader.cpp Src\EffectCommon.cpp Src\EffectFactory.cpp Src\EnvironmentMapEffect.cpp Src\GamePad.cpp Src\GeometricPrimitive.cpp Src\Model.cpp Src\ModelLoadCMO.cpp Src\ModelLoadSDKMESH.cpp Src\ModelLoadVBO.cpp Src\ScreenGrab.cpp Src\SimpleMath.cpp Src\SkinnedEffect.cpp Src\SpriteBatch.cpp Src\PrimitiveBatch.cpp Src\SpriteFont.cpp Src\VertexTypes.cpp Src\WICTextureLoader.cpp
+         WICTextureLoader.cpp
+         VertexTypes.cpp
+         SpriteFont.cpp
+         PrimitiveBatch.cpp
+         SpriteBatch.cpp
+         SkinnedEffect.cpp
+         SimpleMath.cpp
+         ScreenGrab.cpp
+         ModelLoadVBO.cpp
+         ModelLoadSDKMESH.cpp
+         ModelLoadCMO.cpp
+         Model.cpp
+         GeometricPrimitive.cpp
+         GamePad.cpp
+         EnvironmentMapEffect.cpp
+         EffectFactory.cpp
+         EffectCommon.cpp
+         BinaryReader.cpp
+         DualTextureEffect.cpp
+         DGSLEffectFactory.cpp
+         Generating Code...
+         Compiling...
+         DGSLEffect.cpp
+         DDSTextureLoader.cpp
+         CommonStates.cpp
+         BasicEffect.cpp
+         AlphaTestEffect.cpp
+         Generating Code...
+       Lib:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\Lib.exe /OUT:"Bin\Desktop_2013\Win32\Debug\DirectXTK.lib" /NOLOGO Bin\Desktop_2013\Win32\Debug\AlphaTestEffect.obj
+         Bin\Desktop_2013\Win32\Debug\BasicEffect.obj
+         Bin\Desktop_2013\Win32\Debug\CommonStates.obj
+         Bin\Desktop_2013\Win32\Debug\DDSTextureLoader.obj
+         Bin\Desktop_2013\Win32\Debug\DGSLEffect.obj
+         Bin\Desktop_2013\Win32\Debug\DGSLEffectFactory.obj
+         Bin\Desktop_2013\Win32\Debug\DualTextureEffect.obj
+         Bin\Desktop_2013\Win32\Debug\BinaryReader.obj
+         Bin\Desktop_2013\Win32\Debug\EffectCommon.obj
+         Bin\Desktop_2013\Win32\Debug\EffectFactory.obj
+         Bin\Desktop_2013\Win32\Debug\EnvironmentMapEffect.obj
+         Bin\Desktop_2013\Win32\Debug\GamePad.obj
+         Bin\Desktop_2013\Win32\Debug\GeometricPrimitive.obj
+         Bin\Desktop_2013\Win32\Debug\Model.obj
+         Bin\Desktop_2013\Win32\Debug\ModelLoadCMO.obj
+         Bin\Desktop_2013\Win32\Debug\ModelLoadSDKMESH.obj
+         Bin\Desktop_2013\Win32\Debug\ModelLoadVBO.obj
+         Bin\Desktop_2013\Win32\Debug\pch.obj
+         Bin\Desktop_2013\Win32\Debug\ScreenGrab.obj
+         Bin\Desktop_2013\Win32\Debug\SimpleMath.obj
+         Bin\Desktop_2013\Win32\Debug\SkinnedEffect.obj
+         Bin\Desktop_2013\Win32\Debug\SpriteBatch.obj
+         Bin\Desktop_2013\Win32\Debug\PrimitiveBatch.obj
+         Bin\Desktop_2013\Win32\Debug\SpriteFont.obj
+         Bin\Desktop_2013\Win32\Debug\VertexTypes.obj
+         Bin\Desktop_2013\Win32\Debug\WICTextureLoader.obj
+         DirectXTK_Desktop_2013.vcxproj -> C:\OSKAR\3DProjectet_1.2\DirectXTK\Bin\Desktop_2013\Win32\Debug\DirectXTK.lib
+     1>Done Building Project "C:\OSKAR\3DProjectet_1.2\DirectXTK\DirectXTK_Desktop_2013.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:07.87

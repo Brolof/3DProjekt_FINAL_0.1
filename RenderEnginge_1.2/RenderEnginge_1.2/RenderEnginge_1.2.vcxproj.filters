@@ -1,0 +1,170 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Resource Files\VertexShaders">
+      <UniqueIdentifier>{8229cdac-4025-48b9-9363-6f8ee74dc1fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\GeometryShaders">
+      <UniqueIdentifier>{567e2606-d42f-4773-8be4-2efcf52ac222}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\DomainShaders">
+      <UniqueIdentifier>{42a3258c-92a0-4a43-8cb3-628f6478c10c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\PixelShaders">
+      <UniqueIdentifier>{6e6672f2-5954-4e32-b10c-179d5995a9e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Main">
+      <UniqueIdentifier>{0972956e-7a31-42e0-bb4b-4794bf2d5fc2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Visual">
+      <UniqueIdentifier>{63574298-50e5-4429-9301-b595f9ecf467}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Main">
+      <UniqueIdentifier>{20452cd4-c524-4637-bf63-59c90de60f67}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Visual">
+      <UniqueIdentifier>{023682db-a2e2-46bd-b253-3a428d9334cf}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\Cam.cpp">
+      <Filter>Source Files\Visual</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\depthClass.cpp">
+      <Filter>Source Files\Visual</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RenderToTexture.cpp">
+      <Filter>Source Files\Visual</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GameTimer.cpp">
+      <Filter>Source Files\Main</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\HeightMap.cpp">
+      <Filter>Source Files\Main</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Input.cpp">
+      <Filter>Source Files\Main</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\OBJ.cpp">
+      <Filter>Source Files\Main</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RenderEngine.cpp">
+      <Filter>Source Files\Main</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Winmain.cpp">
+      <Filter>Source Files\Main</Filter>
+    </ClCompile>
+    <ClCompile Include="BINimporter.cpp">
+      <Filter>Source Files\Main</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="FX_HLSL\BackFaceGeometryShader.hlsl">
+      <Filter>Resource Files\GeometryShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\BackFaceGShader.hlsl">
+      <Filter>Resource Files\GeometryShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\deafultGS.hlsl">
+      <Filter>Resource Files\GeometryShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\deafultTexGS.hlsl">
+      <Filter>Resource Files\GeometryShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\defaultTexPS.hlsl">
+      <Filter>Resource Files\PixelShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\deafultPS.hlsl">
+      <Filter>Resource Files\PixelShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\depthPS.hlsl">
+      <Filter>Resource Files\PixelShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\hitPixelShader.hlsl">
+      <Filter>Resource Files\PixelShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\RGBSplatmapPS.hlsl">
+      <Filter>Resource Files\PixelShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\shadowPS.hlsl">
+      <Filter>Resource Files\PixelShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\WireFramePS.hlsl">
+      <Filter>Resource Files\PixelShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\WireFramePSContainsTest.hlsl">
+      <Filter>Resource Files\PixelShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\deafultTexVS.hlsl">
+      <Filter>Resource Files\VertexShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\deafultVS.hlsl">
+      <Filter>Resource Files\VertexShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\depthVS.hlsl">
+      <Filter>Resource Files\VertexShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\shadowVS.hlsl">
+      <Filter>Resource Files\VertexShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\WireFrameVS.hlsl">
+      <Filter>Resource Files\VertexShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\LightHelper.fx">
+      <Filter>Resource Files\PixelShaders</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Headers\RenderToTexture.h">
+      <Filter>Header Files\Visual</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\TextureLoader.h">
+      <Filter>Header Files\Visual</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\lights.h">
+      <Filter>Header Files\Visual</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\HeightMap.h">
+      <Filter>Header Files\Visual</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\depthClass.h">
+      <Filter>Header Files\Visual</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Cam.h">
+      <Filter>Header Files\Visual</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\BINimporter.h">
+      <Filter>Header Files\Main</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Entity.h">
+      <Filter>Header Files\Main</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\GameObject.h">
+      <Filter>Header Files\Main</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\GameTimer.h">
+      <Filter>Header Files\Main</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Input.h">
+      <Filter>Header Files\Main</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\OBJ.h">
+      <Filter>Header Files\Main</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\RenderEngine.h">
+      <Filter>Header Files\Main</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
