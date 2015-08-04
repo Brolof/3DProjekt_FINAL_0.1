@@ -65,7 +65,7 @@ bool RenderEngine::Init(){
 
 	//Set Camera values
 	//fpsCam.SetPosition(0.0f, 0.4f, -6.0f);
-	camPosition = Vector4(-1.10f, 10.70f, -20.2f, 0.0f);
+	camPosition = Vector4(-1.10f, 5.70f, -20.2f, 0.0f);
 	fpsCam.SetLens(0.25f*3.14f, screen_Width / screen_Height, 1.0f, 100.0f);
 	
 
@@ -261,7 +261,7 @@ void RenderEngine::TextureFunc(){
 	//Set the View matrix
 	mapView = XMMatrixLookAtLH(mapCamPosition, mapCamTarget, mapCamUp);
 	// Build an orthographic projection matrix
-	mapProjection = XMMatrixOrthographicLH(512, 512, 1.0f, 1000.0f);
+	mapProjection = XMMatrixOrthographicLH(512, 512, 1.0f, 100.0f);
 
 
 	HRESULT texCheck;
@@ -879,37 +879,37 @@ void RenderEngine::Render(){
 
 
 
-	UINT32 vertexSize2 = sizeof(float) * 8;
-	UINT32 offset2 = 0;
+	//UINT32 vertexSize2 = sizeof(float) * 8;
+	//UINT32 offset2 = 0;
 
-	tex = 0;
-	gDeviceContext->IASetInputLayout(gVertexLayout);
-	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	gDeviceContext->VSSetShader(shadowVertexShader, nullptr, 0);
-	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
-	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
-	gDeviceContext->PSSetShader(shadowPixelShader, nullptr, 0);
-	// Set the sampler states to the pixel shader.
-	gDeviceContext->PSSetSamplers(0, 1, &sampState1);
-	gDeviceContext->PSSetSamplers(1, 1, &sampState2);
+	//tex = 0;
+	//gDeviceContext->IASetInputLayout(gVertexLayout);
+	//gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	//gDeviceContext->VSSetShader(shadowVertexShader, nullptr, 0);
+	//gDeviceContext->HSSetShader(nullptr, nullptr, 0);
+	//gDeviceContext->DSSetShader(nullptr, nullptr, 0);
+	//gDeviceContext->PSSetShader(shadowPixelShader, nullptr, 0);
+	//// Set the sampler states to the pixel shader.
+	//gDeviceContext->PSSetSamplers(0, 1, &sampState1);
+	//gDeviceContext->PSSetSamplers(1, 1, &sampState2);
 
 
-	//BACKFACE CULLING
-	//if (Bculling == TRUE)
-	//else if (Bculling == FALSE)
-	//	gDeviceContext->GSSetShader(nullptr, nullptr, 0);
+	////BACKFACE CULLING
+	////if (Bculling == TRUE)
+	////else if (Bculling == FALSE)
+	////	gDeviceContext->GSSetShader(nullptr, nullptr, 0);
 
-	//gDeviceContext->GSSetShader(gBackFaceShader, nullptr, 0);
-	gDeviceContext->PSSetShaderResources(1, 1, &shaderResourceViewMap);
+	////gDeviceContext->GSSetShader(gBackFaceShader, nullptr, 0);
+	//gDeviceContext->PSSetShaderResources(1, 1, &shaderResourceViewMap);
 
-	for (int i = 0; i < renderObjects.size(); i++)
-	{
-		tex = intArrayTex[renderObjects[i]->indexT];
-		gDeviceContext->PSSetShaderResources(0, 1, &RSWArray[tex]);
-		gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->vertexBuffer, &vertexSize2, &offset2);
+	//for (int i = 0; i < renderObjects.size(); i++)
+	//{
+	//	tex = intArrayTex[renderObjects[i]->indexT];
+	//	gDeviceContext->PSSetShaderResources(0, 1, &RSWArray[tex]);
+	//	gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->vertexBuffer, &vertexSize2, &offset2);
 
-		gDeviceContext->Draw(renderObjects[i]->nrElements * 3, 0);
-	}
+	//	gDeviceContext->Draw(renderObjects[i]->nrElements * 3, 0);
+	//}
 
 
 
@@ -980,27 +980,27 @@ void RenderEngine::Render(){
 
 
 
-	gDeviceContext->OMSetRenderTargets(1, &gBackRufferRenderTargetView, gDepthStencilView);
+	//gDeviceContext->OMSetRenderTargets(1, &gBackRufferRenderTargetView, gDepthStencilView);
 
-	//RENDER TestPlane 2 Tris 
-	UINT32 vertexSize = sizeof(float)* 8;
-	UINT32 offset = 0;
-	 WorldGun = XMMatrixScaling(0.5f, 0.5f, 0.0f) * XMMatrixTranslation(0.5f, -0.5f, 0.0f);
-	 XMStoreFloat4x4(&WorldMatrix1.WVP, XMMatrixTranspose(WorldGun));
-	gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
-	gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
+	////RENDER TestPlane 2 Tris 
+	//UINT32 vertexSize = sizeof(float)* 8;
+	//UINT32 offset = 0;
+	// WorldGun = XMMatrixScaling(0.5f, 0.5f, 0.0f) * XMMatrixTranslation(0.5f, -0.5f, 0.0f);
+	// XMStoreFloat4x4(&WorldMatrix1.WVP, XMMatrixTranspose(WorldGun));
+	//gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
+	//gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
 
+	//gDeviceContext->PSSetShaderResources(1, 1, &shaderResourceViewMap);
+	//gDeviceContext->IASetInputLayout(gVertexLayout);
+	//gDeviceContext->IASetVertexBuffers(0, 1, &gVertexBuffer, &vertexSize, &offset);
+	//gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	//gDeviceContext->VSSetShader(shader2DVS, nullptr, 0);
+	//gDeviceContext->HSSetShader(nullptr, nullptr, 0);
+	//gDeviceContext->DSSetShader(nullptr, nullptr, 0);
+	//gDeviceContext->PSSetShader(shader2DPS, nullptr, 0);
+	//gDeviceContext->PSSetShaderResources(0, 1, &RSWArray[tex]);
 
-	gDeviceContext->IASetInputLayout(gVertexLayout);
-	gDeviceContext->IASetVertexBuffers(0, 1, &gVertexBuffer, &vertexSize, &offset);
-	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-	gDeviceContext->VSSetShader(shader2DVS, nullptr, 0);
-	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
-	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
-	gDeviceContext->PSSetShader(shader2DPS, nullptr, 0);
-	gDeviceContext->PSSetShaderResources(0, 1, &RSWArray[tex]);
-
-	gDeviceContext->Draw(4, 0);
+	//gDeviceContext->Draw(4, 0);
 
 	//växla back/front buffer
 	gSwapChain->Present(0, 0); 

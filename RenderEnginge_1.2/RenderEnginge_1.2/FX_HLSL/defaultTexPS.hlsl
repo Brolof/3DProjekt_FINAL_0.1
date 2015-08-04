@@ -1,4 +1,4 @@
-Texture2D txDiffuse : register(t0);
+Texture2D txDiffuse : register(t1);
 SamplerState sampAni: register(s0);
 
 

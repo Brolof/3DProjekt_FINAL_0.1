@@ -1,5 +1,5 @@
-﻿Build started 2015-08-04 10:50:56.
-     1>Project "F:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\RenderEnginge_1.2.vcxproj" on node 2 (Build target(s)).
+﻿Build started 2015-08-04 13:31:44.
+     1>Project "C:\Users\osha13\3DProjekt_FINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\RenderEnginge_1.2.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /IF:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\Headers /IC:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\Headers /Zi /nologo /W3 /WX- /sdl /Od /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Debug\\" /Fd"x64\Debug\vc120.pdb" /Gd /TP /errorReport:prompt Source\RenderEngine.cpp
          RenderEngine.cpp
@@ -17,7 +17,7 @@
      1>Source\RenderEngine.cpp(1301): warning C4305: '+=' : truncation from 'double' to 'float'
      1>Source\RenderEngine.cpp(1385): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
        Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"F:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\x64\Debug\RenderEnginge_1.2.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"F:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\x64\Debug\RenderEnginge_1.2.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"F:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\x64\Debug\RenderEnginge_1.2.lib" /MACHINE:X64 x64\Debug\BINimporter.obj
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\osha13\3DProjekt_FINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\x64\Debug\RenderEnginge_1.2.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\osha13\3DProjekt_FINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\x64\Debug\RenderEnginge_1.2.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\osha13\3DProjekt_FINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\x64\Debug\RenderEnginge_1.2.lib" /MACHINE:X64 x64\Debug\BINimporter.obj
          x64\Debug\Cam.obj
          x64\Debug\depthClass.obj
          x64\Debug\GameTimer.obj
@@ -27,10 +27,10 @@
          x64\Debug\RenderEngine.obj
          x64\Debug\RenderToTexture.obj
          x64\Debug\Winmain.obj
-         F:\OSKAR\3DProjectet_1.2\DirectXTK\Bin\Desktop_2013\x64\Debug\DirectXTK.lib
-         RenderEnginge_1.2.vcxproj -> F:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\x64\Debug\RenderEnginge_1.2.exe
-     1>Done Building Project "F:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\RenderEnginge_1.2.vcxproj" (Build target(s)).
+         C:\Users\osha13\3DProjekt_FINAL\3DProjekt_FINAL_0.1\DirectXTK\Bin\Desktop_2013\x64\Debug\DirectXTK.lib
+         RenderEnginge_1.2.vcxproj -> C:\Users\osha13\3DProjekt_FINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\x64\Debug\RenderEnginge_1.2.exe
+     1>Done Building Project "C:\Users\osha13\3DProjekt_FINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\RenderEnginge_1.2.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:16.14
+Time Elapsed 00:00:02.72

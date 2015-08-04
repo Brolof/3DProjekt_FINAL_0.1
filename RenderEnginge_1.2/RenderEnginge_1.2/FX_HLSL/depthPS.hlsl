@@ -15,7 +15,7 @@ float4 PS_main(PixelInputType input) : SV_TARGET
 	depthValue = input.depthPosition.z / input.depthPosition.w;
 
 	color = float4(depthValue, depthValue, depthValue, 1.0f);
-	//// First 10% of the depth buffer color red.
+	// First 10% of the depth buffer color red.
 	//if (depthValue < 0.9f)
 	//{
 	//	color = float4(1.0, 0.0f, 0.0f, 1.0f);
