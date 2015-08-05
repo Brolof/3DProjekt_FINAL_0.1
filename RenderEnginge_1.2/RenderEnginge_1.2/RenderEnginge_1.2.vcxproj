@@ -68,10 +68,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ExecutablePath>$(ExecutablePath)</ExecutablePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
-    <IncludePath>C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\DirectXTK\Inc;F:\OSKAR\3DProjectet_1.2\DirectXTK\Inc;C:\OSKAR\3DProjectet_1.2\DirectXTK\Inc;$(IncludePath)</IncludePath>
+    <IncludePath>D:\New3dProject\3DProjekt_FINAL_0.1\DirectXTK\Inc;C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\DirectXTK\Inc;F:\OSKAR\3DProjectet_1.2\DirectXTK\Inc;C:\OSKAR\3DProjectet_1.2\DirectXTK\Inc;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\DirectXTK\Inc;F:\OSKAR\3DProjectet_1.2\DirectXTK\Inc;C:\OSKAR\3DProjectet_1.2\DirectXTK\Inc;$(IncludePath)</IncludePath>
+    <IncludePath>D:\New3dProject\3DProjekt_FINAL_0.1\DirectXTK\Inc;C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\DirectXTK\Inc;F:\OSKAR\3DProjectet_1.2\DirectXTK\Inc;C:\OSKAR\3DProjectet_1.2\DirectXTK\Inc;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -89,7 +89,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers;F:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\Headers;C:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\Headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\New3dProject\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers;C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers;F:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\Headers;C:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\Headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -118,7 +118,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers;F:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\Headers;C:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\Headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\New3dProject\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers;C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers;F:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\Headers;C:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\Headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

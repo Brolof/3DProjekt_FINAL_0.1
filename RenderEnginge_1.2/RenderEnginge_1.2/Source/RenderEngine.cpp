@@ -891,10 +891,10 @@ void RenderEngine::Render(){
 	tex = 0;
 	gDeviceContext->IASetInputLayout(gVertexLayout);
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	gDeviceContext->VSSetShader(shadowVertexShader, nullptr, 0);
+	gDeviceContext->VSSetShader(dVertexShader, nullptr, 0);
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
-	gDeviceContext->PSSetShader(shadowPixelShader, nullptr, 0);
+	gDeviceContext->PSSetShader(dPixelShader, nullptr, 0);
 	// Set the sampler states to the pixel shader.
 	gDeviceContext->PSSetSamplers(0, 1, &sampState1);
 	gDeviceContext->PSSetSamplers(1, 1, &sampState2);
