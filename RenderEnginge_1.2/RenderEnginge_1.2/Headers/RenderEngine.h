@@ -97,7 +97,7 @@ public:
 	Vector4 camPosition;
 	Vector4 camTarget;
 	Vector4 camUp;// = Vector4(0.0f, 1.0f, 0.0f, 0.0f);;
-	Vector4 DefaultForward = Vector4(0.0f, 0.0f, 1.0f, 0.0f);
+	Vector4 DefaultForward = Vector4(0.0f, -1.0f, 0.0f, 0.0f);
 	Vector4 DefaultRight = Vector4(1.0f, 0.0f, 0.0f, 0.0f);
 	Vector4 camForward = Vector4(0.0f, 0.0f, 1.0f, 0.0f);
 	Vector4 camRight = Vector4(1.0f, 0.0f, 0.0f, 0.0f);
@@ -114,24 +114,6 @@ public:
 	float speed = 0.0f;
 	float boost = 0.0f;
 	float zoom = 0.0f;
-
-	
-
-	//fpsgun
-	Vector4 GunPosition;
-	Vector4 GunTarget;
-	Vector4 GunUp;// = Vector4(0.0f, 1.0f, 0.0f, 0.0f);;
-	Vector4 GunDForward = Vector4(0.0f, 0.0f, 1.0f, 0.0f);
-	Vector4 GunDRight = Vector4(1.0f, 0.0f, 0.0f, 0.0f);
-	Vector4 GunForward = Vector4(0.0f, 0.0f, 1.0f, 0.0f);
-	Vector4 GunRight = Vector4(1.0f, 0.0f, 0.0f, 0.0f);
-	XMMATRIX GunRotationMatrix;
-	XMMATRIX GunCamLook;
-
-	float GunmoveLeftRight = 0.0f;
-	float GunmoveBackForward = 0.0f;
-	float GunYaw = 0.0f;
-	float GunPitch = 0.0f;
 
 	Camera fpsCam;
 	POINT mLastMousePos;
@@ -458,7 +440,7 @@ protected:
 	
 	//Shadow implement
 	//The Camera Matrices are now defined in the camera class (mainCamera)
-	
+	Camera lightCam;
 	//RENDER TO TEXTURE
 	ID3D11Texture2D* depthMap;
 	
@@ -473,7 +455,7 @@ protected:
 	XMMATRIX identityM2;
 	XMMATRIX WorldInv2;
 
-	void GenerateViewMatrix(XMVECTOR vec1);
+	void GenerateViewMatrix();
 	void GenerateProjectionMatrix(float, float);
 	void GenerateOrthoMatrix(float, float, float);
 	void GetOrthoMatrix(XMMATRIX&);
@@ -497,5 +479,29 @@ protected:
 	ID3D11DepthStencilState* m_depthStencilState;
 	ID3D11Buffer* d2dIndexBuffer;
 	int m_bitmapWidth, m_bitmapHeight = 100;
+
+
+	//light camera
+	Vector4 camPosition2;
+	Vector4 camTarget2;
+	Vector4 camUp2;// = Vector4(0.0f, 1.0f, 0.0f, 0.0f);;
+	Vector4 DefaultForward2 = Vector4(0.0f, -1.0f, 0.0f, 0.0f);
+	Vector4 DefaultRight2 = Vector4(1.0f, 0.0f, 0.0f, 0.0f);
+	Vector4 camForward2 = Vector4(0.0f, 0.0f, 1.0f, 0.0f);
+	Vector4 camRight2 = Vector4(1.0f, 0.0f, 0.0f, 0.0f);
+
+	XMMATRIX camRotationMatrix2;
+	XMMATRIX fpsCamLook2;
+	XMMATRIX CamProjection2;
+	XMMATRIX CamView2;
+
+	float moveLeftRight2 = 0.0f;
+	float moveBackForward2 = 0.0f;
+	float camYaw2 = 0.0f;
+	float camPitch2 = 0.0f;
+	float speed2 = 0.0f;
+	float boost2 = 0.0f;
+	float zoom2 = 0.0f;
+
 
 };

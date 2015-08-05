@@ -58,6 +58,8 @@ float4 PS_main(VS_OUT input) : SV_TARGET
 	float3 lightDir;
 
 	float4 texDiffuse = txDiffuse.Sample(sampWrap, input.tex);
+
+		float4 dTexture = depthMapTexture.Sample(sampWrap, input.tex);
 	//The pixel shader will need to invert the light direction.
 
 		// Invert the light direction.
@@ -119,10 +121,11 @@ float4 PS_main(VS_OUT input) : SV_TARGET
 
 	// Sample the pixel color from the texture using the sampler at this texture coordinate location.
 	textureColor = txDiffuse.Sample(sampWrap, input.tex);
-	float4 textureColor2 = depthMapTexture.Sample(sampWrap, input.tex);
 
 	// Combine the light and texture color.
-	color =  textureColor;
+	color = textureColor;
 	return float4(color);
-	return float4(1.0f,0.0f,0.0f,1.0f);
+	
+
+
 }

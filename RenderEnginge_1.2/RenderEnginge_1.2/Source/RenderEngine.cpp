@@ -66,9 +66,10 @@ bool RenderEngine::Init(){
 
 	//Set Camera values
 	//fpsCam.SetPosition(0.0f, 0.4f, -6.0f);
-	camPosition = Vector4(-1.10f, 10.70f, -20.2f, 0.0f);
+	camPosition = Vector4(0.0f, 10.70f, 0.0f, 0.0f);
+	camPosition2 = Vector4(0.0f, 20.0f, 0.0f, 0.0f);
 	fpsCam.SetLens(0.25f*3.14f, screen_Width / screen_Height, 1.0f, 100.0f);
-	
+	lightCam.SetLens(0.25f*3.14f, SHADOWMAP_WIDTH / SHADOWMAP_HEIGHT, 1.0f, 100.0f);
 
 	//Shadow map init
 	
@@ -802,6 +803,27 @@ void RenderEngine::Render(){
 	XMMATRIX WorldInv = XMMatrixInverse(nullptr, identityM);
 	XMMATRIX WorldGun = identityM;
 
+	//Matrix2 computation
+
+	camRotationMatrix2 = XMMatrixRotationRollPitchYaw(camPitch2, camYaw2, 0);
+
+	camTarget2 = XMVector3TransformCoord(DefaultForward2, camRotationMatrix2);
+	camTarget2 = XMVector3Normalize(camTarget2);
+
+	camRight2 = XMVector3TransformCoord(DefaultRight2, camRotationMatrix2);
+	camForward2 = XMVector3TransformCoord(DefaultForward2, camRotationMatrix2);
+	camUp2 = XMVector3Cross(camForward2, camRight2);
+
+	camPosition2 += moveLeftRight2*camRight2;
+	camPosition2 += moveBackForward2*camForward2;
+
+	moveLeftRight2 = 0.0f;
+	moveBackForward2 = 0.0f;
+
+	camTarget2 = camPosition2 + camTarget2;
+
+	fpsCamLook2 = XMMatrixLookAtLH(camPosition2, camTarget2, camUp2);
+
 
 	// KEYBOARD AND MOUSE STUFF
 	DIMOUSESTATE mouseCurrState;
@@ -822,7 +844,7 @@ void RenderEngine::Render(){
 	PrimaryLights.lDir.Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 0.2f);
 	PrimaryLights.lDir.Diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
 	PrimaryLights.lDir.Specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 2.0f);
-	PrimaryLights.lDir.Dir = XMFLOAT3(5.0f, -10.0f, 0.0f);
+	PrimaryLights.lDir.Dir = XMFLOAT3(0.0f, -10.0f, 0.0f);
 	PrimaryLights.lDir.Pad = 0.0f;
 
 	////Padding
@@ -853,21 +875,34 @@ void RenderEngine::Render(){
 
 	////////////LIGHTS/////////////////////////////////////////////////////
 
-	 //frustum.Transform(frustum, XMMatrixTranspose(CamView)); //updaterar BoundingFrustum frustum varje frame<-------------------------- inverse eller transpose?
-	 //CheckFrustumContains(nrSplitsTree, 0);
-
-
-//	gDeviceContext->OMSetDepthStencilState(gDepthStencilState, 0);
-
 	//Set no backface culling
 	gDeviceContext->RSSetState(NULL);
 	gDeviceContext->RSSetState(NoBcull);
 
-	SetPosition(0, 6, 0);
+	SetPosition(0, 10, 0);
 	SetDirection(PrimaryLights.lDir.Dir.x, PrimaryLights.lDir.Dir.y, PrimaryLights.lDir.Dir.z);
-	SetLookAt(-2.0f, -1.0f, 0.0f);
-	// SHADOW DEPTH TO TEXTURE RENDERING
-	XMMATRIX  lightViewMatrix, lightProjectionMatrix, lightOrthoMatrix;
+	SetLookAt(PrimaryLights.lDir.Dir.x, PrimaryLights.lDir.Dir.y, PrimaryLights.lDir.Dir.z);
+	GenerateProjectionMatrix(100.0f, 1.0f);
+	GenerateViewMatrix();
+
+	// SHADOW DEPTH TO TEXTURE RENDERING //
+
+	// SET MATRIXES FOR DEPTHRENDER
+	XMMATRIX  lightViewMatrix, lightProjectionMatrix, lightOrthoMatrix,lightworld;
+
+	lightViewMatrix = fpsCamLook2;
+	lightProjectionMatrix = lightCam.Proj();
+	lightworld = identityM;
+	//Store matrixes into buffer
+	XMStoreFloat4x4(&WorldMatrix1.View, XMMatrixTranspose(lightViewMatrix));
+	XMStoreFloat4x4(&WorldMatrix1.Projection, XMMatrixTranspose(lightProjectionMatrix));
+	XMStoreFloat4x4(&WorldMatrix1.WorldSpace, XMMatrixTranspose(lightworld));
+	XMStoreFloat4x4(&WorldMatrix1.InvWorld, XMMatrixTranspose(WorldInv));
+	XMStoreFloat4x4(&WorldMatrix1.lightView, XMMatrixTranspose(mapView));
+	XMStoreFloat4x4(&WorldMatrix1.lightProjection, XMMatrixTranspose(mapProjection));
+
+	gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
+	gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
 
 	// SET TARGET AND DEPTHSTENCIL FOR DEPTH RENDER
 	ID3D11RenderTargetView* renderTargetViewDepthMap[1] = { 0 };
@@ -877,8 +912,23 @@ void RenderEngine::Render(){
 
 	//RENDER DEPTH BELOW
 
+	UINT32 vertexSize3= sizeof(float)* 8;
+	UINT32 offset3 = 0;
+
+	gDeviceContext->IASetInputLayout(gVertexLayout);
+	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	gDeviceContext->VSSetShader(dVertexShader, nullptr, 0);
+	gDeviceContext->PSSetShader(dPixelShader, nullptr, 0);
+
+	for (int i = 0; i < renderObjects.size(); i++)
+	{
+		gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->vertexBuffer, &vertexSize3, &offset3);
+		gDeviceContext->Draw(renderObjects[i]->nrElements * 3, 0);
+	}
 
 	/////
+
+	//NORMAL RENDER PASS FROM EYE POS //
 
 	//Set BackGround Color
 	gDeviceContext->RSSetViewports(1, &vp);
@@ -900,7 +950,15 @@ void RenderEngine::Render(){
 
 
 	gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
+
 	gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
+
+	
+	//BACKFACE CULLING
+
+	gDeviceContext->GSSetShader(gBackFaceShader, nullptr, 0);
+	//SET SHADOW MAP
+	gDeviceContext->PSSetShaderResources(1, 1, &shaderResourceDepthMap);
 
 
 
@@ -910,22 +968,14 @@ void RenderEngine::Render(){
 	tex = 0;
 	gDeviceContext->IASetInputLayout(gVertexLayout);
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	gDeviceContext->VSSetShader(dVertexShader, nullptr, 0);
+	gDeviceContext->VSSetShader(shadowVertexShader, nullptr, 0);
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
-	gDeviceContext->PSSetShader(dPixelShader, nullptr, 0);
+	gDeviceContext->PSSetShader(shadowPixelShader, nullptr, 0);
 	// Set the sampler states to the pixel shader.
 	gDeviceContext->PSSetSamplers(0, 1, &sampState1);
 	gDeviceContext->PSSetSamplers(1, 1, &sampState2);
 
-
-	//BACKFACE CULLING
-	//if (Bculling == TRUE)
-	//else if (Bculling == FALSE)
-	//	gDeviceContext->GSSetShader(nullptr, nullptr, 0);
-
-	//gDeviceContext->GSSetShader(gBackFaceShader, nullptr, 0);
-	gDeviceContext->PSSetShaderResources(1, 1, &shaderResourceDepthMap);
 
 	for (int i = 0; i < renderObjects.size(); i++)
 	{
@@ -1753,7 +1803,7 @@ XMFLOAT3 RenderEngine::GetPosition()
 }
 //The view matrix for the light is built using the up vector, the lookAt vector, and the position of the light.
 
-void RenderEngine::GenerateViewMatrix(XMVECTOR view)
+void RenderEngine::GenerateViewMatrix()
 {
 	Vector3 up;
 	Vector3 lookatt;
