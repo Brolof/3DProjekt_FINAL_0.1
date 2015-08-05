@@ -215,7 +215,7 @@ void RenderEngine::TextureFunc(){
 	D3D11_TEXTURE2D_DESC textureDesc;
 	D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
 	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
-
+	D3D11_DEPTH_STENCIL_VIEW_DESC dpsDesc;
 	///////////////////////// Map's Texture
 	// Initialize the  texture description.
 	ZeroMemory(&textureDesc, sizeof(textureDesc));
@@ -227,34 +227,41 @@ void RenderEngine::TextureFunc(){
 	textureDesc.Height = SHADOWMAP_HEIGHT;
 	textureDesc.MipLevels = 1;
 	textureDesc.ArraySize = 1;
-	textureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	textureDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
 	textureDesc.SampleDesc.Count = 1;
 	textureDesc.Usage = D3D11_USAGE_DEFAULT;
-	textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	textureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 	textureDesc.CPUAccessFlags = 0;
 	textureDesc.MiscFlags = 0;
 
 	// Create the texture
-	gDevice->CreateTexture2D(&textureDesc, NULL, &renderTargetTextureMap);
+	gDevice->CreateTexture2D(&textureDesc, NULL, &depthMap);
 
-	/////////////////////// Render to texture's Render Target
-	// Setup the description of the render target view.
-	renderTargetViewDesc.Format = textureDesc.Format;
-	renderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
-	renderTargetViewDesc.Texture2D.MipSlice = 0;
+	// DONT NEED NOW
+	///////////////////////// Render to texture's Render Target
+	//// Setup the description of the render target view.
+	//renderTargetViewDesc.Format = textureDesc.Format;
+	//renderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+	//renderTargetViewDesc.Texture2D.MipSlice = 0;
 
 	// Create the render target view.
-	gDevice->CreateRenderTargetView(renderTargetTextureMap, &renderTargetViewDesc, &renderTargetViewMap);
+	//gDevice->CreateRenderTargetView(depthMap, &renderTargetViewDesc, &depthMap);
 
+	/////////////////////// Map's depth stencil view
+	dpsDesc.Flags = 0;
+	dpsDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	dpsDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	dpsDesc.Texture2D.MipSlice = 0;
+	gDevice->CreateDepthStencilView(depthMap, &dpsDesc, &depthStencilcDepthMap);
 	/////////////////////// Map's Shader Resource View
 	// Setup the description of the shader resource view.
-	shaderResourceViewDesc.Format = textureDesc.Format;
+	shaderResourceViewDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
 	shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
+	shaderResourceViewDesc.Texture2D.MostDetailedMip = textureDesc.MipLevels;
 	shaderResourceViewDesc.Texture2D.MipLevels = 1;
 
 	// Create the shader resource view.
-	gDevice->CreateShaderResourceView(renderTargetTextureMap, &shaderResourceViewDesc, &shaderResourceViewMap);
+	gDevice->CreateShaderResourceView(depthMap, &shaderResourceViewDesc, &shaderResourceDepthMap);
 	//RENDER TO TEXTURE
 	//Matrix computation
 
@@ -906,7 +913,7 @@ void RenderEngine::Render(){
 	//	gDeviceContext->GSSetShader(nullptr, nullptr, 0);
 
 	//gDeviceContext->GSSetShader(gBackFaceShader, nullptr, 0);
-	gDeviceContext->PSSetShaderResources(1, 1, &shaderResourceViewMap);
+	gDeviceContext->PSSetShaderResources(1, 1, &shaderResourceDepthMap);
 
 	for (int i = 0; i < renderObjects.size(); i++)
 	{

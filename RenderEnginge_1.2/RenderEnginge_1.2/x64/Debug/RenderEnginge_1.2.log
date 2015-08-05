@@ -1,7 +1,7 @@
-﻿Build started 2015-08-05 11:18:55.
+﻿Build started 2015-08-05 11:48:25.
      1>Project "D:\New3dProject\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\RenderEnginge_1.2.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /ID:\New3dProject\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers /IC:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers /IF:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\Headers /IC:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\Headers /Zi /nologo /W3 /WX- /sdl /Od /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Debug\\" /Fd"x64\Debug\vc120.pdb" /Gd /TP /errorReport:prompt Source\HeightMap.cpp Source\RenderEngine.cpp Source\Winmain.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /ID:\New3dProject\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers /IC:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers /IF:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\Headers /IC:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\Headers /Zi /nologo /W3 /WX- /sdl /Od /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Debug\\" /Fd"x64\Debug\vc120.pdb" /Gd /TP /errorReport:prompt Source\RenderEngine.cpp Source\Winmain.cpp
          RenderEngine.cpp
      1>d:\new3dproject\3dprojekt_final_0.1\renderenginge_1.2\renderenginge_1.2\headers\GameObject.h(78): warning C4267: '=' : conversion from 'size_t' to 'UINT', possible loss of data
      1>d:\new3dproject\3dprojekt_final_0.1\renderenginge_1.2\renderenginge_1.2\headers\GameObject.h(135): warning C4305: 'argument' : truncation from 'double' to 'float'
@@ -13,13 +13,19 @@
      1>Source\RenderEngine.cpp(158): warning C4244: '=' : conversion from 'UINT' to 'FLOAT', possible loss of data
      1>Source\RenderEngine.cpp(166): warning C4244: '=' : conversion from 'const int' to 'FLOAT', possible loss of data
      1>Source\RenderEngine.cpp(167): warning C4244: '=' : conversion from 'const int' to 'FLOAT', possible loss of data
-     1>Source\RenderEngine.cpp(747): warning C4305: 'initializing' : truncation from 'double' to 'float'
-     1>Source\RenderEngine.cpp(1321): warning C4305: '+=' : truncation from 'double' to 'float'
-     1>Source\RenderEngine.cpp(1405): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>Source\RenderEngine.cpp(216): warning C4101: 'renderTargetViewDesc' : unreferenced local variable
+     1>Source\RenderEngine.cpp(754): warning C4305: 'initializing' : truncation from 'double' to 'float'
+     1>Source\RenderEngine.cpp(1328): warning C4305: '+=' : truncation from 'double' to 'float'
+     1>Source\RenderEngine.cpp(1412): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
          Generating Code...
-         Skipping... (no relevant changes detected)
+         Compiling...
          Winmain.cpp
-         HeightMap.cpp
+     1>d:\new3dproject\3dprojekt_final_0.1\renderenginge_1.2\renderenginge_1.2\headers\GameObject.h(78): warning C4267: '=' : conversion from 'size_t' to 'UINT', possible loss of data
+     1>d:\new3dproject\3dprojekt_final_0.1\renderenginge_1.2\renderenginge_1.2\headers\GameObject.h(135): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>d:\new3dproject\3dprojekt_final_0.1\renderenginge_1.2\renderenginge_1.2\headers\GameObject.h(141): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>D:\New3dProject\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers\RenderEngine.h(267): warning C4267: '=' : conversion from 'size_t' to 'UINT', possible loss of data
+     1>D:\New3dProject\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers\RenderEngine.h(339): warning C4267: '=' : conversion from 'size_t' to 'UINT', possible loss of data
+         Generating Code...
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"D:\New3dProject\3DProjekt_FINAL_0.1\RenderEnginge_1.2\x64\Debug\RenderEnginge_1.2.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:\New3dProject\3DProjekt_FINAL_0.1\RenderEnginge_1.2\x64\Debug\RenderEnginge_1.2.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\New3dProject\3DProjekt_FINAL_0.1\RenderEnginge_1.2\x64\Debug\RenderEnginge_1.2.lib" /MACHINE:X64 x64\Debug\BINimporter.obj
          x64\Debug\Cam.obj
@@ -37,4 +43,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:02.37
+Time Elapsed 00:00:05.46

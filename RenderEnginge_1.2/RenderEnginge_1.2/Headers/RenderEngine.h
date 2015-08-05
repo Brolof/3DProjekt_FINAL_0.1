@@ -460,9 +460,10 @@ protected:
 	//The Camera Matrices are now defined in the camera class (mainCamera)
 	
 	//RENDER TO TEXTURE
-	ID3D11Texture2D* renderTargetTextureMap;
+	ID3D11Texture2D* depthMap;
 	ID3D11RenderTargetView* renderTargetViewMap;
-	ID3D11ShaderResourceView* shaderResourceViewMap;
+	ID3D11ShaderResourceView* shaderResourceDepthMap;
+	ID3D11DepthStencilView* depthStencilcDepthMap;
 	D3D11_VIEWPORT shadowVP;
 	// Our render to textures camera's view and projection matrices
 	XMMATRIX mapView;
