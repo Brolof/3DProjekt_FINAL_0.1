@@ -153,7 +153,6 @@ bool RenderEngine::InitWindow(){
 
 void RenderEngine::SetViewport()
 {
-	D3D11_VIEWPORT vp;
 	vp.Width = screen_Width;
 	vp.Height = screen_Height;
 	vp.MinDepth = 0.0f;
@@ -199,7 +198,7 @@ void RenderEngine::fpscounter()
 			<< L"        Time: " << timer << L" sec";
 
 		//Prints the text in the window handler
-		SetWindowText(hWindow, "FPS");// outs.str().c_str());
+		SetWindowText(hWindow, "Shadows soon");// outs.str().c_str());
 
 		// Reset for next fps.
 		framecount = 0;
@@ -247,7 +246,7 @@ void RenderEngine::TextureFunc(){
 	// Create the render target view.
 	//gDevice->CreateRenderTargetView(depthMap, &renderTargetViewDesc, &depthMap);
 
-	/////////////////////// Map's depth stencil view
+	/////////////////////// Map's depth stencil view 
 	dpsDesc.Flags = 0;
 	dpsDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	dpsDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
@@ -750,12 +749,7 @@ int RenderEngine::Run(){
 
 void RenderEngine::Render(){
 
-	//Set BackGround Color
-	float clearColor[] = { 0, 0.3, 0.7f, 1.0f };
-	gDeviceContext->ClearRenderTargetView(gBackRufferRenderTargetView, clearColor);
-	gDeviceContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
-	gDeviceContext->OMSetRenderTargets(1, &gBackRufferRenderTargetView, gDepthStencilView);
-
+	
 
 	//Static Values
 	static bool zoom;
@@ -874,6 +868,24 @@ void RenderEngine::Render(){
 	SetLookAt(-2.0f, -1.0f, 0.0f);
 	// SHADOW DEPTH TO TEXTURE RENDERING
 	XMMATRIX  lightViewMatrix, lightProjectionMatrix, lightOrthoMatrix;
+
+	// SET TARGET AND DEPTHSTENCIL FOR DEPTH RENDER
+	ID3D11RenderTargetView* renderTargetViewDepthMap[1] = { 0 };
+	gDeviceContext->RSSetViewports(1, &shadowVP);
+	gDeviceContext->OMSetRenderTargets(1, renderTargetViewDepthMap, depthStencilcDepthMap);
+	gDeviceContext->ClearDepthStencilView(depthStencilcDepthMap, D3D11_CLEAR_DEPTH, 1.0f, 0.0f);
+
+	//RENDER DEPTH BELOW
+
+
+	/////
+
+	//Set BackGround Color
+	gDeviceContext->RSSetViewports(1, &vp);
+	float clearColor[] = { 0, 0.3, 0.7f, 1.0f };
+	gDeviceContext->ClearRenderTargetView(gBackRufferRenderTargetView, clearColor);
+	gDeviceContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+	gDeviceContext->OMSetRenderTargets(1, &gBackRufferRenderTargetView, gDepthStencilView);
 
 	int tex = 0;
 

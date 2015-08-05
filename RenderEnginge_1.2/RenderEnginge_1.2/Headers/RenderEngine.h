@@ -438,15 +438,15 @@ protected:
 	//Render States
 	ID3D11RasterizerState* NoBcull;
 
-
+	D3D11_VIEWPORT vp;
 	// SHADOW THINGS
 
 
 	public:
 		const int SHADOWMAP_WIDTH = 1024;
 		const int SHADOWMAP_HEIGHT = 1024;
-		const float SHADOWMAP_DEPTH = 100.0f;
-		const float SHADOWMAP_NEAR = 1.0f;
+		const float SHADOWMAP_DEPTH = 1.0f;
+		const float SHADOWMAP_NEAR = 0.0f;
 
 	UINT32 vertexSize3 = sizeof(float) * 8;
 	UINT32 offset3 = 0;
@@ -461,7 +461,7 @@ protected:
 	
 	//RENDER TO TEXTURE
 	ID3D11Texture2D* depthMap;
-	ID3D11RenderTargetView* renderTargetViewMap;
+	
 	ID3D11ShaderResourceView* shaderResourceDepthMap;
 	ID3D11DepthStencilView* depthStencilcDepthMap;
 	D3D11_VIEWPORT shadowVP;

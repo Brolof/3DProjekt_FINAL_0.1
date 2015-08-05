@@ -1,4 +1,4 @@
-﻿Build started 2015-08-05 11:48:25.
+﻿Build started 2015-08-05 13:03:41.
      1>Project "D:\New3dProject\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\RenderEnginge_1.2.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /ID:\New3dProject\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers /IC:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers /IF:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\Headers /IC:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\Headers /Zi /nologo /W3 /WX- /sdl /Od /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Debug\\" /Fd"x64\Debug\vc120.pdb" /Gd /TP /errorReport:prompt Source\RenderEngine.cpp Source\Winmain.cpp
@@ -9,14 +9,15 @@
      1>D:\New3dProject\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers\RenderEngine.h(267): warning C4267: '=' : conversion from 'size_t' to 'UINT', possible loss of data
      1>D:\New3dProject\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers\RenderEngine.h(339): warning C4267: '=' : conversion from 'size_t' to 'UINT', possible loss of data
      1>Source\RenderEngine.cpp(70): warning C4244: 'argument' : conversion from 'UINT' to 'float', possible loss of data
+     1>Source\RenderEngine.cpp(156): warning C4244: '=' : conversion from 'UINT' to 'FLOAT', possible loss of data
      1>Source\RenderEngine.cpp(157): warning C4244: '=' : conversion from 'UINT' to 'FLOAT', possible loss of data
-     1>Source\RenderEngine.cpp(158): warning C4244: '=' : conversion from 'UINT' to 'FLOAT', possible loss of data
+     1>Source\RenderEngine.cpp(165): warning C4244: '=' : conversion from 'const int' to 'FLOAT', possible loss of data
      1>Source\RenderEngine.cpp(166): warning C4244: '=' : conversion from 'const int' to 'FLOAT', possible loss of data
-     1>Source\RenderEngine.cpp(167): warning C4244: '=' : conversion from 'const int' to 'FLOAT', possible loss of data
-     1>Source\RenderEngine.cpp(216): warning C4101: 'renderTargetViewDesc' : unreferenced local variable
-     1>Source\RenderEngine.cpp(754): warning C4305: 'initializing' : truncation from 'double' to 'float'
-     1>Source\RenderEngine.cpp(1328): warning C4305: '+=' : truncation from 'double' to 'float'
-     1>Source\RenderEngine.cpp(1412): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>Source\RenderEngine.cpp(215): warning C4101: 'renderTargetViewDesc' : unreferenced local variable
+     1>Source\RenderEngine.cpp(876): warning C4244: 'argument' : conversion from 'float' to 'UINT8', possible loss of data
+     1>Source\RenderEngine.cpp(885): warning C4305: 'initializing' : truncation from 'double' to 'float'
+     1>Source\RenderEngine.cpp(1340): warning C4305: '+=' : truncation from 'double' to 'float'
+     1>Source\RenderEngine.cpp(1424): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
          Generating Code...
          Compiling...
          Winmain.cpp
@@ -43,4 +44,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:05.46
+Time Elapsed 00:00:04.13
