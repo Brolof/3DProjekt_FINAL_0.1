@@ -40,6 +40,7 @@ struct MaterialProperties
 class GameObjects : public Entity{
 public:
 	BoundingBox bbox;
+	BoundingBox originalBBox;
 
 	bool isTransparent;
 
@@ -86,6 +87,7 @@ public:
 	GameObjects(ID3D11Buffer *b, BoundingBox bb, bool transparent, XMFLOAT3 center, bool isActive, bool isStatic) : Entity(center, isActive, isStatic){
 		this->vertexBuffer = b;
 		this->bbox = bb;
+		this->originalBBox = bb;
 		this->isTransparent = transparent;
 
 	}
@@ -107,6 +109,14 @@ public:
 
 	ID3D11Buffer* GetIndexBuffer(){
 		return indexBuffer;
+	}
+
+	void Translate(float x, float y, float z){
+		BoundingBox b;
+		b = originalBBox;
+		pos = XMMatrixTranslation(x, y, z); //göra pos till en indentitets matris innan detta utförs?
+		b.Transform(b, pos);
+		bbox = b;
 	}
 	/**
 	XMFLOAT3 GetPosition(){

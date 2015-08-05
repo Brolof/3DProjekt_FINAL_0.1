@@ -27,7 +27,7 @@ RenderEngine::RenderEngine(HINSTANCE hInstance, std::string name, UINT scrW, UIN
 // DESTRUCTOR
 
 RenderEngine::~RenderEngine(){ //destruktor
-
+	//Release(); denna ligger kanske nån annanstans
 }
 
 
@@ -88,6 +88,8 @@ bool RenderEngine::Init(){
 	{
 		renderObjects[i]->CreateBBOXVertexBuffer(gDevice);
 	}
+
+	quadTree = new QuadTree(renderObjects, 2, gDevice, XMFLOAT3(10,10,10));
 	
 	//ImportHeightmap("Textures/8x8Map.bmp", L"Textures/stone.dds", L"Textures/grass.dds", L"Textures/hippo.dds", L"Textures/splatmap.dds");
 	//ImportHeightmap("Textures/JäkligtFinHeightmap.bmp", L"Textures/stone.dds", L"Textures/grass.dds", L"Textures/hippo.dds", L"Textures/splatmap.dds");
@@ -98,8 +100,6 @@ bool RenderEngine::Init(){
 		MessageBox(hWindow, "Could not initialize the input object.", "Error", MB_OK);
 		return false;
 	}
-
-	ListQuadTree(nrSplitsTree, XMFLOAT3(0, 0, 0), XMFLOAT3(10, 10, 10)); //den första boxen som skickas in är den största (världsboxen)
 
 	return true; //om båda funkade så returnera true (y)
 	
@@ -752,14 +752,12 @@ void RenderEngine::Render(){
 
 	//Static Values
 	static bool zoom;
-	static  float rot;
+	
 	static  int clicktest;
 	static int ShootScore;
 	static int ltest;
 	static  int hitIndex;
 
-	//Increase rotation value per frame
-	rot += 0.0003f;
 
 	//Movement and camera rotation speed
 	speed = ((gTimer.TotalTime() / gTimer.TotalTime()) / 200.0f + boost);
@@ -813,6 +811,8 @@ void RenderEngine::Render(){
 	//Get States
 	Mouse->GetDeviceState(sizeof(DIMOUSESTATE), &mouseCurrState);
 	Keyboard->GetDeviceState(sizeof(keyboardState), (LPVOID)&keyboardState);
+
+	quadTree->StartFrustumTest(CamProjection, CamView);
 
 	////////////LIGHTS/////////////////////////////////////////////////////
 
@@ -915,19 +915,21 @@ void RenderEngine::Render(){
 
 	for (int i = 0; i < renderObjects.size(); i++)
 	{
-		
-		renderObjects[i]->CalculateWorld();		
+		if (renderObjects[i]->GetActive() == true){
+			renderObjects[i]->CalculateWorld();
 
-		XMStoreFloat4x4(&WorldMatrix1.WorldSpace, XMMatrixTranspose(renderObjects[i]->world));
-		gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
-		gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
+			XMStoreFloat4x4(&WorldMatrix1.WorldSpace, XMMatrixTranspose(renderObjects[i]->world));
+			gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
+			gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
 
-		tex = intArrayTex[renderObjects[i]->indexT];
-		gDeviceContext->PSSetShaderResources(0, 1, &RSWArray[tex]);
-		gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->vertexBuffer, &vertexSize2, &offset2);
+			tex = intArrayTex[renderObjects[i]->indexT];
+			gDeviceContext->PSSetShaderResources(0, 1, &RSWArray[tex]);
+			gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->vertexBuffer, &vertexSize2, &offset2);
 
-		gDeviceContext->Draw(renderObjects[i]->nrElements * 3, 0);
+			gDeviceContext->Draw(renderObjects[i]->nrElements * 3, 0);
+		}
 	}
+
 
 	//WIREFRAME!!!
 	gDeviceContext->VSSetShader(gWireFrameVertexShader, nullptr, 0);
@@ -947,6 +949,19 @@ void RenderEngine::Render(){
 		gDeviceContext->Draw(16, 0);
 	}
 
+
+	//quadträdet
+	XMStoreFloat4x4(&WorldMatrixWF.WorldSpace, XMMatrixTranspose(identityM)); //använder wireframe matrisen istället här
+	gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrixWF, 0, 0);
+	gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
+	
+	for (int i = 0; i < quadTree->quadTreeBranches.size(); i++)
+	{
+		if (quadTree->quadTreeBranches[i].isInFrustum == true){
+			gDeviceContext->IASetVertexBuffers(0, 1, &quadTree->quadTreeBranches[i].boxBuffer, &vertexWireFrameSize, &offset2);
+			gDeviceContext->Draw(16, 0);
+		}
+	}
 
 	//////////////////////////// Draw Terrain Onto Map
 	//// Here we will draw our map, which is just the terrain from the mapCam's view
@@ -1054,6 +1069,8 @@ void RenderEngine::Update(float dt){
 //REALESE AND CLEANUP
 
 void RenderEngine::Release(){
+	delete quadTree;
+	quadTree = NULL;
 
 	gDevice->Release();
 	depthStencilBuffer->Release();
@@ -1399,79 +1416,79 @@ void RenderEngine::InputHandler()
 
 }
 
-// Quad Tree
-
-void RenderEngine::ListQuadTree(int nrSplits, XMFLOAT3 center, XMFLOAT3 extents){
-
-	BoundingBox b(center, extents);
-
-	QuadTreeInstance lB;
-	lB.SetValues(b, gDevice);
-	if (nrSplits <= 0) //om det är längst ner i trädet så innebär det att denne ska innehålla gameobjects (förutsatt att det finns några där :- ))
-		lB.TestContains(gameObjects); //testa endast mot de längst ner ifall det finns några gameobjects i dem
-
-	quadTree.push_back(lB);
-	//quads.push_back(lB);
-
-	BoundingBox children[4];
-
-	if (nrSplits > 0){
-		//CENTER ÄR JU 0!!!? FIXA DETTA
-		children[0].Center = XMFLOAT3(center.x + -extents.x * 0.5f, center.y, center.z + -extents.z * 0.5);
-		children[1].Center = XMFLOAT3(center.x + extents.x * 0.5f, center.y, center.z + -extents.z * 0.5f);
-		children[2].Center = XMFLOAT3(center.x + -extents.x * 0.5f, center.y, center.z + extents.z *0.5f);
-		children[3].Center = XMFLOAT3(center.x + extents.x * 0.5f, center.y, center.z + extents.z * 0.5f);
-
-		children[0].Extents = XMFLOAT3(extents.x / 2, extents.y, extents.z / 2);
-		children[1].Extents = XMFLOAT3(extents.x / 2, extents.y, extents.z / 2);
-		children[2].Extents = XMFLOAT3(extents.x / 2, extents.y, extents.z / 2);
-		children[3].Extents = XMFLOAT3(extents.x / 2, extents.y, extents.z / 2);
-	}
-
-	int newNrSplits = nrSplits - 1;
-	if (nrSplits > 0){
-		for each (BoundingBox child in children)
-		{
-			ListQuadTree(newNrSplits, child.Center, child.Extents);
-		}
-	}
-}
-
-//Check Frustum
-
-void RenderEngine::CheckFrustumContains(int nrSplits, int index){
-	ContainmentType test = frustum.Contains(quadTree[index].box);
-	if (test == 2 || test == 1){ //hit på boxen, contains ELLER intersects
-		if (nrSplits > 0){
-			int newNrSplits = nrSplits - 1;
-			for (int i = 0; i < 4; i++){
-				index += 1;
-				CheckFrustumContains(newNrSplits, index);
-			}
-		}
-		else{ //botten på trädet
-			int objectIndex = 0;
-			for each (GameObject var in quadTree[index].gameObjectsToRender)//vad skall göras ifall den ena boxen säger att objektet ska renderas men den andra inte?
-			{
-				test = frustum.Contains(var.bbox);
-				if (test == 2 || test == 1){ //hit på objektets box
-					//var.render = true; //RENDERA!
-					//var.visibleThisFrame = true; //ÄR "var" BARA EN TEMPORÄR VARIABEL?????????
-					//quadTree[index].gameObjectsToRender[objectIndex].render = true;
-					//quadTree[index].gameObjectsToRender[objectIndex].visibleThisFrame = true;
-					gameObjects[var.gameObjectIndex].visibleThisFrame = true;
-					gameObjects[var.gameObjectIndex].render = true;
-				}
-				else if (gameObjects[var.gameObjectIndex].visibleThisFrame == false){ //om ingen annan box har sagt att denna ska renderas denna framen
-					//var.render = false; //LIGGER INTE I FRUSTUMET
-					gameObjects[var.gameObjectIndex].render = false;
-					//quadTree[index].gameObjectsToRender[objectIndex].render = false;
-				}
-				objectIndex++;
-			}
-		}
-	}
-}
+//// Quad Tree
+//
+//void RenderEngine::ListQuadTree(int nrSplits, XMFLOAT3 center, XMFLOAT3 extents){
+//
+//	BoundingBox b(center, extents);
+//
+//	QuadTreeInstance lB;
+//	lB.SetValues(b, gDevice);
+//	if (nrSplits <= 0) //om det är längst ner i trädet så innebär det att denne ska innehålla gameobjects (förutsatt att det finns några där :- ))
+//		lB.TestContains(gameObjects); //testa endast mot de längst ner ifall det finns några gameobjects i dem
+//
+//	quadTree.push_back(lB);
+//	//quads.push_back(lB);
+//
+//	BoundingBox children[4];
+//
+//	if (nrSplits > 0){
+//		//CENTER ÄR JU 0!!!? FIXA DETTA
+//		children[0].Center = XMFLOAT3(center.x + -extents.x * 0.5f, center.y, center.z + -extents.z * 0.5);
+//		children[1].Center = XMFLOAT3(center.x + extents.x * 0.5f, center.y, center.z + -extents.z * 0.5f);
+//		children[2].Center = XMFLOAT3(center.x + -extents.x * 0.5f, center.y, center.z + extents.z *0.5f);
+//		children[3].Center = XMFLOAT3(center.x + extents.x * 0.5f, center.y, center.z + extents.z * 0.5f);
+//
+//		children[0].Extents = XMFLOAT3(extents.x / 2, extents.y, extents.z / 2);
+//		children[1].Extents = XMFLOAT3(extents.x / 2, extents.y, extents.z / 2);
+//		children[2].Extents = XMFLOAT3(extents.x / 2, extents.y, extents.z / 2);
+//		children[3].Extents = XMFLOAT3(extents.x / 2, extents.y, extents.z / 2);
+//	}
+//
+//	int newNrSplits = nrSplits - 1;
+//	if (nrSplits > 0){
+//		for each (BoundingBox child in children)
+//		{
+//			ListQuadTree(newNrSplits, child.Center, child.Extents);
+//		}
+//	}
+//}
+//
+////Check Frustum
+//
+//void RenderEngine::CheckFrustumContains(int nrSplits, int index){
+//	ContainmentType test = frustum.Contains(quadTree[index].box);
+//	if (test == 2 || test == 1){ //hit på boxen, contains ELLER intersects
+//		if (nrSplits > 0){
+//			int newNrSplits = nrSplits - 1;
+//			for (int i = 0; i < 4; i++){
+//				index += 1;
+//				CheckFrustumContains(newNrSplits, index);
+//			}
+//		}
+//		else{ //botten på trädet
+//			int objectIndex = 0;
+//			for each (GameObject var in quadTree[index].gameObjectsToRender)//vad skall göras ifall den ena boxen säger att objektet ska renderas men den andra inte?
+//			{
+//				test = frustum.Contains(var.bbox);
+//				if (test == 2 || test == 1){ //hit på objektets box
+//					//var.render = true; //RENDERA!
+//					//var.visibleThisFrame = true; //ÄR "var" BARA EN TEMPORÄR VARIABEL?????????
+//					//quadTree[index].gameObjectsToRender[objectIndex].render = true;
+//					//quadTree[index].gameObjectsToRender[objectIndex].visibleThisFrame = true;
+//					gameObjects[var.gameObjectIndex].visibleThisFrame = true;
+//					gameObjects[var.gameObjectIndex].render = true;
+//				}
+//				else if (gameObjects[var.gameObjectIndex].visibleThisFrame == false){ //om ingen annan box har sagt att denna ska renderas denna framen
+//					//var.render = false; //LIGGER INTE I FRUSTUMET
+//					gameObjects[var.gameObjectIndex].render = false;
+//					//quadTree[index].gameObjectsToRender[objectIndex].render = false;
+//				}
+//				objectIndex++;
+//			}
+//		}
+//	}
+//}
 
 
 

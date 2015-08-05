@@ -129,13 +129,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BINimporter.cpp" />
-    <ClCompile Include="QuadTree.cpp" />
     <ClCompile Include="Source\Cam.cpp" />
     <ClCompile Include="Source\depthClass.cpp" />
     <ClCompile Include="Source\GameTimer.cpp" />
     <ClCompile Include="Source\HeightMap.cpp" />
     <ClCompile Include="Source\Input.cpp" />
     <ClCompile Include="Source\OBJ.cpp" />
+    <ClCompile Include="Source\QuadTree.cpp" />
     <ClCompile Include="Source\RenderEngine.cpp" />
     <ClCompile Include="Source\RenderToTexture.cpp" />
     <ClCompile Include="Source\Winmain.cpp" />
@@ -303,10 +303,10 @@
     <ClInclude Include="Headers\Input.h" />
     <ClInclude Include="Headers\lights.h" />
     <ClInclude Include="Headers\OBJ.h" />
+    <ClInclude Include="Headers\QuadTree.h" />
     <ClInclude Include="Headers\RenderEngine.h" />
     <ClInclude Include="Headers\RenderToTexture.h" />
     <ClInclude Include="Headers\TextureLoader.h" />
-    <ClInclude Include="QuadTree.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\DirectXTK\DirectXTK_Desktop_2013.vcxproj">

@@ -1,7 +1,8 @@
 #include "QuadTree.h"
 
-QuadTree::QuadTree(vector<GameObjects> objectsInScene, int nrSplits, ID3D11Device* gDevice, XMFLOAT3 boxSize){
+QuadTree::QuadTree(vector<GameObjects*> objectsInScene, int nrSplits, ID3D11Device* gDevice, XMFLOAT3 boxSize){
 	this->objectsInScene = objectsInScene;
+	this->nrSplits = nrSplits;
 
 	CreateQuadTree(nrSplits, XMFLOAT3(0, 0, 0), XMFLOAT3(boxSize.x, boxSize.y, boxSize.z), gDevice);
 }
@@ -40,4 +41,58 @@ void QuadTree::CreateQuadTree(int nrSplits, XMFLOAT3 center, XMFLOAT3 extents, I
 			CreateQuadTree(newNrSplits, child.Center, child.Extents, gDevice);
 		}
 	}
+}
+
+void QuadTree::StartFrustumTest(XMMATRIX proj, XMMATRIX view){
+	//frustumCheckIndex = 0;
+	for (int i = 0; i < quadTreeBranches.size(); i++){
+		quadTreeBranches[i].isInFrustum = false;
+	}
+	CheckFrustumCollision(nrSplits, 0, proj, view);
+}
+
+void QuadTree::CheckFrustumCollision(int nrSplits, int splitIndex, XMMATRIX proj, XMMATRIX view){
+	BoundingFrustum f;
+	f.CreateFromMatrix(f, proj);
+	f.Transform(f, view);
+
+	frustum = f;
+	
+	ContainmentType test = frustum.Contains(quadTreeBranches[splitIndex].bbox);
+	if (test == 2 || test == 1){ //hit på boxen, contains ELLER intersects	
+		quadTreeBranches[splitIndex].isInFrustum = true;
+		if (nrSplits > 0){
+			int newNrSplits = nrSplits - 1; //vilket steg av branches man är på
+			//frustumCheckIndex += 4;
+			for (int i = 0; i < 4; i++){
+				if (i > 0)
+					splitIndex += 4 * newNrSplits; //??
+				else
+					splitIndex += 1;
+				CheckFrustumCollision(newNrSplits, splitIndex, proj, view);
+			}
+		}
+		else{ //botten på trädet
+			int objectIndex = 0;
+			for (int y = 0; y < quadTreeBranches[splitIndex].gameObjectsToRender.size(); y++)//vad skall göras ifall den ena boxen säger att objektet ska renderas men den andra inte?
+			{
+				test = frustum.Contains(quadTreeBranches[splitIndex].gameObjectsToRender[y].bbox);
+				if (test == 2 || test == 1){ //hit på objektets box
+					quadTreeBranches[splitIndex].gameObjectsToRender[y].visibleThisFrame = true;
+					quadTreeBranches[splitIndex].gameObjectsToRender[y].SetActive(true);
+				}
+				else if (quadTreeBranches[splitIndex].gameObjectsToRender[y].visibleThisFrame == false){ //om ingen annan box har sagt att denna ska renderas denna framen
+					
+					quadTreeBranches[splitIndex].gameObjectsToRender[y].SetActive(false);
+					
+				}
+				objectIndex++;
+			}
+		}
+	}
+	else
+		quadTreeBranches[splitIndex].isInFrustum = false;
+
+
+	
 }

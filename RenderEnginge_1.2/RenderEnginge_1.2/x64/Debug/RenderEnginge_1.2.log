@@ -1,68 +1,29 @@
-﻿Build started 2015-08-05 11:46:41.
-     1>Project "C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\RenderEnginge_1.2.vcxproj" on node 2 (Rebuild target(s)).
+﻿Build started 2015-08-05 14:49:29.
+     1>Project "C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\RenderEnginge_1.2.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /IC:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers /IF:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\Headers /IC:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\Headers /Zi /nologo /W3 /WX- /sdl /Od /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Debug\\" /Fd"x64\Debug\vc120.pdb" /Gd /TP /errorReport:prompt BINimporter.cpp QuadTree.cpp Source\Cam.cpp Source\depthClass.cpp Source\GameTimer.cpp Source\HeightMap.cpp Source\Input.cpp Source\OBJ.cpp Source\RenderEngine.cpp Source\RenderToTexture.cpp Source\Winmain.cpp
-         Winmain.cpp
-     1>c:\users\simon\downloads\programmering\3dprojectfinal\3dprojekt_final_0.1\renderenginge_1.2\renderenginge_1.2\headers\GameObject.h(78): warning C4267: '=' : conversion from 'size_t' to 'UINT', possible loss of data
-     1>c:\users\simon\downloads\programmering\3dprojectfinal\3dprojekt_final_0.1\renderenginge_1.2\renderenginge_1.2\headers\GameObject.h(135): warning C4305: 'argument' : truncation from 'double' to 'float'
-     1>c:\users\simon\downloads\programmering\3dprojectfinal\3dprojekt_final_0.1\renderenginge_1.2\renderenginge_1.2\headers\GameObject.h(141): warning C4305: 'argument' : truncation from 'double' to 'float'
-     1>C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers\RenderEngine.h(33): fatal error C1083: Cannot open include file: 'QuadTree.h': No such file or directory
-         RenderToTexture.cpp
-         RenderEngine.cpp
-     1>c:\users\simon\downloads\programmering\3dprojectfinal\3dprojekt_final_0.1\renderenginge_1.2\renderenginge_1.2\headers\GameObject.h(78): warning C4267: '=' : conversion from 'size_t' to 'UINT', possible loss of data
-     1>c:\users\simon\downloads\programmering\3dprojectfinal\3dprojekt_final_0.1\renderenginge_1.2\renderenginge_1.2\headers\GameObject.h(135): warning C4305: 'argument' : truncation from 'double' to 'float'
-     1>c:\users\simon\downloads\programmering\3dprojectfinal\3dprojekt_final_0.1\renderenginge_1.2\renderenginge_1.2\headers\GameObject.h(141): warning C4305: 'argument' : truncation from 'double' to 'float'
-     1>C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers\RenderEngine.h(33): fatal error C1083: Cannot open include file: 'QuadTree.h': No such file or directory
-         OBJ.cpp
-     1>Source\OBJ.cpp(138): warning C4267: '=' : conversion from 'size_t' to 'UINT', possible loss of data
-     1>Source\OBJ.cpp(146): warning C4267: '=' : conversion from 'size_t' to 'UINT', possible loss of data
-     1>Source\OBJ.cpp(195): warning C4056: overflow in floating-point constant arithmetic
-         Input.cpp
-         HeightMap.cpp
-     1>Source\HeightMap.cpp(19): warning C4101: 'nChars' : unreferenced local variable
-     1>Source\HeightMap.cpp(130): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
-     1>Source\HeightMap.cpp(135): warning C4244: '=' : conversion from 'float' to 'int', possible loss of data
-     1>Source\HeightMap.cpp(136): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
-     1>Source\HeightMap.cpp(170): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
-     1>Source\HeightMap.cpp(171): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
-     1>Source\HeightMap.cpp(176): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
-     1>Source\HeightMap.cpp(177): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
-     1>Source\HeightMap.cpp(182): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
-     1>Source\HeightMap.cpp(183): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
-     1>Source\HeightMap.cpp(188): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
-     1>Source\HeightMap.cpp(189): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
-     1>Source\HeightMap.cpp(194): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
-     1>Source\HeightMap.cpp(195): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
-     1>Source\HeightMap.cpp(200): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
-     1>Source\HeightMap.cpp(201): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
-     1>Source\HeightMap.cpp(291): warning C4267: '=' : conversion from 'size_t' to 'UINT', possible loss of data
-     1>Source\HeightMap.cpp(297): warning C4267: '=' : conversion from 'size_t' to 'UINT', possible loss of data
-         GameTimer.cpp
-         depthClass.cpp
-     1>Source\depthClass.cpp(117): warning C4101: 'errorMessage' : unreferenced local variable
-         Cam.cpp
-     1>Source\Cam.cpp(10): warning C4305: 'argument' : truncation from 'double' to 'float'
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /IC:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers /IF:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\Headers /IC:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\Headers /Zi /nologo /W3 /WX- /sdl /Od /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Debug\\" /Fd"x64\Debug\vc120.pdb" /Gd /TP /errorReport:prompt Source\QuadTree.cpp
          QuadTree.cpp
-     1>C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers\GameObject.h(78): warning C4267: '=' : conversion from 'size_t' to 'UINT', possible loss of data
-     1>C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers\GameObject.h(135): warning C4305: 'argument' : truncation from 'double' to 'float'
-     1>C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers\GameObject.h(141): warning C4305: 'argument' : truncation from 'double' to 'float'
-     1>c:\users\simon\downloads\programmering\3dprojectfinal\3dprojekt_final_0.1\renderenginge_1.2\renderenginge_1.2\QuadTree.h(50): warning C4267: '=' : conversion from 'size_t' to 'UINT', possible loss of data
-     1>QuadTree.cpp(25): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
-         BINimporter.cpp
-     1>c:\users\simon\downloads\programmering\3dprojectfinal\3dprojekt_final_0.1\renderenginge_1.2\renderenginge_1.2\headers\GameObject.h(78): warning C4267: '=' : conversion from 'size_t' to 'UINT', possible loss of data
-     1>c:\users\simon\downloads\programmering\3dprojectfinal\3dprojekt_final_0.1\renderenginge_1.2\renderenginge_1.2\headers\GameObject.h(135): warning C4305: 'argument' : truncation from 'double' to 'float'
-     1>c:\users\simon\downloads\programmering\3dprojectfinal\3dprojekt_final_0.1\renderenginge_1.2\renderenginge_1.2\headers\GameObject.h(141): warning C4305: 'argument' : truncation from 'double' to 'float'
-         Generating Code...
-     1>c:\users\simon\downloads\programmering\3dprojectfinal\3dprojekt_final_0.1\renderenginge_1.2\renderenginge_1.2\source\obj.cpp(194): warning C4756: overflow in constant arithmetic
-     1>c:\users\simon\downloads\programmering\3dprojectfinal\3dprojekt_final_0.1\renderenginge_1.2\renderenginge_1.2\source\obj.cpp(194): warning C4756: overflow in constant arithmetic
-     1>c:\users\simon\downloads\programmering\3dprojectfinal\3dprojekt_final_0.1\renderenginge_1.2\renderenginge_1.2\source\obj.cpp(194): warning C4756: overflow in constant arithmetic
-     1>c:\users\simon\downloads\programmering\3dprojectfinal\3dprojekt_final_0.1\renderenginge_1.2\renderenginge_1.2\source\obj.cpp(195): warning C4756: overflow in constant arithmetic
-     1>c:\users\simon\downloads\programmering\3dprojectfinal\3dprojekt_final_0.1\renderenginge_1.2\renderenginge_1.2\source\obj.cpp(195): warning C4756: overflow in constant arithmetic
-     1>c:\users\simon\downloads\programmering\3dprojectfinal\3dprojekt_final_0.1\renderenginge_1.2\renderenginge_1.2\source\obj.cpp(195): warning C4756: overflow in constant arithmetic
-     1>c:\users\simon\downloads\programmering\3dprojectfinal\3dprojekt_final_0.1\renderenginge_1.2\renderenginge_1.2\source\obj.cpp(194): warning C4756: overflow in constant arithmetic
-     1>c:\users\simon\downloads\programmering\3dprojectfinal\3dprojekt_final_0.1\renderenginge_1.2\renderenginge_1.2\source\obj.cpp(195): warning C4756: overflow in constant arithmetic
-     1>Done Building Project "C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\RenderEnginge_1.2.vcxproj" (Rebuild target(s)) -- FAILED.
+     1>c:\users\simon\downloads\programmering\3dprojectfinal\3dprojekt_final_0.1\renderenginge_1.2\renderenginge_1.2\headers\GameObject.h(79): warning C4267: '=' : conversion from 'size_t' to 'UINT', possible loss of data
+     1>c:\users\simon\downloads\programmering\3dprojectfinal\3dprojekt_final_0.1\renderenginge_1.2\renderenginge_1.2\headers\GameObject.h(145): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\simon\downloads\programmering\3dprojectfinal\3dprojekt_final_0.1\renderenginge_1.2\renderenginge_1.2\headers\GameObject.h(151): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers\QuadTree.h(51): warning C4267: '=' : conversion from 'size_t' to 'UINT', possible loss of data
+     1>Source\QuadTree.cpp(26): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\x64\Debug\RenderEnginge_1.2.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\x64\Debug\RenderEnginge_1.2.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\x64\Debug\RenderEnginge_1.2.lib" /MACHINE:X64 x64\Debug\BINimporter.obj
+         x64\Debug\Cam.obj
+         x64\Debug\depthClass.obj
+         x64\Debug\GameTimer.obj
+         x64\Debug\HeightMap.obj
+         x64\Debug\Input.obj
+         x64\Debug\OBJ.obj
+         x64\Debug\QuadTree.obj
+         x64\Debug\RenderEngine.obj
+         x64\Debug\RenderToTexture.obj
+         x64\Debug\Winmain.obj
+         C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\DirectXTK\Bin\Desktop_2013\x64\Debug\DirectXTK.lib
+         RenderEnginge_1.2.vcxproj -> C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\x64\Debug\RenderEnginge_1.2.exe
+     1>Done Building Project "C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\RenderEnginge_1.2.vcxproj" (Build target(s)).
 
-Build FAILED.
+Build succeeded.
 
-Time Elapsed 00:00:17.47
+Time Elapsed 00:00:02.28

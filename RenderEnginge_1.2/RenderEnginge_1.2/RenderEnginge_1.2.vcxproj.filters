@@ -69,7 +69,7 @@
     <ClCompile Include="BINimporter.cpp">
       <Filter>Source Files\Main</Filter>
     </ClCompile>
-    <ClCompile Include="QuadTree.cpp">
+    <ClCompile Include="Source\QuadTree.cpp">
       <Filter>Source Files\Main</Filter>
     </ClCompile>
   </ItemGroup>
@@ -169,7 +169,7 @@
     <ClInclude Include="Headers\RenderEngine.h">
       <Filter>Header Files\Main</Filter>
     </ClInclude>
-    <ClInclude Include="QuadTree.h">
+    <ClInclude Include="Headers\QuadTree.h">
       <Filter>Header Files\Main</Filter>
     </ClInclude>
   </ItemGroup>

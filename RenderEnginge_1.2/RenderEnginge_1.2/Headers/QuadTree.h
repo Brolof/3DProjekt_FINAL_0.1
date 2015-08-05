@@ -16,6 +16,7 @@ public:
 	};
 	struct QuadTreeInstance{
 		vector<GameObjects> gameObjectsToRender;
+		//QuadTreeInstance children[4];
 		//vector<QuadTreeInstance> children;
 		BoundingBox bbox;
 		ID3D11Buffer *boxBuffer = nullptr;		
@@ -53,27 +54,35 @@ public:
 			data.pSysMem = boxVertPoints.data();//<--------
 			HRESULT VertexBufferChecker = gDevice->CreateBuffer(&bDesc, &data, &boxBuffer);
 		}
-		void TestContains(vector<GameObjects> gameObjectsPossibleHit){ //skicka in alla gameobjects i världen, (gameObjectsInWorldSpace)
+		void TestContains(vector<GameObjects*> gameObjectsPossibleHit){ //skicka in alla gameobjects i världen, (gameObjectsInWorldSpace)
 
 			for (int i = 0; i < gameObjectsPossibleHit.size(); i++){
-				if (gameObjectsPossibleHit[i].GetStatic() == true){
-					ContainmentType test = bbox.Contains(gameObjectsPossibleHit[i].bbox);
+				if (gameObjectsPossibleHit[i]->GetStatic() == true){
+					ContainmentType test = bbox.Contains(gameObjectsPossibleHit[i]->bbox);
 					if (test == 2 || test == 1){ //1 = intersects, 2 = contains, testa ifall nått gameobject ligger i just denna boxen, om den gör det så lägg till den
-						gameObjectsToRender.push_back(gameObjectsPossibleHit[i]);
+						gameObjectsToRender.push_back(*gameObjectsPossibleHit[i]);
 					}
 				}
 			}
 		}
+
+		bool isInFrustum; //för test
 	};
 
-	vector<GameObjects> objectsInScene; //skickar in alla object hit
+	vector<GameObjects*> objectsInScene; //skickar in alla object hit
 	vector<QuadTreeInstance> quadTreeBranches; //alla uppdelningar
+	int nrSplits; //hur många uppdelningar
+	BoundingFrustum frustum;	
 
 	QuadTree(){}
-	QuadTree(vector<GameObjects> objectsInScene, int nrSplits, ID3D11Device* gDevice, XMFLOAT3 boxSize);
+	QuadTree(vector<GameObjects*> objectsInScene, int nrSplits, ID3D11Device* gDevice, XMFLOAT3 boxSize);
 	~QuadTree(){}
 
 	void CreateQuadTree(int nrSplits, XMFLOAT3 center, XMFLOAT3 extents, ID3D11Device* gDevice);
+
+	//int frustumCheckIndex;
+	void StartFrustumTest(XMMATRIX proj, XMMATRIX view);
+	void CheckFrustumCollision(int nrSplits, int splitIndex, XMMATRIX proj, XMMATRIX view); //kollar vilka branches respektive objekt som befinner sig i frustumet, sätter objekten till active = true/false
 
 private:
 
