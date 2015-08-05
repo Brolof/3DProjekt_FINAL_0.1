@@ -68,7 +68,8 @@ public:
 	}
 
 	void CalculateWorld(){ //denna ska kallas innan man skickar in den i GPUn
-		world = scale * rot * pos; //stämmer detta?
+		if (isStatic == false)
+			world = scale * rot * pos; //stämmer detta?
 	}
 
 	void SetActive(bool a){

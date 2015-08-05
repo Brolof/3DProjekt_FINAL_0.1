@@ -878,6 +878,11 @@ void RenderEngine::Render(){
 	XMStoreFloat4x4(&WorldMatrix1.lightView, XMMatrixTranspose(mapView));
 	XMStoreFloat4x4(&WorldMatrix1.lightProjection, XMMatrixTranspose(mapProjection));
 
+	//wireframe constantbuffer
+	XMStoreFloat4x4(&WorldMatrixWF.View, XMMatrixTranspose(CamView));
+	XMStoreFloat4x4(&WorldMatrixWF.Projection, XMMatrixTranspose(CamProjection));
+	XMStoreFloat4x4(&WorldMatrixWF.WorldSpace, XMMatrixTranspose(identityM));
+
 
 
 	gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
@@ -910,6 +915,13 @@ void RenderEngine::Render(){
 
 	for (int i = 0; i < renderObjects.size(); i++)
 	{
+		
+		renderObjects[i]->CalculateWorld();		
+
+		XMStoreFloat4x4(&WorldMatrix1.WorldSpace, XMMatrixTranspose(renderObjects[i]->world));
+		gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
+		gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
+
 		tex = intArrayTex[renderObjects[i]->indexT];
 		gDeviceContext->PSSetShaderResources(0, 1, &RSWArray[tex]);
 		gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->vertexBuffer, &vertexSize2, &offset2);
@@ -926,7 +938,10 @@ void RenderEngine::Render(){
 
 	for (int i = 0; i < renderObjects.size(); i++)
 	{
-		//tex = intArrayTex[renderObjects[i]->indexT];
+		XMStoreFloat4x4(&WorldMatrixWF.WorldSpace, XMMatrixTranspose(renderObjects[i]->world)); //använder wireframe matrisen istället här
+		gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrixWF, 0, 0);
+		gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
+
 		gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->boundingBoxVertexBuffer, &vertexWireFrameSize, &offset2);
 
 		gDeviceContext->Draw(16, 0);

@@ -30,6 +30,7 @@
 #include "DDSTextureLoader.h"
 #include "WICTextureLoader.h"
 #include "BINimporter.h"
+#include "QuadTree.h"
 //#include "depthClass.h"
 
 #include "SimpleMath.h"
@@ -181,7 +182,15 @@ public:
 		XMFLOAT4X4 lightView;
 		XMFLOAT4X4 lightProjection;
 	};
+	struct WorldWireFrame{
+		XMFLOAT4X4 View;
+		XMFLOAT4X4 Projection;
+		XMFLOAT4X4 WorldSpace;
+	};
+
 	World WorldMatrix1;
+	WorldWireFrame WorldMatrixWF;
+
 	struct shadowSettings
 	{
 		int shadowTesting;
