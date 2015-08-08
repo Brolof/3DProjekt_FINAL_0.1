@@ -5,13 +5,7 @@ Texture2D RTexture : register(t0);
 Texture2D GTexture : register(t1);
 Texture2D BTexture : register(t2);
 Texture2D SplatTexture : register(t3);
-SamplerState normalSamState
-{
-	Filter = ANISOTROPIC;
-	MaxAnisotropy = 4;
-	AdressU = WRAP;
-	AdressV = WRAP;
-};
+SamplerState normalSamState : register(s8);
 
 
 cbuffer Lights1: register (b1)

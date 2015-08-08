@@ -91,8 +91,10 @@ bool RenderEngine::Init(){
 
 	quadTree = new QuadTree(renderObjects, 2, gDevice, XMFLOAT3(10,10,10));
 	
-	//ImportHeightmap("Textures/8x8Map.bmp", L"Textures/stone.dds", L"Textures/grass.dds", L"Textures/hippo.dds", L"Textures/splatmap.dds");
-	//ImportHeightmap("Textures/JäkligtFinHeightmap.bmp", L"Textures/stone.dds", L"Textures/grass.dds", L"Textures/hippo.dds", L"Textures/splatmap.dds");
+	ImportHeightmap("Textures/JäkligtFinHeightmap.bmp", L"Textures/stone_texture1.dds", L"Textures/happy-smug-sloth.dds", L"Textures/sky_textureball.dds", L"Textures/splatmap_texture.png");
+	//HeightMap *heightmap = new HeightMap(gDevice, gDeviceContext);
+	//heightmap->ImportHeightmap("Textures/JäkligtFinHeightmap.bmp", L"Textures/stone.dds", L"Textures/grass.dds", L"Textures/hippo.dds", L"Textures/splatmap.dds");
+	//heightMapObjects.push_back(heightmap);
 
 	inputtest = m_Input->Initialize(hInstance, hWindow, screen_Width, screen_Height);
 	if (inputtest==0) 
@@ -931,7 +933,39 @@ void RenderEngine::Render(){
 	}
 
 
+	//Render Heightmap´s
+	for (int i = 0; i < heightMapObjects.size(); i++)
+	{
+		UINT32 vertexSize = sizeof(float) * 8;
+		UINT32 offset = 0;
+
+		gDeviceContext->IASetInputLayout(gVertexLayout);
+		gDeviceContext->IASetVertexBuffers(0, 1, &heightMapObjects[i]->gVertexBuffer, &vertexSize, &offset);
+		gDeviceContext->IASetIndexBuffer(heightMapObjects[i]->gIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+		gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		gDeviceContext->PSSetSamplers(8, 1, &sampState1); //wrap samp
+		gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
+		gDeviceContext->HSSetShader(nullptr, nullptr, 0);
+		gDeviceContext->DSSetShader(nullptr, nullptr, 0);
+		gDeviceContext->GSSetShader(nullptr, nullptr, 0);
+		//gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
+		gDeviceContext->PSSetShader(splatMapPixelShader, nullptr, 0);
+		//Bind texture to object
+		//gDeviceContext->PSSetShaderResources(0, 1, &ddsTex1);
+		gDeviceContext->PSSetShaderResources(0, 1, &heightMapObjects[i]->tex1shaderResourceView);
+		gDeviceContext->PSSetShaderResources(1, 1, &heightMapObjects[i]->tex2shaderResourceView);
+		gDeviceContext->PSSetShaderResources(2, 1, &heightMapObjects[i]->tex3shaderResourceView);
+		gDeviceContext->PSSetShaderResources(3, 1, &heightMapObjects[i]->splatshaderResourceView);
+
+		//gDeviceContext->PSSetShaderResources(0, 1, &var.splatshaderResourceView);
+
+		gDeviceContext->DrawIndexed((heightMapObjects[i]->nmrElement), 0, 0);
+	}
+
+
 	//WIREFRAME!!!
+	gDeviceContext->PSSetSamplers(8, 1, &sampState2);
 	gDeviceContext->VSSetShader(gWireFrameVertexShader, nullptr, 0);
 	gDeviceContext->PSSetShader(gWireFramePixelShader, nullptr, 0);
 	gDeviceContext->IASetInputLayout(gWireFrameLayout);
@@ -1126,29 +1160,29 @@ void RenderEngine::ImportObj(char* geometryFileName, char* materialFileName, ID3
 
 //IMPORT HEIGHTMAPS
 
-//void RenderEngine::ImportHeightmap(char* HeightMapFileName, wstring tex1File, wstring tex2File, wstring tex3File, wstring texSplatFile){
-//	HeightMap ImportedHM(gDevice, gDeviceContext);
-//
-//	ImportedHM.LoadHeightMap(HeightMapFileName);
-//	ImportedHM.LoadSplatMap(tex1File, tex2File, tex3File, texSplatFile);
-//
-//	HeightMapObject cHeightMap;
-//
-//	cHeightMap.gIndexBuffer = ImportedHM.GetIndexBuffer();
-//	cHeightMap.gVertexBuffer = ImportedHM.GetVertexBuffer();
-//	cHeightMap.nmrElement = ImportedHM.GetNrElements();
-//	cHeightMap.gridSize = ImportedHM.GetGridSize();
-//	cHeightMap.vertexHeights = ImportedHM.GetHeights();
-//	cHeightMap.tex1shaderResourceView = ImportedHM.GetTex1();
-//	cHeightMap.tex2shaderResourceView = ImportedHM.GetTex2();
-//	cHeightMap.tex3shaderResourceView = ImportedHM.GetTex3();
-//	cHeightMap.splatshaderResourceView = ImportedHM.GetSplatTex();
-//
-//	HeightMapObjects.push_back(cHeightMap);
-//
-//
-//
-//}
+void RenderEngine::ImportHeightmap(char* HeightMapFileName, wstring tex1File, wstring tex2File, wstring tex3File, wstring texSplatFile){
+	HeightMap ImportedHM(gDevice, gDeviceContext);
+
+	ImportedHM.LoadHeightMap(HeightMapFileName);
+	ImportedHM.LoadSplatMap(tex1File, tex2File, tex3File, texSplatFile);
+
+	HeightMapObject *cHeightMap = new HeightMapObject;
+
+	cHeightMap->gIndexBuffer = ImportedHM.GetIndexBuffer();
+	cHeightMap->gVertexBuffer = ImportedHM.GetVertexBuffer();
+	cHeightMap->nmrElement = ImportedHM.GetNrElements();
+	//cHeightMap->gridSize = ImportedHM.GetGridSize();
+	//cHeightMap->vertexHeights = ImportedHM.GetHeights();
+	cHeightMap->tex1shaderResourceView = ImportedHM.GetTex1();
+	cHeightMap->tex2shaderResourceView = ImportedHM.GetTex2();
+	cHeightMap->tex3shaderResourceView = ImportedHM.GetTex3();
+	cHeightMap->splatshaderResourceView = ImportedHM.GetSplatTex();
+
+	heightMapObjects.push_back(cHeightMap);
+
+
+
+}
 
 //PICKING FUNCTIONS
 
@@ -1416,151 +1450,6 @@ void RenderEngine::InputHandler()
 
 }
 
-//// Quad Tree
-//
-//void RenderEngine::ListQuadTree(int nrSplits, XMFLOAT3 center, XMFLOAT3 extents){
-//
-//	BoundingBox b(center, extents);
-//
-//	QuadTreeInstance lB;
-//	lB.SetValues(b, gDevice);
-//	if (nrSplits <= 0) //om det är längst ner i trädet så innebär det att denne ska innehålla gameobjects (förutsatt att det finns några där :- ))
-//		lB.TestContains(gameObjects); //testa endast mot de längst ner ifall det finns några gameobjects i dem
-//
-//	quadTree.push_back(lB);
-//	//quads.push_back(lB);
-//
-//	BoundingBox children[4];
-//
-//	if (nrSplits > 0){
-//		//CENTER ÄR JU 0!!!? FIXA DETTA
-//		children[0].Center = XMFLOAT3(center.x + -extents.x * 0.5f, center.y, center.z + -extents.z * 0.5);
-//		children[1].Center = XMFLOAT3(center.x + extents.x * 0.5f, center.y, center.z + -extents.z * 0.5f);
-//		children[2].Center = XMFLOAT3(center.x + -extents.x * 0.5f, center.y, center.z + extents.z *0.5f);
-//		children[3].Center = XMFLOAT3(center.x + extents.x * 0.5f, center.y, center.z + extents.z * 0.5f);
-//
-//		children[0].Extents = XMFLOAT3(extents.x / 2, extents.y, extents.z / 2);
-//		children[1].Extents = XMFLOAT3(extents.x / 2, extents.y, extents.z / 2);
-//		children[2].Extents = XMFLOAT3(extents.x / 2, extents.y, extents.z / 2);
-//		children[3].Extents = XMFLOAT3(extents.x / 2, extents.y, extents.z / 2);
-//	}
-//
-//	int newNrSplits = nrSplits - 1;
-//	if (nrSplits > 0){
-//		for each (BoundingBox child in children)
-//		{
-//			ListQuadTree(newNrSplits, child.Center, child.Extents);
-//		}
-//	}
-//}
-//
-////Check Frustum
-//
-//void RenderEngine::CheckFrustumContains(int nrSplits, int index){
-//	ContainmentType test = frustum.Contains(quadTree[index].box);
-//	if (test == 2 || test == 1){ //hit på boxen, contains ELLER intersects
-//		if (nrSplits > 0){
-//			int newNrSplits = nrSplits - 1;
-//			for (int i = 0; i < 4; i++){
-//				index += 1;
-//				CheckFrustumContains(newNrSplits, index);
-//			}
-//		}
-//		else{ //botten på trädet
-//			int objectIndex = 0;
-//			for each (GameObject var in quadTree[index].gameObjectsToRender)//vad skall göras ifall den ena boxen säger att objektet ska renderas men den andra inte?
-//			{
-//				test = frustum.Contains(var.bbox);
-//				if (test == 2 || test == 1){ //hit på objektets box
-//					//var.render = true; //RENDERA!
-//					//var.visibleThisFrame = true; //ÄR "var" BARA EN TEMPORÄR VARIABEL?????????
-//					//quadTree[index].gameObjectsToRender[objectIndex].render = true;
-//					//quadTree[index].gameObjectsToRender[objectIndex].visibleThisFrame = true;
-//					gameObjects[var.gameObjectIndex].visibleThisFrame = true;
-//					gameObjects[var.gameObjectIndex].render = true;
-//				}
-//				else if (gameObjects[var.gameObjectIndex].visibleThisFrame == false){ //om ingen annan box har sagt att denna ska renderas denna framen
-//					//var.render = false; //LIGGER INTE I FRUSTUMET
-//					gameObjects[var.gameObjectIndex].render = false;
-//					//quadTree[index].gameObjectsToRender[objectIndex].render = false;
-//				}
-//				objectIndex++;
-//			}
-//		}
-//	}
-//}
-
-
-
-
-
-
-
-//========================================================================\\
-//=============================OLD RENDER STUFF===========================\\
-//========================================================================\\
-//                                    |
-//									  |
-//									  v
-
-
-
-
-
-//////////////////////////////////////////////////////////
-///////////////// RENDER FUNCTIONTS //////////////////
-//////////////////////////////////////////////////////////
-
-//UINT32 bufferElementSize = sizeof(Float3);
-//UINT32 offset1 = 0;
-
-//gDeviceContext->IASetInputLayout(gWireFrameLayout);
-//gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
-
-//gDeviceContext->VSSetShader(gWireFrameVertexShader, nullptr, 0);
-//gDeviceContext->HSSetShader(nullptr, nullptr, 0);
-//gDeviceContext->DSSetShader(nullptr, nullptr, 0);
-//gDeviceContext->GSSetShader(nullptr, nullptr, 0);
-//gDeviceContext->PSSetShader(gWireFramePixelShader, nullptr, 0);
-//for each(QuadTreeInstance box in quadTree){
-//	ContainmentType test = frustum.Contains(box.box);
-//	if (test == 2 || test == 1)
-//		gDeviceContext->PSSetShader(gWireFramePixelShader, nullptr, 0);
-//	else
-//		gDeviceContext->PSSetShader(gWireFramePixelShaderCONTAINTEST, nullptr, 0);
-//	gDeviceContext->IASetVertexBuffers(0, 1, &box.boxBuffer, &bufferElementSize, &offset1);
-//	gDeviceContext->Draw(16, 0);
-//}
-
-//RENDER OBJ FILES
-//
-//for each (GameObject var in gameObjects)
-//{
-//	UINT32 vertexSize = sizeof(float) * 8;
-//	UINT32 offset = 0;
-//	count += 1;
-//
-//	if (count == 1){
-//		gDeviceContext->PSSetShaderResources(0, 1, &ddsTex1);
-//	}
-//	else if (count == 2){
-//		gDeviceContext->PSSetShaderResources(0, 1, &ddsTex3);
-//	}
-//	else if (count == 3){
-//		gDeviceContext->PSSetShaderResources(0, 1, &ddsTex3);
-//	}
-//	else if (count == 4){
-//		gDeviceContext->PSSetShaderResources(0, 1, &NpcRV);
-//	}
-//
-//	gDeviceContext->IASetInputLayout(gVertexLayout);
-//	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-//	gDeviceContext->IASetVertexBuffers(0, 1, &var.gVertexBuffer, &vertexSize, &offset);
-//	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-//
-//	gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
-//	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
-//	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
 //	if (Bculling == TRUE)
 //		gDeviceContext->GSSetShader(gBackFaceShader, nullptr, 0);
 //	else if (Bculling == FALSE)
@@ -1612,79 +1501,6 @@ void RenderEngine::InputHandler()
 //	gDeviceContext->Draw(var.nrElements * 3, 0);
 //
 //}
-
-//Render Heightmap´s
-
-//BOXARNA TILL GAMEOBJECTSEN.................................
-/*bufferElementSize = sizeof(Float3);
-offset1 = 0;
-
-gDeviceContext->IASetInputLayout(gWireFrameLayout);
-gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
-
-gDeviceContext->VSSetShader(gWireFrameVertexShader, nullptr, 0);
-gDeviceContext->HSSetShader(nullptr, nullptr, 0);
-gDeviceContext->DSSetShader(nullptr, nullptr, 0);
-gDeviceContext->GSSetShader(nullptr, nullptr, 0);
-gDeviceContext->PSSetShader(gWireFramePixelShader, nullptr, 0);
-for each (GameObject var in gameObjects)
-{
-ContainmentType test = frustum.Contains(var.bbox);
-if (test == 2 || test == 1)
-gDeviceContext->PSSetShader(gWireFramePixelShader, nullptr, 0);
-else
-gDeviceContext->PSSetShader(gWireFramePixelShaderCONTAINTEST, nullptr, 0);
-gDeviceContext->IASetVertexBuffers(0, 1, &var.boxBuffer, &bufferElementSize, &offset1);
-gDeviceContext->Draw(16, 0);
-}
-*/
-
-//Render Heightmap´s
-
-//for each (HeightMapObject var in HeightMapObjects)
-//{
-//	UINT32 vertexSize = sizeof(float)* 8;
-//	UINT32 offset = 0;
-
-//	gDeviceContext->IASetInputLayout(gVertexLayout);
-//	gDeviceContext->IASetVertexBuffers(0, 1, &var.gVertexBuffer, &vertexSize, &offset);
-//	gDeviceContext->IASetIndexBuffer(var.gIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-//	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-//	gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
-//	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
-//	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
-//	gDeviceContext->GSSetShader(nullptr, nullptr, 0);
-//	//gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
-//	gDeviceContext->PSSetShader(splatMapPixelShader, nullptr, 0);
-//	//Bind texture to object
-//	//gDeviceContext->PSSetShaderResources(0, 1, &ddsTex1);
-//	gDeviceContext->PSSetShaderResources(0, 1, &var.tex1shaderResourceView);
-//	gDeviceContext->PSSetShaderResources(1, 1, &var.tex2shaderResourceView);
-//	gDeviceContext->PSSetShaderResources(2, 1, &var.tex3shaderResourceView);
-//	gDeviceContext->PSSetShaderResources(3, 1, &var.splatshaderResourceView);
-
-//	//gDeviceContext->PSSetShaderResources(0, 1, &var.splatshaderResourceView);
-
-//	gDeviceContext->DrawIndexed((var.nmrElement), 0, 0);
-//}
-
-//RENDER TestPlane 2 Tris 
-//UINT32 vertexSize = sizeof(float)* 8;
-//UINT32 offset = 0;
-
-//gDeviceContext->IASetInputLayout(gVertexLayout);
-//gDeviceContext->IASetVertexBuffers(0, 1, &gVertexBuffer, &vertexSize, &offset);
-//gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-
-//gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
-//gDeviceContext->HSSetShader(nullptr, nullptr, 0);
-//gDeviceContext->DSSetShader(nullptr, nullptr, 0);
-//gDeviceContext->GSSetShader(nullptr, nullptr, 0);
-//gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
-
-//gDeviceContext->Draw(4, 0);
-
 
 
 // %%%%%%%%%%%%%%%%%% BEFORE SHADOWS BINARY FORMAT RENDER %%%%%%%%%%%%%%%%%%%%%
