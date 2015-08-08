@@ -229,6 +229,14 @@ void BINimporter::ImportBIN(ID3D11Device* gDevice, char* fileName){
 			bTemp.Extents = XMFLOAT3(extentX, extentY, extentZ);
 
 			GameObjects* tempP = new GameObjects(meshVertexBuffer, bTemp, false, bTemp.Center, true, false);
+
+			//TEST MED FRUSTUM CULLING
+			if (centerX < -1.2f)
+				tempP->SetStatic(true);
+			else
+				tempP->SetStatic(false);
+			//****************************
+
 			tempP->material.Diffuse = KD;
 			tempP->material.Ambient = KA;
 			tempP->material.Specular = KS;

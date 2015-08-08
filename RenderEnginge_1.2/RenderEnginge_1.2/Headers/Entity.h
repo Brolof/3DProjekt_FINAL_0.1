@@ -76,6 +76,10 @@ public:
 		isActive = a; //används ifall vi vill stänga av detta object, tex när man plockar upp den
 	}
 
+	void SetStatic(bool b){
+		isStatic = b;
+	}
+
 	bool GetActive(){ return isActive; }
 	bool GetStatic(){ return isStatic; }
 

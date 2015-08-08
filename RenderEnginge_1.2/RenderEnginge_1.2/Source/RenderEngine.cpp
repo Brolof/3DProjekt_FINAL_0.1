@@ -913,7 +913,7 @@ void RenderEngine::Render(){
 	//gDeviceContext->GSSetShader(gBackFaceShader, nullptr, 0);
 	gDeviceContext->PSSetShaderResources(1, 1, &shaderResourceViewMap);
 
-	for (int i = 0; i < renderObjects.size(); i++)
+	for (int i = 0; i < renderObjects.size(); i++) //objekten i scenen
 	{
 		if (renderObjects[i]->GetActive() == true){
 			renderObjects[i]->CalculateWorld();
@@ -957,8 +957,8 @@ void RenderEngine::Render(){
 	
 	for (int i = 0; i < quadTree->quadTreeBranches.size(); i++)
 	{
-		if (quadTree->quadTreeBranches[i].isInFrustum == true){
-			gDeviceContext->IASetVertexBuffers(0, 1, &quadTree->quadTreeBranches[i].boxBuffer, &vertexWireFrameSize, &offset2);
+		if (quadTree->quadTreeBranches[i]->isInFrustum == true){
+			gDeviceContext->IASetVertexBuffers(0, 1, &quadTree->quadTreeBranches[i]->boxBuffer, &vertexWireFrameSize, &offset2);
 			gDeviceContext->Draw(16, 0);
 		}
 	}
