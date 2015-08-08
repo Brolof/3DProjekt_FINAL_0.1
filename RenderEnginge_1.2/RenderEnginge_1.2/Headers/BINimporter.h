@@ -24,7 +24,7 @@ public:
 
 private:
 	vector<GameObjects*> binObj;
-
+	vector<GameObjects*> transparentObj;
 
 
 	struct FileInfo{
@@ -111,5 +111,9 @@ public:
 
 	vector<GameObjects*> GetObjects(){
 		return binObj;
+	}
+
+	vector<GameObjects*> GetTransparentObjects(){
+		return transparentObj;
 	}
 };

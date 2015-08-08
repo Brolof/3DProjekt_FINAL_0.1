@@ -78,10 +78,12 @@ bool RenderEngine::Init(){
 
 	//Initialize Shaders and triangle data
 	Shaders();
+	BlendStates();
 	InitDirectInput(hInstance);
 	theCustomImporter.ImportBIN(gDevice, "Geometry/testFile.bin");
 	intArrayTex = theCustomImporter.GetindexArray();
 	renderObjects = theCustomImporter.GetObjects();
+	transparentObjects = theCustomImporter.GetTransparentObjects();
 	TextureFunc();
 
 	for (int i = 0; i < renderObjects.size(); i++) //skapar boundingboxar för objecten
@@ -917,7 +919,7 @@ void RenderEngine::Render(){
 
 	for (int i = 0; i < renderObjects.size(); i++) //objekten i scenen
 	{
-		if (renderObjects[i]->GetActive() == true){
+		if (renderObjects[i]->GetActive() == true && renderObjects[i]->isTransparent == false){
 			renderObjects[i]->CalculateWorld();
 
 			XMStoreFloat4x4(&WorldMatrix1.WorldSpace, XMMatrixTranspose(renderObjects[i]->world));
@@ -932,7 +934,25 @@ void RenderEngine::Render(){
 		}
 	}
 
+	//transparent objects
+	float blendFactor[] = { 0.75f, 0.75f, 0.75f, 1.0f };
+	gDeviceContext->OMSetBlendState(transparency, blendFactor, 0xffffffff);
+	for (int i = 0; i < transparentObjects.size(); i++){
+		if (transparentObjects[i]->GetActive() == true){
 
+			XMStoreFloat4x4(&WorldMatrix1.WorldSpace, XMMatrixTranspose(transparentObjects[i]->world));
+			gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
+			gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
+
+			tex = intArrayTex[transparentObjects[i]->indexT];
+			gDeviceContext->PSSetShaderResources(0, 1, &RSWArray[tex]);
+			gDeviceContext->IASetVertexBuffers(0, 1, &transparentObjects[i]->vertexBuffer, &vertexSize2, &offset2);
+
+			gDeviceContext->Draw(transparentObjects[i]->nrElements * 3, 0);
+		}
+	}
+
+	gDeviceContext->OMSetBlendState(0, 0, 0xffffffff); //ingen blending, denna ändras sen i slutet till transparenta objekt (y)
 	//Render Heightmap´s
 	for (int i = 0; i < heightMapObjects.size(); i++)
 	{
@@ -962,7 +982,6 @@ void RenderEngine::Render(){
 
 		gDeviceContext->DrawIndexed((heightMapObjects[i]->nmrElement), 0, 0);
 	}
-
 
 	//WIREFRAME!!!
 	gDeviceContext->PSSetSamplers(8, 1, &sampState2);
@@ -1120,6 +1139,10 @@ void RenderEngine::Release(){
 	gDeviceContext->Release();
 	NoBcull->Release();
 	PrimaryLightBuffer->Release();
+
+	CWCullmode->Release();
+	counterCWCullmode->Release();
+	transparency->Release();
 	
 }
 
@@ -1670,4 +1693,42 @@ void RenderEngine::TurnZBufferOff()
 {
 	gDeviceContext->OMSetDepthStencilState(m_depthDisabledStencilState, 1);
 	return;
+}
+
+
+void RenderEngine::BlendStates(){
+	HRESULT hr;
+
+	D3D11_BLEND_DESC bDesc;
+	ZeroMemory(&bDesc, sizeof(bDesc));
+
+	D3D11_RENDER_TARGET_BLEND_DESC rtbDesc;
+	ZeroMemory(&rtbDesc, sizeof(rtbDesc));
+
+	rtbDesc.BlendEnable = true;
+	rtbDesc.SrcBlend = D3D11_BLEND_SRC_COLOR;
+	rtbDesc.DestBlend = D3D11_BLEND_BLEND_FACTOR;
+	rtbDesc.BlendOp = D3D11_BLEND_OP_ADD;
+	rtbDesc.SrcBlendAlpha = D3D11_BLEND_ONE;
+	rtbDesc.DestBlendAlpha = D3D11_BLEND_ZERO;
+	rtbDesc.BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	rtbDesc.RenderTargetWriteMask = D3D10_COLOR_WRITE_ENABLE_ALL;
+
+	bDesc.AlphaToCoverageEnable = false;
+	bDesc.RenderTarget[0] = rtbDesc;
+
+	gDevice->CreateBlendState(&bDesc, &transparency);
+
+	//cull counter/clockwise
+	D3D11_RASTERIZER_DESC cmdesc;
+	ZeroMemory(&cmdesc, sizeof(D3D11_RASTERIZER_DESC));
+
+	cmdesc.FillMode = D3D11_FILL_SOLID;
+	cmdesc.CullMode = D3D11_CULL_BACK;
+
+	cmdesc.FrontCounterClockwise = true;
+	hr = gDevice->CreateRasterizerState(&cmdesc, &counterCWCullmode);
+
+	cmdesc.FrontCounterClockwise = false;
+	hr = gDevice->CreateRasterizerState(&cmdesc, &CWCullmode);
 }

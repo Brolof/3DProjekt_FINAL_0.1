@@ -83,6 +83,7 @@ public:
 	BINimporter theCustomImporter;
 	vector<int> intArrayTex;
 	std::vector<GameObjects*> renderObjects;
+	std::vector<GameObjects*> transparentObjects; //dessa är de ända som kommer sorteras från avstånd av kameran
 	QuadTree *quadTree = nullptr;
 	//Shadows
 	
@@ -448,5 +449,12 @@ protected:
 	ID3D11DepthStencilState* m_depthStencilState;
 	ID3D11Buffer* d2dIndexBuffer;
 	int m_bitmapWidth, m_bitmapHeight = 100;
+
+
+	//blendstates and transparency
+	void BlendStates();
+	ID3D11BlendState *transparency;
+	ID3D11RasterizerState *counterCWCullmode; //dessa används vid transpareny mojs
+	ID3D11RasterizerState *CWCullmode;
 
 };
