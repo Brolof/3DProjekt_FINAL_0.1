@@ -67,10 +67,10 @@ bool RenderEngine::Init(){
 	//Set Camera values
 	//fpsCam.SetPosition(0.0f, 0.4f, -6.0f);
 	camPosition = Vector4(0.0f, 10.70f, 0.0f, 0.0f);
-	camPosition2 = Vector4(0.0f, 20.0f, 0.0f, 0.0f);
+	camPosition2 = Vector4(0.0f, 5.0f, 0.0f, 0.0f);
 	fpsCam.SetLens(0.25f*3.14f, screen_Width / screen_Height, 1.0f, 100.0f);
 	lightCam.SetLens(0.25f*3.14f, SHADOWMAP_WIDTH / SHADOWMAP_HEIGHT, 1.0f, 100.0f);
-
+	m_orthoMatrix= XMMatrixOrthographicLH(20.0f, 20.0f, 1.0f, 100.0f);
 	//Shadow map init
 	
 
@@ -154,19 +154,19 @@ bool RenderEngine::InitWindow(){
 
 void RenderEngine::SetViewport()
 {
-	vp.Width = screen_Width;
-	vp.Height = screen_Height;
+	vp.Width = (float)screen_Width;
+	vp.Height = (float)screen_Height;
 	vp.MinDepth = 0.0f;
 	vp.MaxDepth = 1.0f;
 	vp.TopLeftX = 0;
 	vp.TopLeftY = 0;
-	gDeviceContext->RSSetViewports(1, &vp);
+
 	
 
-	shadowVP.Width = SHADOWMAP_WIDTH;
-	shadowVP.Height = SHADOWMAP_HEIGHT;
-	shadowVP.MinDepth = SHADOWMAP_NEAR;
-	shadowVP.MaxDepth = SHADOWMAP_DEPTH;
+	shadowVP.Width = (float)SHADOWMAP_WIDTH;
+	shadowVP.Height = (float)SHADOWMAP_HEIGHT;
+	shadowVP.MinDepth = 0.0f;
+	shadowVP.MaxDepth = 1.0f;
 	shadowVP.TopLeftX = 0;
 	shadowVP.TopLeftY = 0;
 }
@@ -215,7 +215,8 @@ void RenderEngine::TextureFunc(){
 	D3D11_TEXTURE2D_DESC textureDesc;
 	D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
 	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
-	D3D11_DEPTH_STENCIL_VIEW_DESC dpsDesc;
+	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc2;
+	D3D11_TEXTURE2D_DESC depthBufferDesc;
 	///////////////////////// Map's Texture
 	// Initialize the  texture description.
 	ZeroMemory(&textureDesc, sizeof(textureDesc));
@@ -227,54 +228,67 @@ void RenderEngine::TextureFunc(){
 	textureDesc.Height = SHADOWMAP_HEIGHT;
 	textureDesc.MipLevels = 1;
 	textureDesc.ArraySize = 1;
-	textureDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
+	textureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;// test later DXGI_FORMAT_R24G8_TYPELESS
 	textureDesc.SampleDesc.Count = 1;
 	textureDesc.Usage = D3D11_USAGE_DEFAULT;
-	textureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+	textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 	textureDesc.CPUAccessFlags = 0;
 	textureDesc.MiscFlags = 0;
 
 	// Create the texture
-	gDevice->CreateTexture2D(&textureDesc, NULL, &depthMap);
+	gDevice->CreateTexture2D(&textureDesc, NULL, &renderTargetTextureMap);
 
-	// DONT NEED NOW
-	///////////////////////// Render to texture's Render Target
-	//// Setup the description of the render target view.
-	//renderTargetViewDesc.Format = textureDesc.Format;
-	//renderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
-	//renderTargetViewDesc.Texture2D.MipSlice = 0;
+
+	/////////////////////// Render to texture's Render Target
+	// Setup the description of the render target view.
+	renderTargetViewDesc.Format = textureDesc.Format;
+	renderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+	renderTargetViewDesc.Texture2D.MipSlice = 0;
 
 	// Create the render target view.
-	//gDevice->CreateRenderTargetView(depthMap, &renderTargetViewDesc, &depthMap);
+	gDevice->CreateRenderTargetView(renderTargetTextureMap, &renderTargetViewDesc, &renderTargetViewMap);
 
-	/////////////////////// Map's depth stencil view 
-	dpsDesc.Flags = 0;
-	dpsDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	dpsDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-	dpsDesc.Texture2D.MipSlice = 0;
-	gDevice->CreateDepthStencilView(depthMap, &dpsDesc, &depthStencilcDepthMap);
 	/////////////////////// Map's Shader Resource View
 	// Setup the description of the shader resource view.
-	shaderResourceViewDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	shaderResourceViewDesc.Format = textureDesc.Format;
 	shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	shaderResourceViewDesc.Texture2D.MostDetailedMip = textureDesc.MipLevels;
+	shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
 	shaderResourceViewDesc.Texture2D.MipLevels = 1;
 
 	// Create the shader resource view.
-	gDevice->CreateShaderResourceView(depthMap, &shaderResourceViewDesc, &shaderResourceDepthMap);
+	gDevice->CreateShaderResourceView(renderTargetTextureMap, &shaderResourceViewDesc, &shaderResourceViewMap);
+
+
+	// Initialize the description of the depth buffer.
+	ZeroMemory(&depthBufferDesc, sizeof(depthBufferDesc));
+
+	// Set up the description of the depth buffer.
+	depthBufferDesc.Width = SHADOWMAP_WIDTH;
+	depthBufferDesc.Height = SHADOWMAP_HEIGHT;
+	depthBufferDesc.MipLevels = 1;
+	depthBufferDesc.ArraySize = 1;
+	depthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthBufferDesc.SampleDesc.Count = 1;
+	depthBufferDesc.SampleDesc.Quality = 0;
+	depthBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	depthBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	depthBufferDesc.CPUAccessFlags = 0;
+	depthBufferDesc.MiscFlags = 0;
+
+	// Create the texture for the depth buffer using the filled out description.
+	gDevice->CreateTexture2D(&depthBufferDesc, NULL, &m_depthStencilBuffer);
+
+	// Initailze the depth stencil view description.
+	ZeroMemory(&depthStencilViewDesc2, sizeof(depthStencilViewDesc2));
+
+	// Set up the depth stencil view description.
+	depthStencilViewDesc2.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilViewDesc2.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	depthStencilViewDesc2.Texture2D.MipSlice = 0;
+
+	// Create the depth stencil view.
+	gDevice->CreateDepthStencilView(m_depthStencilBuffer, &depthStencilViewDesc2, &m_depthStencilView);
 	//RENDER TO TEXTURE
-	//Matrix computation
-
-	//////////////////////// Map's camera information
-	// We will have the camera follow the player
-	XMVECTOR mapCamPosition = XMVectorSet(0.0f, 25.0f, 1.0f, 0.0f);// XMVectorSetY(camPosition, XMVectorGetY(camPosition) + 100.0f);
-	XMVECTOR mapCamTarget = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f); //camPosition;
-	XMVECTOR mapCamUp = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
-
-	//Set the View matrix
-	mapView = XMMatrixLookAtLH(mapCamPosition, mapCamTarget, mapCamUp);
-	// Build an orthographic projection matrix
-	mapProjection = XMMatrixOrthographicLH(512, 512, 1.0f, 1000.0f);
 
 
 	HRESULT texCheck;
@@ -388,7 +402,7 @@ void RenderEngine::Shaders(){
 	//Create shadow vertexShader
 	ID3DBlob* pSVS = nullptr;
 	ShaderTest = CompileShader(L"FX_HLSL/shadowVS.hlsl", "VS_main", "vs_5_0", &pSVS);
-	ShaderTest = gDevice->CreateVertexShader(pSVS->GetBufferPointer(), pSVS->GetBufferSize(), nullptr, &shadowVertexShader);
+ 	ShaderTest = gDevice->CreateVertexShader(pSVS->GetBufferPointer(), pSVS->GetBufferSize(), nullptr, &shadowVertexShader);
 
 
 	//create input layout (verified using vertex shader)
@@ -440,7 +454,7 @@ void RenderEngine::Shaders(){
 
 	////create shadow pixel shader
 	ID3DBlob* pSPS = nullptr;
-	ShaderTest = CompileShader(L"FX_HLSL/shadowPS.hlsl", "PS_main", "ps_5_0", &pSPS);
+	ShaderTest = CompileShader(L"FX_HLSL/shadowPS.hlsl", "PS_main", "ps_4_1", &pSPS);
 	ShaderTest = gDevice->CreatePixelShader(pSPS->GetBufferPointer(), pSPS->GetBufferSize(), nullptr, &shadowPixelShader);
 	
 
@@ -515,6 +529,16 @@ void RenderEngine::CreatePlaneDataAndBuffers(){
 	transformbuffer.Usage = D3D11_USAGE_DEFAULT;
 	transformbuffer.ByteWidth = sizeof(World);
 	BufferTest = gDevice->CreateBuffer(&transformbuffer, NULL, &gWorld);
+
+
+	// Rotatation And transform World Buffer
+	D3D11_BUFFER_DESC lightMatrixBDesc;
+	memset(&lightMatrixBDesc, 0, sizeof(lightMatrixBDesc));
+	lightMatrixBDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	lightMatrixBDesc.Usage = D3D11_USAGE_DEFAULT;
+	lightMatrixBDesc.ByteWidth = sizeof(LightMatrix);
+	BufferTest = gDevice->CreateBuffer(&lightMatrixBDesc, NULL, &gLMat);
+
 
 	// Lightbuffer
 	D3D11_BUFFER_DESC lightbufferDesc;
@@ -785,7 +809,7 @@ void RenderEngine::Render(){
 
 	camTarget = camPosition + camTarget;
 
-	Vector3 viewPoint = Vector3(camTarget.x, camTarget.y, camTarget.z);
+	Vector3 viewPoint = Vector3(camPosition.x, camPosition.y, camPosition.z);
 	ViewP.viewPoint = viewPoint;
 	ViewP.pad = 0;
 	fpsCamLook = XMMatrixLookAtLH(camPosition, camTarget, camUp);
@@ -871,7 +895,7 @@ void RenderEngine::Render(){
 	//STORE VALUES
 
 	gDeviceContext->UpdateSubresource(ViewBuffer, 0, NULL, &ViewP, 0, 0);
-	gDeviceContext->GSSetConstantBuffers(4, 1, &ViewBuffer);
+	gDeviceContext->VSSetConstantBuffers(4, 1, &ViewBuffer);
 
 	////////////LIGHTS/////////////////////////////////////////////////////
 
@@ -891,24 +915,27 @@ void RenderEngine::Render(){
 	XMMATRIX  lightViewMatrix, lightProjectionMatrix, lightOrthoMatrix,lightworld;
 
 	lightViewMatrix = fpsCamLook2;
-	lightProjectionMatrix = lightCam.Proj();
+	lightProjectionMatrix = m_orthoMatrix;// lightCam.Proj();
 	lightworld = identityM;
 	//Store matrixes into buffer
 	XMStoreFloat4x4(&WorldMatrix1.View, XMMatrixTranspose(lightViewMatrix));
 	XMStoreFloat4x4(&WorldMatrix1.Projection, XMMatrixTranspose(lightProjectionMatrix));
 	XMStoreFloat4x4(&WorldMatrix1.WorldSpace, XMMatrixTranspose(lightworld));
 	XMStoreFloat4x4(&WorldMatrix1.InvWorld, XMMatrixTranspose(WorldInv));
-	XMStoreFloat4x4(&WorldMatrix1.lightView, XMMatrixTranspose(mapView));
-	XMStoreFloat4x4(&WorldMatrix1.lightProjection, XMMatrixTranspose(mapProjection));
+	XMStoreFloat4x4(&WorldMatrix1.lightView, XMMatrixTranspose(lightViewMatrix));
+	XMStoreFloat4x4(&WorldMatrix1.lightProjection, XMMatrixTranspose(lightProjectionMatrix));
 
 	gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
 	gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
 
 	// SET TARGET AND DEPTHSTENCIL FOR DEPTH RENDER
-	ID3D11RenderTargetView* renderTargetViewDepthMap[1] = { 0 };
+	//ID3D11RenderTargetView* renderTargetViewDepthMap[1] = { 0 };
+	float black[] = { 0, 0, 0, 1 };
+
 	gDeviceContext->RSSetViewports(1, &shadowVP);
-	gDeviceContext->OMSetRenderTargets(1, renderTargetViewDepthMap, depthStencilcDepthMap);
-	gDeviceContext->ClearDepthStencilView(depthStencilcDepthMap, D3D11_CLEAR_DEPTH, 1.0f, 0.0f);
+	gDeviceContext->OMSetRenderTargets(1, &renderTargetViewMap, m_depthStencilView);
+	gDeviceContext->ClearRenderTargetView(renderTargetViewMap, black);
+	gDeviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0.0f);
 
 	//RENDER DEPTH BELOW
 
@@ -931,11 +958,12 @@ void RenderEngine::Render(){
 	//NORMAL RENDER PASS FROM EYE POS //
 
 	//Set BackGround Color
+	gDeviceContext->OMSetRenderTargets(1, &gBackRufferRenderTargetView, gDepthStencilView);
 	gDeviceContext->RSSetViewports(1, &vp);
 	float clearColor[] = { 0, 0.3, 0.7f, 1.0f };
 	gDeviceContext->ClearRenderTargetView(gBackRufferRenderTargetView, clearColor);
 	gDeviceContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
-	gDeviceContext->OMSetRenderTargets(1, &gBackRufferRenderTargetView, gDepthStencilView);
+
 
 	int tex = 0;
 
@@ -943,9 +971,9 @@ void RenderEngine::Render(){
 	XMStoreFloat4x4(&WorldMatrix1.View, XMMatrixTranspose(CamView));
 	XMStoreFloat4x4(&WorldMatrix1.Projection, XMMatrixTranspose(CamProjection));
 	XMStoreFloat4x4(&WorldMatrix1.WorldSpace, XMMatrixTranspose(identityM));
-	XMStoreFloat4x4(&WorldMatrix1.InvWorld, XMMatrixTranspose(WorldInv));
-	XMStoreFloat4x4(&WorldMatrix1.lightView, XMMatrixTranspose(mapView));
-	XMStoreFloat4x4(&WorldMatrix1.lightProjection, XMMatrixTranspose(mapProjection));
+	XMStoreFloat4x4(&WorldMatrix1.InvWorld, XMMatrixTranspose(lightViewMatrix));
+	XMStoreFloat4x4(&WorldMatrix1.lightView, XMMatrixTranspose(lightViewMatrix));
+	XMStoreFloat4x4(&WorldMatrix1.lightProjection, XMMatrixTranspose(lightProjectionMatrix));
 
 
 
@@ -953,13 +981,23 @@ void RenderEngine::Render(){
 
 	gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
 
+
+
+	//Store matrixes into buffer
+	XMStoreFloat4x4(&LightMatrix1.lightView, XMMatrixTranspose(lightViewMatrix));
+	XMStoreFloat4x4(&LightMatrix1.lightProjection, XMMatrixTranspose(lightProjectionMatrix));
+
+
+
+	gDeviceContext->UpdateSubresource(gLMat, 0, NULL, &LightMatrix1, 0, 0);
+
+	gDeviceContext->VSSetConstantBuffers(1, 1, &gLMat);
+
+
 	
 	//BACKFACE CULLING
 
-	gDeviceContext->GSSetShader(gBackFaceShader, nullptr, 0);
-	//SET SHADOW MAP
-	gDeviceContext->PSSetShaderResources(1, 1, &shaderResourceDepthMap);
-
+	//gDeviceContext->GSSetShader(gBackFaceShader, nullptr, 0);
 
 
 	UINT32 vertexSize2 = sizeof(float) * 8;
@@ -977,29 +1015,32 @@ void RenderEngine::Render(){
 	gDeviceContext->PSSetSamplers(1, 1, &sampState2);
 
 
+	gDeviceContext->PSSetShaderResources(1, 1, &shaderResourceViewMap);
 	for (int i = 0; i < renderObjects.size(); i++)
 	{
 		tex = intArrayTex[renderObjects[i]->indexT];
 		gDeviceContext->PSSetShaderResources(0, 1, &RSWArray[tex]);
+
 		gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->vertexBuffer, &vertexSize2, &offset2);
+		
 
 		gDeviceContext->Draw(renderObjects[i]->nrElements * 3, 0);
 	}
 
-	//WIREFRAME!!!
-	gDeviceContext->VSSetShader(gWireFrameVertexShader, nullptr, 0);
-	gDeviceContext->PSSetShader(gWireFramePixelShader, nullptr, 0);
-	gDeviceContext->IASetInputLayout(gWireFrameLayout);
-	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
-	UINT32 vertexWireFrameSize = sizeof(float) * 3;
+	////WIREFRAME!!!
+	//gDeviceContext->VSSetShader(gWireFrameVertexShader, nullptr, 0);
+	//gDeviceContext->PSSetShader(gWireFramePixelShader, nullptr, 0);
+	//gDeviceContext->IASetInputLayout(gWireFrameLayout);
+	//gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
+	//UINT32 vertexWireFrameSize = sizeof(float) * 3;
 
-	for (int i = 0; i < renderObjects.size(); i++)
-	{
-		//tex = intArrayTex[renderObjects[i]->indexT];
-		gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->boundingBoxVertexBuffer, &vertexWireFrameSize, &offset2);
+	//for (int i = 0; i < renderObjects.size(); i++)
+	//{
+	//	//tex = intArrayTex[renderObjects[i]->indexT];
+	//	gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->boundingBoxVertexBuffer, &vertexWireFrameSize, &offset2);
 
-		gDeviceContext->Draw(16, 0);
-	}
+	//	gDeviceContext->Draw(16, 0);
+	//}
 
 
 	//////////////////////////// Draw Terrain Onto Map
@@ -1070,7 +1111,7 @@ void RenderEngine::Render(){
 
 
 	//gDeviceContext->OMSetRenderTargets(1, &gBackRufferRenderTargetView, gDepthStencilView);
-
+	//	TurnZBufferOff();
 	////RENDER TestPlane 2 Tris 
 	//UINT32 vertexSize = sizeof(float)* 8;
 	//UINT32 offset = 0;
@@ -1087,10 +1128,10 @@ void RenderEngine::Render(){
 	//gDeviceContext->HSSetShader(nullptr, nullptr, 0);
 	//gDeviceContext->DSSetShader(nullptr, nullptr, 0);
 	//gDeviceContext->PSSetShader(shader2DPS, nullptr, 0);
-	//gDeviceContext->PSSetShaderResources(0, 1, &RSWArray[tex]);
+	//gDeviceContext->PSSetShaderResources(0, 1, &shaderResourceViewMap);
 
 	//gDeviceContext->Draw(4, 0);
-
+	//TurnZBufferOn();
 	//växla back/front buffer
 	gSwapChain->Present(0, 0); 
 }

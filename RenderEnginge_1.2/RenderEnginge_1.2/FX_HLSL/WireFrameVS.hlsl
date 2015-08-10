@@ -1,5 +1,5 @@
 //VERTEX SHADER
-cbuffer World : register (c3)
+cbuffer World : register (b3)
 {
 	matrix View;
 	matrix Projection;

@@ -39,8 +39,11 @@ struct VS_OUT
 	float2 tex : TEXCOORD;
 	float3 normal : NORMAL;
 	float4 wPos		: SV_POSITION;
-	float4 lightViewPosition : TEXCOORD1;
+	float4 lightViewPos : TEXCOORD1;
+	float3 lightPos : TEXCOORD2;
+	float3 viewDir : TEXCOORD3;
 };
+
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -57,6 +60,11 @@ float4 PS_main(VS_OUT input) : SV_TARGET
 	float4 textureColor;
 	float3 lightDir;
 
+	//NEW
+	float3 reflection;
+	float4 specular;
+	//
+
 	float4 texDiffuse = txDiffuse.Sample(sampWrap, input.tex);
 
 		float4 dTexture = depthMapTexture.Sample(sampWrap, input.tex);
@@ -72,29 +80,30 @@ float4 PS_main(VS_OUT input) : SV_TARGET
 	color = lDir.Ambient;
 
 	// Calculate the projected texture coordinates.
-	projectTexCoord.x = input.lightViewPosition.x / input.lightViewPosition.w / 2.0f + 0.5f;
-	projectTexCoord.y = -input.lightViewPosition.y / input.lightViewPosition.w / 2.0f + 0.5f;
+	projectTexCoord.x = input.lightViewPos.x / input.lightViewPos.w / 2.0f + 0.5f;
+	projectTexCoord.y = -input.lightViewPos.y / input.lightViewPos.w / 2.0f + 0.5f;
 
 	// Determine if the projected coordinates are in the 0 to 1 range.  If so then this pixel is in the view of the light.
+	
+	//GÅR ALDRIG INN I LOOPEN
 	if ((saturate(projectTexCoord.x) == projectTexCoord.x) && (saturate(projectTexCoord.y) == projectTexCoord.y))
 	{
 		// Sample the shadow map depth value from the depth texture using the sampler at the projected texture coordinate location.
 		depthValue = depthMapTexture.Sample(sampClamp, projectTexCoord).r;
 
 		// Calculate the depth of the light.
-		lightDepthValue = input.lightViewPosition.z / input.lightViewPosition.w;
-
+		lightDepthValue = input.lightViewPos.z / input.lightViewPos.w;
 		// Subtract the bias from the lightDepthValue.
 		lightDepthValue = lightDepthValue - bias;
 
 		// Compare the depth of the shadow map value and the depth of the light to determine whether to shadow or to light this pixel.
 		// If the light is in front of the object then light the pixel, if not then shadow this pixel since an object (occluder) is casting a shadow on it.
-		if (lightDepthValue <depthValue)
+		if (lightDepthValue < depthValue)
 		{
 			//We calculate directional lighting now instead of positional.
 
 				// Calculate the amount of light on this pixel.
-				lightIntensity = saturate(dot(input.normal, lightDir));
+			lightIntensity = saturate(dot(input.normal, lightDir));
 
 			if (lightIntensity > 0.0f)
 			{
@@ -103,6 +112,13 @@ float4 PS_main(VS_OUT input) : SV_TARGET
 
 				// Saturate the final light color.
 				color = saturate(color);
+
+				// Calculate the reflection vector based on the light intensity, normal vector, and light direction.
+				reflection = normalize(2 * lightIntensity * input.normal - lDir.Dir);
+					// Determine the amount of specular light based on the reflection vector, viewing direction, and specular power.
+				specular = pow(saturate(dot(reflection, input.viewDir)), 10.0f);
+			
+
 			}
 		}
 	}
@@ -113,7 +129,7 @@ float4 PS_main(VS_OUT input) : SV_TARGET
 		// If this is outside the area of shadow map range then draw things normally with regular lighting.
 		lightIntensity = saturate(dot(input.normal, lightDir));
 		if (lightIntensity > 0.0f)
-		{
+		{ 
 			color += (lDir.Diffuse * lightIntensity);
 			color = saturate(color);
 		}
@@ -123,9 +139,10 @@ float4 PS_main(VS_OUT input) : SV_TARGET
 	textureColor = txDiffuse.Sample(sampWrap, input.tex);
 
 	// Combine the light and texture color.
-	color = textureColor;
-	return float4(color);
-	
+	color = color* textureColor;
+	color = saturate(color + specular);
+	return color;
+
 
 
 }

@@ -164,14 +164,13 @@ public:
 		XMFLOAT4X4 lightProjection;
 	};
 	World WorldMatrix1;
-	struct shadowSettings
-	{
-		int shadowTesting;
-		int pad1;
-		int pad2;
-		int pad3;
+	struct LightMatrix{
+	//Shadow matrixs
+	XMFLOAT4X4 lightView;
+	XMFLOAT4X4 lightProjection;
 	};
-	shadowSettings shadowBufferData;
+	LightMatrix LightMatrix1;
+
 	//LightBuffers
 	struct LightStruct{
 		
@@ -374,13 +373,13 @@ protected:
 	//Buffers
 	ID3D11Buffer* gVertexBuffer = nullptr;
 	ID3D11Buffer* gVertexBuffer2 = nullptr;
-	ID3D11Buffer* gWorld;
+	ID3D11Buffer* gWorld = nullptr;;
 	ID3D11Buffer* ViewBuffer = nullptr;
-	ID3D11Buffer* gLights;
-	ID3D11Buffer* PrimaryLightBuffer;
-	ID3D11Buffer* MatBuffer;
+	ID3D11Buffer* gLights = nullptr;;
+	ID3D11Buffer* PrimaryLightBuffer = nullptr;;
+	ID3D11Buffer* MatBuffer = nullptr;;
 	ID3D11Buffer* shadowBuffer = nullptr;
-
+	ID3D11Buffer* gLMat = nullptr;
 	//Shader resources for textures and more
 	ID3D11ShaderResourceView* ddsTex1= nullptr;
 	ID3D11ShaderResourceView* ddsTex2 = nullptr;
@@ -427,8 +426,8 @@ protected:
 	public:
 		const int SHADOWMAP_WIDTH = 1024;
 		const int SHADOWMAP_HEIGHT = 1024;
-		const float SHADOWMAP_DEPTH = 1.0f;
-		const float SHADOWMAP_NEAR = 0.0f;
+		const float SHADOWMAP_DEPTH = 100.0f;
+		const float SHADOWMAP_NEAR = 1.0f;
 
 	UINT32 vertexSize3 = sizeof(float) * 8;
 	UINT32 offset3 = 0;
@@ -445,7 +444,13 @@ protected:
 	ID3D11Texture2D* depthMap;
 	
 	ID3D11ShaderResourceView* shaderResourceDepthMap;
-	ID3D11DepthStencilView* depthStencilcDepthMap;
+	ID3D11DepthStencilView* m_depthStencilView;
+
+	// MAY WORK
+	ID3D11Texture2D* renderTargetTextureMap;
+	ID3D11RenderTargetView* renderTargetViewMap;
+	ID3D11ShaderResourceView* shaderResourceViewMap;
+	ID3D11Texture2D* m_depthStencilBuffer = nullptr;
 	D3D11_VIEWPORT shadowVP;
 	// Our render to textures camera's view and projection matrices
 	XMMATRIX mapView;

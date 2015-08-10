@@ -39,7 +39,7 @@ bool Applikation::Init(){
 
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow){
-	Applikation* pApplication = new Applikation(hInstance, "Korven", 512, 512);
+	Applikation* pApplication = new Applikation(hInstance, "Korven", 1024, 1024);
 
 	if (!pApplication->Init()){
 		MessageBox(NULL, "Kunde inte k?ra Init()", NULL, NULL);

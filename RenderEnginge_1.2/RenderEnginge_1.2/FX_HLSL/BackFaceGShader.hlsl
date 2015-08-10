@@ -1,5 +1,5 @@
 
-cbuffer ViewBuffer : register(c4)
+cbuffer ViewBuffer : register(b4)
 {
 	float3 ViewPoint;
 	float pad;
