@@ -87,7 +87,7 @@ bool HeightMap::LoadSplatMap(wstring texture1, wstring texture2, wstring texture
 	return true;
 }
 
-bool HeightMap::LoadHeightMap(char* fileName){
+bool HeightMap::LoadHeightMap(char* fileName){ //MAPPEN MÅSTE VARA LIKA STOR PÅ BÅDA HÅLL!!!!!!
 	//8 bits bild!! kan gå mellan 0-255, char är 1 byte, alltså 8 bit! unsgined char går mellan 0-255 MINST
 
 	BITMAPFILEHEADER bitmapFH; //information about file
@@ -111,7 +111,7 @@ bool HeightMap::LoadHeightMap(char* fileName){
 	int imageSize = hmI.terrainWidth * hmI.terrainHeight * 3; //rgb (*3)
 	heights = new unsigned char[imageSize]; //denna kommer hålla arrayen av chars kommer innehålla datan från bilden, 0-255 eller mer
 
-	int facesCount = (hmI.terrainWidth - 1) * (hmI.terrainHeight - 1) * 2;//*2 pga att man får antal quads
+	int facesCount = (hmI.terrainWidth - 1) * (hmI.terrainHeight - 1) * 2;//*2 pga att man får antal quads, men vill ha i tris
 
 	//fseek(pFile, bitmapFH.bfOffBits, SEEK_SET); //placerar pFile i början på filen, fseek används för att flytta runt pekare i filer så man kan läsa därifrån
 	////SEEK_SET = Beginning of file, offset från beginning of file : bitmapFH.bfOffBits.    bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
@@ -131,6 +131,8 @@ bool HeightMap::LoadHeightMap(char* fileName){
 
 	int offsetColors = 0; //används för att kunna hoppa över GB
 	//per vertex
+	heightElements = hmI.terrainWidth;
+
 	int widthWhole = (int)hmI.terrainWidth, heightWhole = (int)hmI.terrainHeight; //terrain values in nr verts
 	for (int h = 0; h < hmI.terrainHeight; h++){ //kanske inte -1
 		for (int w = 0; w < hmI.terrainWidth; w++){
@@ -151,6 +153,8 @@ bool HeightMap::LoadHeightMap(char* fileName){
 
 			tempV.u = 0;
 			tempV.v = 0;
+			tempV.alphaU = 0;
+			tempV.alphaV = 0;
 
 			vertecies.push_back(tempV);
 			offsetColors = offsetColors + 3;
@@ -168,6 +172,9 @@ bool HeightMap::LoadHeightMap(char* fileName){
 	int UIndex = 0;
 	int VIndex = 0;
 
+	int terWidth = hmI.terrainWidth;
+	int terHeight = hmI.terrainHeight;
+
 	for (int h = 0; h < hmI.terrainHeight - 1; h++){
 		for (int w = 0; w < hmI.terrainWidth - 1; w++){
 
@@ -177,36 +184,48 @@ bool HeightMap::LoadHeightMap(char* fileName){
 			indecies[inIndex] = start;
 			vertecies[start].u = UIndex;
 			vertecies[start].v = VIndex;
+			vertecies[start].alphaU = (float)UIndex / terWidth;
+			vertecies[start].alphaV = (float)VIndex / terHeight;
 			inIndex++;
 			nrElements++;
 			//top right
 			indecies[inIndex] = start + 1;
 			vertecies[start + 1].u = UIndex + 1;
 			vertecies[start + 1].v = VIndex;
+			vertecies[start + 1].alphaU = (float)UIndex + 1 / terWidth;
+			vertecies[start + 1].alphaV = (float)VIndex / terHeight;
 			inIndex++;
 			nrElements++;
 			//bottom left
 			indecies[inIndex] = start + widthWhole;
 			vertecies[start + widthWhole].u = UIndex;
 			vertecies[start + widthWhole].v = VIndex + 1;
+			vertecies[start + widthWhole].alphaU = (float)UIndex / terWidth;
+			vertecies[start + widthWhole].alphaV = (float)VIndex + 1 / terHeight;
 			inIndex++;
 			nrElements++;
 			//bottom right
 			indecies[inIndex] = start + 1 + widthWhole;
 			vertecies[start + 1 + widthWhole].u = UIndex + 1;
 			vertecies[start + 1 + widthWhole].v = VIndex + 1;
+			vertecies[start + 1 + widthWhole].alphaU = (float)UIndex + 1 / terWidth;
+			vertecies[start + 1 + widthWhole].alphaV = (float)VIndex + 1 / terHeight;
 			inIndex++;
 			nrElements++;
 			//bottom left
 			indecies[inIndex] = start + widthWhole;
 			vertecies[start + widthWhole].u = UIndex;
 			vertecies[start + widthWhole].v = VIndex + 1;
+			vertecies[start + widthWhole].alphaU = (float)UIndex / terWidth;
+			vertecies[start + widthWhole].alphaV = (float)VIndex + 1 / terHeight;
 			inIndex++;
 			nrElements++;
 			//top right
 			indecies[inIndex] = start + 1;
 			vertecies[start + 1].u = UIndex + 1;
 			vertecies[start + 1].v = VIndex;
+			vertecies[start + 1].alphaU = (float)UIndex + 1 / terWidth;
+			vertecies[start + 1].alphaV = (float)VIndex / terHeight;
 			inIndex++;
 			nrElements++;
 

@@ -24,6 +24,19 @@ protected:
 	struct Float3{
 		float x, y, z;
 
+		Float3()
+		{
+			x = 1;
+			y = 1;
+			z = 1;
+		}
+
+		Float3(float x, float y, float z){
+			this->x = x;
+			this->y = y;
+			this->z = z;
+		}
+
 		Float3 Float3Subtract(Float3 s){
 			s.x -= s.x;
 			s.y -= s.y;
@@ -35,6 +48,7 @@ protected:
 	struct Vertex{
 		float x, y, z;
 		float u, v;
+		float alphaU, alphaV;
 		float nx, ny, nz;
 	};
 
@@ -56,6 +70,8 @@ public:
 	}
 	bool LoadHeightMap(char* fileName);
 	bool LoadSplatMap(wstring texture1, wstring texture2, wstring texture3, wstring splatMap);
+
+	int heightElements; //till constant buffer som håller värdet till splatmappens uv stuff
 
 	int GetNrElements(){
 		return nrElements;

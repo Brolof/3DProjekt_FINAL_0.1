@@ -376,6 +376,10 @@ void RenderEngine::Shaders(){
 	ID3DBlob* dVS = nullptr;
 	ShaderTest = CompileShader(L"FX_HLSL/depthVS.hlsl", "VS_main", "vs_5_0", &dVS);
 	ShaderTest = gDevice->CreateVertexShader(dVS->GetBufferPointer(), dVS->GetBufferSize(), nullptr, &dVertexShader);
+
+	ID3DBlob* dVS2 = nullptr;
+	ShaderTest = CompileShader(L"FX_HLSL/RGBSplatmapVS.hlsl", "main", "vs_5_0", &dVS2);
+	ShaderTest = gDevice->CreateVertexShader(dVS2->GetBufferPointer(), dVS2->GetBufferSize(), nullptr, &splatMapVertexShader);
 	
 	//create vertex texture
 	ID3DBlob* ddVS = nullptr;
@@ -400,6 +404,14 @@ void RenderEngine::Shaders(){
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 	gDevice->CreateInputLayout(inputDescPosOnly, ARRAYSIZE(inputDescPosOnly), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gWireFrameLayout);
+
+	D3D11_INPUT_ELEMENT_DESC inputDescSplatmap[] = {
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORDALPHA", 0, DXGI_FORMAT_R32G32_FLOAT, 20, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 28, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+	};
+	gDevice->CreateInputLayout(inputDescSplatmap, ARRAYSIZE(inputDescSplatmap), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gSplatmapLayout);
 	
 
 	//Create geometry shader
@@ -431,8 +443,8 @@ void RenderEngine::Shaders(){
 
 	////create height pixel shader
 	ID3DBlob* pPS2 = nullptr;
-	//ShaderTest = CompileShader(L"RGBSplatmapPS.hlsl", "main", "ps_5_0", &pPS2);
-	//ShaderTest = gDevice->CreatePixelShader(pPS2->GetBufferPointer(), pPS2->GetBufferSize(), nullptr, &splatMapPixelShader);
+	ShaderTest = CompileShader(L"FX_HLSL/RGBSplatmapPS.hlsl", "main", "ps_5_0", &pPS2);
+	ShaderTest = gDevice->CreatePixelShader(pPS2->GetBufferPointer(), pPS2->GetBufferSize(), nullptr, &splatMapPixelShader);
 	//
 
 	////create shadow pixel shader
@@ -512,6 +524,14 @@ void RenderEngine::CreatePlaneDataAndBuffers(){
 	transformbuffer.Usage = D3D11_USAGE_DEFAULT;
 	transformbuffer.ByteWidth = sizeof(World);
 	BufferTest = gDevice->CreateBuffer(&transformbuffer, NULL, &gWorld);
+
+	//heightmap stuff, till splatmap
+	D3D11_BUFFER_DESC heightmapBuffer;
+	memset(&heightmapBuffer, 0, sizeof(heightmapBuffer));
+	heightmapBuffer.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	heightmapBuffer.Usage = D3D11_USAGE_DEFAULT;
+	heightmapBuffer.ByteWidth = sizeof(heightmapInfo);
+	BufferTest = gDevice->CreateBuffer(&heightmapBuffer, NULL, &heightmapInfoConstant);
 
 	// Lightbuffer
 	D3D11_BUFFER_DESC lightbufferDesc;
@@ -956,21 +976,30 @@ void RenderEngine::Render(){
 	//Render Heightmap´s
 	for (int i = 0; i < heightMapObjects.size(); i++)
 	{
-		UINT32 vertexSize = sizeof(float) * 8;
+		UINT32 vertexSize = sizeof(float) * 10;
 		UINT32 offset = 0;
 
-		gDeviceContext->IASetInputLayout(gVertexLayout);
+		XMStoreFloat4x4(&WorldMatrixWF.WorldSpace, XMMatrixTranspose(identityM));
+		gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
+		gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
+
+		gDeviceContext->UpdateSubresource(heightmapInfoConstant, 0, NULL, &heightMapObjects[i]->HMInfoConstant, 0, 0);
+		gDeviceContext->PSSetConstantBuffers(3, 1, &heightmapInfoConstant);
+
+
+		gDeviceContext->IASetInputLayout(gSplatmapLayout);
 		gDeviceContext->IASetVertexBuffers(0, 1, &heightMapObjects[i]->gVertexBuffer, &vertexSize, &offset);
 		gDeviceContext->IASetIndexBuffer(heightMapObjects[i]->gIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 		gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-		gDeviceContext->PSSetSamplers(8, 1, &sampState1); //wrap samp
-		gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
+		gDeviceContext->VSSetShader(splatMapVertexShader, nullptr, 0);
 		gDeviceContext->HSSetShader(nullptr, nullptr, 0);
 		gDeviceContext->DSSetShader(nullptr, nullptr, 0);
 		gDeviceContext->GSSetShader(nullptr, nullptr, 0);
 		//gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
 		gDeviceContext->PSSetShader(splatMapPixelShader, nullptr, 0);
+		gDeviceContext->PSSetSamplers(8, 1, &sampState2); //clamp 
+		gDeviceContext->PSSetSamplers(9, 1, &sampState1); //wrap samp
 		//Bind texture to object
 		//gDeviceContext->PSSetShaderResources(0, 1, &ddsTex1);
 		gDeviceContext->PSSetShaderResources(0, 1, &heightMapObjects[i]->tex1shaderResourceView);
@@ -1196,6 +1225,7 @@ void RenderEngine::ImportHeightmap(char* HeightMapFileName, wstring tex1File, ws
 	cHeightMap->nmrElement = ImportedHM.GetNrElements();
 	//cHeightMap->gridSize = ImportedHM.GetGridSize();
 	//cHeightMap->vertexHeights = ImportedHM.GetHeights();
+	cHeightMap->HMInfoConstant.heightElements = ImportedHM.heightElements;
 	cHeightMap->tex1shaderResourceView = ImportedHM.GetTex1();
 	cHeightMap->tex2shaderResourceView = ImportedHM.GetTex2();
 	cHeightMap->tex3shaderResourceView = ImportedHM.GetTex3();

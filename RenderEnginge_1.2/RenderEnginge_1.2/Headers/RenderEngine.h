@@ -188,9 +188,21 @@ public:
 		XMFLOAT4X4 Projection;
 		XMFLOAT4X4 WorldSpace;
 	};
+	struct HeightmapInfo{
+		float heightElements;
+		XMFLOAT3 pad1;
+
+		HeightmapInfo hmInfoConstant(){
+			pad1.x = 1;
+			pad1.y = 1;
+			pad1.z = 1;
+		}
+	};
+
 
 	World WorldMatrix1;
 	WorldWireFrame WorldMatrixWF;
+	HeightmapInfo heightmapInfo;
 
 	struct shadowSettings
 	{
@@ -300,6 +312,8 @@ public:
 		ID3D11ShaderResourceView* tex2shaderResourceView = nullptr;
 		ID3D11ShaderResourceView* tex3shaderResourceView = nullptr;
 		ID3D11ShaderResourceView* splatshaderResourceView = nullptr;
+
+		HeightmapInfo HMInfoConstant;
 	};											 
 	std::vector<HeightMapObject*> heightMapObjects;
 
@@ -346,6 +360,7 @@ protected:
 	ID3D11Buffer* gVertexBuffer = nullptr;
 	ID3D11Buffer* gVertexBuffer2 = nullptr;
 	ID3D11Buffer* gWorld;
+	ID3D11Buffer* heightmapInfoConstant;
 	ID3D11Buffer* ViewBuffer = nullptr;
 	ID3D11Buffer* gLights;
 	ID3D11Buffer* PrimaryLightBuffer;
@@ -363,12 +378,14 @@ protected:
 	//Vertex/geometry layout desc
 	ID3D11InputLayout* gVertexLayout = nullptr;
 	ID3D11InputLayout* gWireFrameLayout = nullptr;
+	ID3D11InputLayout* gSplatmapLayout = nullptr;
 	
 
 	//Samplers
 	ID3D11SamplerState* sampState1 = nullptr;
 	ID3D11SamplerState* sampState2 = nullptr;
 	//Shaders
+	ID3D11VertexShader* splatMapVertexShader = nullptr;
 	ID3D11VertexShader* gVertexShader = nullptr;
 	ID3D11VertexShader* dVertexShader = nullptr;
 	ID3D11VertexShader* shadowVertexShader = nullptr;

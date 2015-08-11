@@ -128,6 +128,9 @@
     <FxCompile Include="FX_HLSL\LightHelper.fx">
       <Filter>Resource Files\PixelShaders</Filter>
     </FxCompile>
+    <FxCompile Include="FX_HLSL\RGBSplatmapVS.hlsl">
+      <Filter>Resource Files\VertexShaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Headers\RenderToTexture.h">
