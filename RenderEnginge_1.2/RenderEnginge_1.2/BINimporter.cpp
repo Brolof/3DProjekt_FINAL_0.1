@@ -229,6 +229,18 @@ void BINimporter::ImportBIN(ID3D11Device* gDevice, char* fileName){
 			bTemp.Extents = XMFLOAT3(extentX, extentY, extentZ);
 
 			GameObjects* tempP = new GameObjects(meshVertexBuffer, bTemp, false, bTemp.Center, true, false);
+
+			//TEST MED FRUSTUM CULLING
+			if (centerX < -1.2f){
+				tempP->SetStatic(true);
+				//tempP->isTransparent = true;
+			}
+			else{
+				tempP->SetStatic(false);
+				tempP->isTransparent = true; //bara för att testa och separera objekt, ta bort detta sen och ersätt med en import där man kan välja vad det ska va i maya
+			}
+			//****************************
+
 			tempP->material.Diffuse = KD;
 			tempP->material.Ambient = KA;
 			tempP->material.Specular = KS;
@@ -237,6 +249,8 @@ void BINimporter::ImportBIN(ID3D11Device* gDevice, char* fileName){
 			tempP->indexT = mesnNumberInt;
 			mesnNumberInt++;
 			binObj.push_back(tempP);
+			if (tempP->isTransparent == true)
+				transparentObj.push_back(tempP);
 		}
 		//delete meshVertexBuffer
 

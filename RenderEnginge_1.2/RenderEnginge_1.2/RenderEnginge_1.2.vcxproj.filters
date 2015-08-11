@@ -69,6 +69,9 @@
     <ClCompile Include="BINimporter.cpp">
       <Filter>Source Files\Main</Filter>
     </ClCompile>
+    <ClCompile Include="Source\QuadTree.cpp">
+      <Filter>Source Files\Main</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="FX_HLSL\BackFaceGeometryShader.hlsl">
@@ -164,6 +167,9 @@
       <Filter>Header Files\Main</Filter>
     </ClInclude>
     <ClInclude Include="Headers\RenderEngine.h">
+      <Filter>Header Files\Main</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\QuadTree.h">
       <Filter>Header Files\Main</Filter>
     </ClInclude>
   </ItemGroup>

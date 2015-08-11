@@ -30,6 +30,7 @@
 #include "DDSTextureLoader.h"
 #include "WICTextureLoader.h"
 #include "BINimporter.h"
+#include "QuadTree.h"
 //#include "depthClass.h"
 
 #include "SimpleMath.h"
@@ -82,7 +83,8 @@ public:
 	BINimporter theCustomImporter;
 	vector<int> intArrayTex;
 	std::vector<GameObjects*> renderObjects;
-	
+	std::vector<GameObjects*> transparentObjects; //dessa är de ända som kommer sorteras från avstånd av kameran
+	QuadTree *quadTree = nullptr;
 	//Shadows
 	
 
@@ -142,7 +144,7 @@ public:
 
 	//Import Functions
 	void ImportObj(char* geometryFileName, char* materialFileName, ID3D11Device* gDev);// , bool isStatic, XMMATRIX startPosMatrix);
-	void ImportHeightmap(char* HeightMapFileName, wstring tex1File, wstring tex2File, wstring tex3File, wstring texSplatFile);
+	
 
 	//Window name
 	std::wstring mainwname;
@@ -181,7 +183,15 @@ public:
 		XMFLOAT4X4 lightView;
 		XMFLOAT4X4 lightProjection;
 	};
+	struct WorldWireFrame{
+		XMFLOAT4X4 View;
+		XMFLOAT4X4 Projection;
+		XMFLOAT4X4 WorldSpace;
+	};
+
 	World WorldMatrix1;
+	WorldWireFrame WorldMatrixWF;
+
 	struct shadowSettings
 	{
 		int shadowTesting;
@@ -279,6 +289,8 @@ public:
 	};
 	ViewBufferStruct ViewP;
 
+	
+	void ImportHeightmap(char* HeightMapFileName, wstring tex1File, wstring tex2File, wstring tex3File, wstring texSplatFile);
 	//Struct for HeightMap
 	struct HeightMapObject{						 
 		ID3D11Buffer* gIndexBuffer;		
@@ -289,9 +301,9 @@ public:
 		ID3D11ShaderResourceView* tex3shaderResourceView = nullptr;
 		ID3D11ShaderResourceView* splatshaderResourceView = nullptr;
 	};											 
-	std::vector<HeightMapObject> HeightMapObjects;
+	std::vector<HeightMapObject*> heightMapObjects;
 
-	//quadtree!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	
 	struct Float3{
 		float x, y, z;
 		Float3(float x, float y, float z){
@@ -301,65 +313,6 @@ public:
 		}
 	};
 
-
-	struct QuadTreeInstance{
-		vector<GameObject> gameObjectsToRender;
-		//vector<QuadTreeInstance> children;
-		BoundingBox box;
-		ID3D11Buffer *boxBuffer = nullptr;
-
-		void SetValues(BoundingBox b, ID3D11Device* gDevice){
-			box = b;
-			std::vector<Float3> boxVertPoints;
-
-			boxVertPoints.push_back(Float3(box.Center.x - box.Extents.x, box.Center.y - box.Extents.y, box.Center.z - box.Extents.z)); //0,0,0
-			boxVertPoints.push_back(Float3(box.Center.x + box.Extents.x, box.Center.y - box.Extents.y, box.Center.z - box.Extents.z)); //1,0,0
-			boxVertPoints.push_back(Float3(box.Center.x + box.Extents.x, box.Center.y + box.Extents.y, box.Center.z - box.Extents.z)); //1,1,0
-			boxVertPoints.push_back(Float3(box.Center.x - box.Extents.x, box.Center.y + box.Extents.y, box.Center.z - box.Extents.z)); //0,1,0
-			boxVertPoints.push_back(Float3(box.Center.x - box.Extents.x, box.Center.y - box.Extents.y, box.Center.z - box.Extents.z)); //0,0,0
-
-			boxVertPoints.push_back(Float3(box.Center.x - box.Extents.x, box.Center.y - box.Extents.y, box.Center.z + box.Extents.z)); //0,0,1
-			boxVertPoints.push_back(Float3(box.Center.x + box.Extents.x, box.Center.y - box.Extents.y, box.Center.z + box.Extents.z)); //1,0,1
-			boxVertPoints.push_back(Float3(box.Center.x + box.Extents.x, box.Center.y + box.Extents.y, box.Center.z + box.Extents.z)); //1,1,1
-			boxVertPoints.push_back(Float3(box.Center.x - box.Extents.x, box.Center.y + box.Extents.y, box.Center.z + box.Extents.z)); //0,1,1
-			boxVertPoints.push_back(Float3(box.Center.x - box.Extents.x, box.Center.y - box.Extents.y, box.Center.z + box.Extents.z)); //0,0,1
-
-			boxVertPoints.push_back(Float3(box.Center.x + box.Extents.x, box.Center.y - box.Extents.y, box.Center.z + box.Extents.z)); //1,0,1
-			boxVertPoints.push_back(Float3(box.Center.x + box.Extents.x, box.Center.y - box.Extents.y, box.Center.z - box.Extents.z)); //1,0,0
-			boxVertPoints.push_back(Float3(box.Center.x + box.Extents.x, box.Center.y + box.Extents.y, box.Center.z - box.Extents.z)); //1,1,0
-			boxVertPoints.push_back(Float3(box.Center.x + box.Extents.x, box.Center.y + box.Extents.y, box.Center.z + box.Extents.z)); //1,1,1
-			boxVertPoints.push_back(Float3(box.Center.x - box.Extents.x, box.Center.y + box.Extents.y, box.Center.z + box.Extents.z)); //0,1,1
-			boxVertPoints.push_back(Float3(box.Center.x - box.Extents.x, box.Center.y + box.Extents.y, box.Center.z - box.Extents.z)); //0,1,0
-
-
-			D3D11_BUFFER_DESC bDesc;
-			ZeroMemory(&bDesc, sizeof(D3D11_BUFFER_DESC));
-			bDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-			bDesc.Usage = D3D11_USAGE_DEFAULT;
-			bDesc.ByteWidth = sizeof(Float3)* (boxVertPoints.size());
-
-			D3D11_SUBRESOURCE_DATA data;
-			data.pSysMem = boxVertPoints.data();//<--------
-			HRESULT VertexBufferChecker = gDevice->CreateBuffer(&bDesc, &data, &boxBuffer);
-		}
-
-		void TestContains(vector<GameObject> gameObjectsPossibleHit){ //skicka in alla gameobjects i världen, (gameObjectsInWorldSpace)
-			for each (GameObject ob in gameObjectsPossibleHit)
-			{
-				if (ob.isStatic == true){ //bara de statiska objekten ska kunna cullas
-					ContainmentType test = box.Contains(ob.bbox);
-					if (test == 2 || test == 1){ //1 = intersects, 2 = contains, testa ifall nått gameobject ligger i just denna boxen, om den gör det så lägg till den
-						gameObjectsToRender.push_back(ob);
-					}
-				}
-			}
-		}
-	};
-	vector<QuadTreeInstance> quadTree;
-	void ListQuadTree(int nrSplits, XMFLOAT3 center, XMFLOAT3 extents);
-	void CheckFrustumContains(int nrSplits, int);
-	int nrSplitsTree = 2; //<-------- ÄNDRA DENNA OM VI BEHÖVER FLER SPLITS I QUADTRÄDET
-	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 	//Window handlers
@@ -496,5 +449,12 @@ protected:
 	ID3D11DepthStencilState* m_depthStencilState;
 	ID3D11Buffer* d2dIndexBuffer;
 	int m_bitmapWidth, m_bitmapHeight = 100;
+
+
+	//blendstates and transparency
+	void BlendStates();
+	ID3D11BlendState *transparency;
+	ID3D11RasterizerState *counterCWCullmode; //dessa används vid transpareny mojs
+	ID3D11RasterizerState *CWCullmode;
 
 };
