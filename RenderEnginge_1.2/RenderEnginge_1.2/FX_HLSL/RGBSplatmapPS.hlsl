@@ -64,9 +64,9 @@ float4 main(VS_OUT input) : SV_Target
 		float4 gTex = GTexture.Sample(wrapSamState, input.Tex);
 		float4 bTex = BTexture.Sample(wrapSamState, input.Tex);
 		//float4 splatTex = SplatTexture.Sample(normalSamState, input.AlphaTex);
-		float4 splatTex = SplatTexture.Sample(normalSamState, input.Tex / heightElements);
+		float4 splatTex = SplatTexture.Sample(normalSamState, input.Tex / heightElements); //heightelements är hur många vertiser det finns i ett led, uv delas alltså up mellan 0 och 1
 
-		float4 finalTexture = (rTex * splatTex.r + gTex * splatTex.g + bTex * splatTex.b);
+		//float4 finalTexture = (rTex * splatTex.r + gTex * splatTex.g + bTex * splatTex.b);
 
 		float4 finalTex = float4(rTex.x * splatTex.r + gTex.x * splatTex.g + bTex.x * splatTex.b, rTex.y * splatTex.r + gTex.y * splatTex.g + bTex.y * splatTex.b, rTex.z * splatTex.r + gTex.z * splatTex.g + bTex.z * splatTex.b, 1);
 		/*ComputePointLight(gMaterial, lPoint, input.Pos.xyz, input.tunormal, toEyeWorld, A, D, S);
@@ -79,7 +79,7 @@ float4 main(VS_OUT input) : SV_Target
 	diffuse += D;
 	spec += S;
 
-	float4 finalcolor = finalTexture * (ambient + diffuse) + spec;// +float4(input.color, 1.0f);
+	float4 finalcolor = finalTex * (ambient + diffuse) + spec;// +float4(input.color, 1.0f);
 
 		//See only tex
 		//return Texdiffuse;

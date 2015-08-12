@@ -126,7 +126,7 @@ bool HeightMap::LoadHeightMap(char* fileName){ //MAPPEN MÅSTE VARA LIKA STOR PÅ 
 	//if (hFile.is_open == true){
 	//	std::vector<unsigned char> heights(width * height); //vector konstruktor
 	std::vector<Vertex> vertecies;
-	vertexHeightsArray.resize((hmI.terrainHeight * hmI.terrainWidth));
+	vertexHeightsArray.resize((hmI.terrainHeight * hmI.terrainWidth)); //den man går på!
 	//hFile.read((char *)&heights[0], (std::streamsize)heights.size()); //store:a alla filens värden i heights
 
 	int offsetColors = 0; //används för att kunna hoppa över GB
