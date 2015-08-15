@@ -50,6 +50,23 @@ protected:
 		float u, v;
 		float alphaU, alphaV;
 		float nx, ny, nz;
+
+		Vertex(){
+			x = 0;
+			y = 0;
+			z = 0;
+
+			u = 0;
+			v = 0;
+
+			alphaU = 0;
+			alphaV = 0;
+
+			nx = 0;
+			ny = 0;
+			nz = 0;
+		}
+
 	};
 
 	struct HeightMapInfo{

@@ -16,7 +16,6 @@
 #include <vector>
 #include <memory>
 
-
 /////////////////////
 #include "GameTimer.h"
 #include "lights.h"
@@ -31,6 +30,7 @@
 #include "WICTextureLoader.h"
 #include "BINimporter.h"
 #include "QuadTree.h"
+#include "Glow.h"
 //#include "depthClass.h"
 
 #include "SimpleMath.h"
@@ -85,6 +85,7 @@ public:
 	std::vector<GameObjects*> renderObjects;
 	std::vector<GameObjects*> transparentObjects; //dessa är de ända som kommer sorteras från avstånd av kameran
 	QuadTree *quadTree = nullptr;
+	Glow *glow;
 	//Shadows
 	
 
@@ -355,6 +356,7 @@ protected:
 	ID3D11DepthStencilView* gDepthStencilView = nullptr;
 	//2D Textures
 	ID3D11Texture2D* depthStencilBuffer = nullptr;
+	D3D11_VIEWPORT vp;
 
 	//Buffers
 	ID3D11Buffer* gVertexBuffer = nullptr;
@@ -391,6 +393,10 @@ protected:
 	ID3D11VertexShader* shadowVertexShader = nullptr;
 	ID3D11VertexShader* gWireFrameVertexShader = nullptr;
 	ID3D11VertexShader* shader2DVS = nullptr;
+	ID3D11VertexShader* glowVertexShader = nullptr;
+	ID3DBlob* glowBlob = nullptr;
+	ID3D11VertexShader* horizontalBlurVertexShader = nullptr;
+	ID3D11VertexShader* verticalBlurVertexShader = nullptr;
 
 	ID3D11GeometryShader* gGeometryShader = nullptr;
 	ID3D11GeometryShader* gBackFaceShader = nullptr;
@@ -403,6 +409,9 @@ protected:
 	ID3D11PixelShader* gWireFramePixelShader = nullptr;
 	ID3D11PixelShader* gWireFramePixelShaderCONTAINTEST = nullptr;
 	ID3D11PixelShader* shader2DPS = nullptr;
+	ID3D11PixelShader* glowPixelShader = nullptr;
+	ID3D11PixelShader* horizontalBlurPixelShader = nullptr;
+	ID3D11PixelShader* verticalBlurPixelShader = nullptr;
 
 
 	//Render States

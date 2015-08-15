@@ -72,6 +72,9 @@
     <ClCompile Include="Source\QuadTree.cpp">
       <Filter>Source Files\Main</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Glow.cpp">
+      <Filter>Source Files\Visual</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="FX_HLSL\BackFaceGeometryShader.hlsl">
@@ -131,6 +134,18 @@
     <FxCompile Include="FX_HLSL\RGBSplatmapVS.hlsl">
       <Filter>Resource Files\VertexShaders</Filter>
     </FxCompile>
+    <FxCompile Include="FX_HLSL\GlowVS.hlsl">
+      <Filter>Resource Files\VertexShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\HorizontalBlurVS.hlsl">
+      <Filter>Resource Files\VertexShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\GlowPS.hlsl">
+      <Filter>Resource Files\PixelShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\HorizontalBlurPS.hlsl">
+      <Filter>Resource Files\PixelShaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Headers\RenderToTexture.h">
@@ -174,6 +189,9 @@
     </ClInclude>
     <ClInclude Include="Headers\QuadTree.h">
       <Filter>Header Files\Main</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Glow.h">
+      <Filter>Header Files\Visual</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

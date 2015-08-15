@@ -117,45 +117,34 @@ bool HeightMap::LoadHeightMap(char* fileName){ //MAPPEN MÅSTE VARA LIKA STOR PÅ 
 	////SEEK_SET = Beginning of file, offset från beginning of file : bitmapFH.bfOffBits.    bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
 
 	//fread(heights, 1, imageSize, pFile); //store:a alla värden i heights
+	fseek(pFile, bitmapFH.bfOffBits, SEEK_SET);
+
+	// Read in the bitmap image data.
+	fread(heights, 1, imageSize, pFile);
+
 	fclose(pFile);
 
-	ifstream hFile;
-	hFile.open(fileName, std::ifstream::binary);
-	hFile.read((char*)&heights[0], (streamsize)imageSize);
-
-	//if (hFile.is_open == true){
-	//	std::vector<unsigned char> heights(width * height); //vector konstruktor
 	std::vector<Vertex> vertecies;
 	vertexHeightsArray.resize((hmI.terrainHeight * hmI.terrainWidth)); //den man går på!
-	//hFile.read((char *)&heights[0], (std::streamsize)heights.size()); //store:a alla filens värden i heights
+	
 
-	int offsetColors = 0; //används för att kunna hoppa över GB
 	//per vertex
 	heightElements = hmI.terrainWidth;
+
+	int offsetColors = 0; //används för att kunna hoppa över GB
 
 	int widthWhole = (int)hmI.terrainWidth, heightWhole = (int)hmI.terrainHeight; //terrain values in nr verts
 	for (int h = 0; h < hmI.terrainHeight; h++){ //kanske inte -1
 		for (int w = 0; w < hmI.terrainWidth; w++){
 			Vertex tempV;
 			tempV.x = w * gridSize;
-			//tempV.y = (float)(heights[(h * hmI.terrainHeight) + w]) * heightMultiplier; //-----------------------------
 			tempV.y = (float)heights[offsetColors];
-			tempV.y = tempV.y * heightMultiplier; //höjden
-			//tempV.y = 0;
+			tempV.y = tempV.y * heightMultiplier; //höjden			
 			vertexHeightsArray[h * widthWhole + w] = tempV.y;//fyller denna med alla höjd värden för att sedan användas när man går på terrängen
 			tempV.z = -h * gridSize; //minus becuz LH och RH
-			tempV.nx = 0;
+			
 			tempV.ny = 1;
-			tempV.nz = 0;
-
-			/*tempV.u = (float)(w / (width - 1));
-			tempV.v = (float)(h / (height - 1));*/
-
-			tempV.u = 0;
-			tempV.v = 0;
-			tempV.alphaU = 0;
-			tempV.alphaV = 0;
-
+			
 			vertecies.push_back(tempV);
 			offsetColors = offsetColors + 3;
 		}
@@ -172,8 +161,8 @@ bool HeightMap::LoadHeightMap(char* fileName){ //MAPPEN MÅSTE VARA LIKA STOR PÅ 
 	int UIndex = 0;
 	int VIndex = 0;
 
-	int terWidth = hmI.terrainWidth;
-	int terHeight = hmI.terrainHeight;
+	//int terWidth = hmI.terrainWidth;
+	//int terHeight = hmI.terrainHeight;
 
 	for (int h = 0; h < hmI.terrainHeight - 1; h++){
 		for (int w = 0; w < hmI.terrainWidth - 1; w++){
@@ -184,48 +173,48 @@ bool HeightMap::LoadHeightMap(char* fileName){ //MAPPEN MÅSTE VARA LIKA STOR PÅ 
 			indecies[inIndex] = start;
 			vertecies[start].u = UIndex;
 			vertecies[start].v = VIndex;
-			vertecies[start].alphaU = (float)UIndex / terWidth;
-			vertecies[start].alphaV = (float)VIndex / terHeight;
+			/*vertecies[start].alphaU = (float)UIndex / terWidth;
+			vertecies[start].alphaV = (float)VIndex / terHeight;*/
 			inIndex++;
 			nrElements++;
 			//top right
 			indecies[inIndex] = start + 1;
 			vertecies[start + 1].u = UIndex + 1;
 			vertecies[start + 1].v = VIndex;
-			vertecies[start + 1].alphaU = (float)UIndex + 1 / terWidth;
-			vertecies[start + 1].alphaV = (float)VIndex / terHeight;
+			/*vertecies[start + 1].alphaU = (float)UIndex + 1 / terWidth;
+			vertecies[start + 1].alphaV = (float)VIndex / terHeight;*/
 			inIndex++;
 			nrElements++;
 			//bottom left
 			indecies[inIndex] = start + widthWhole;
 			vertecies[start + widthWhole].u = UIndex;
 			vertecies[start + widthWhole].v = VIndex + 1;
-			vertecies[start + widthWhole].alphaU = (float)UIndex / terWidth;
-			vertecies[start + widthWhole].alphaV = (float)VIndex + 1 / terHeight;
+			/*vertecies[start + widthWhole].alphaU = (float)UIndex / terWidth;
+			vertecies[start + widthWhole].alphaV = (float)VIndex + 1 / terHeight;*/
 			inIndex++;
 			nrElements++;
 			//bottom right
 			indecies[inIndex] = start + 1 + widthWhole;
 			vertecies[start + 1 + widthWhole].u = UIndex + 1;
 			vertecies[start + 1 + widthWhole].v = VIndex + 1;
-			vertecies[start + 1 + widthWhole].alphaU = (float)UIndex + 1 / terWidth;
-			vertecies[start + 1 + widthWhole].alphaV = (float)VIndex + 1 / terHeight;
+			/*vertecies[start + 1 + widthWhole].alphaU = (float)UIndex + 1 / terWidth;
+			vertecies[start + 1 + widthWhole].alphaV = (float)VIndex + 1 / terHeight;*/
 			inIndex++;
 			nrElements++;
 			//bottom left
 			indecies[inIndex] = start + widthWhole;
 			vertecies[start + widthWhole].u = UIndex;
 			vertecies[start + widthWhole].v = VIndex + 1;
-			vertecies[start + widthWhole].alphaU = (float)UIndex / terWidth;
-			vertecies[start + widthWhole].alphaV = (float)VIndex + 1 / terHeight;
+			/*vertecies[start + widthWhole].alphaU = (float)UIndex / terWidth;
+			vertecies[start + widthWhole].alphaV = (float)VIndex + 1 / terHeight;*/
 			inIndex++;
 			nrElements++;
 			//top right
 			indecies[inIndex] = start + 1;
 			vertecies[start + 1].u = UIndex + 1;
 			vertecies[start + 1].v = VIndex;
-			vertecies[start + 1].alphaU = (float)UIndex + 1 / terWidth;
-			vertecies[start + 1].alphaV = (float)VIndex / terHeight;
+			/*vertecies[start + 1].alphaU = (float)UIndex + 1 / terWidth;
+			vertecies[start + 1].alphaV = (float)VIndex / terHeight;*/
 			inIndex++;
 			nrElements++;
 
