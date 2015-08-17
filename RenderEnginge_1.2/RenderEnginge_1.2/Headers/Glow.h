@@ -46,7 +46,11 @@ public:
 
 	ID3D11Buffer *planeVertexBuffer; //rendera på denna vid andra passet
 
-	Glow(){}
+	Glow(){
+		void CreateViewPort();
+		void CreateTextures();
+		void CreatePlaneAndBuffers();
+	}
 	Glow(ID3D11Device *gDevice, ID3D11DeviceContext *gDeviceContext, int screen_Width, int screen_Height, ID3D11VertexShader *glowVS, ID3D11PixelShader *glowPS, ID3DBlob* glowBlob){
 		this->gDevice = gDevice;
 		this->gDeviceContext = gDeviceContext;

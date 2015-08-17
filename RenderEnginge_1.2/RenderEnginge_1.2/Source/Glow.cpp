@@ -1,7 +1,7 @@
 #include "Glow.h"
 
 void Glow::CreateViewPort(){
-	D3D11_VIEWPORT glowViewPort;
+	//D3D11_VIEWPORT glowViewPort;
 	glowViewPort.Width = screen_Width;
 	glowViewPort.Height = screen_Height;
 	glowViewPort.MinDepth = 0.0f;

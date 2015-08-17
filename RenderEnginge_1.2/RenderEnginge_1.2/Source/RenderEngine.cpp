@@ -933,12 +933,12 @@ void RenderEngine::Render(){
 	//GLOWTEST!!!!!!!!!
 	tex = 0;
 	glow->DrawToGlowMap();
-	gDeviceContext->RSSetViewports(1, &vp);
+	//gDeviceContext->RSSetViewports(1, &vp);
 	//Set BackGround Color
-	float clearColor[] = { 0, 0.3, 0.7f, 1.0f };
-	gDeviceContext->ClearRenderTargetView(gBackRufferRenderTargetView, clearColor);
+	float clearColor[] = { 0.0f, 0.3f, 0.7f, 1.0f };
+	/*gDeviceContext->ClearRenderTargetView(gBackRufferRenderTargetView, clearColor);
 	gDeviceContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
-	gDeviceContext->OMSetRenderTargets(1, &gBackRufferRenderTargetView, gDepthStencilView);
+	gDeviceContext->OMSetRenderTargets(1, &gBackRufferRenderTargetView, gDepthStencilView);*/
 
 
 	gDeviceContext->IASetInputLayout(gVertexLayout);
@@ -963,33 +963,34 @@ void RenderEngine::Render(){
 		gDeviceContext->Draw(renderObjects[i]->nrElements * 3, 0);
 		
 	}
+	//kör om med blur här!!!!!!!!!
 
 //******************************************************************************************************
 
-	//gDeviceContext->RSSetViewports(1, &vp);
-	////Set BackGround Color
+	gDeviceContext->RSSetViewports(1, &vp);
+	//Set BackGround Color
 	//float clearColor[] = { 0, 0.3, 0.7f, 1.0f };
-	//gDeviceContext->ClearRenderTargetView(gBackRufferRenderTargetView, clearColor);
-	//gDeviceContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
-	//gDeviceContext->OMSetRenderTargets(1, &gBackRufferRenderTargetView, gDepthStencilView);
+	gDeviceContext->ClearRenderTargetView(gBackRufferRenderTargetView, clearColor);
+	gDeviceContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+	gDeviceContext->OMSetRenderTargets(1, &gBackRufferRenderTargetView, gDepthStencilView);
 
-	//tex = 0;
-	//gDeviceContext->IASetInputLayout(gVertexLayout);
-	//
-	////rita ut glowen**********************************************************************************************
-	//gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-	////TurnZBufferOff();
-	//UINT32 vertexPosTex = sizeof(float) * 5;
-	//gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
-	//gDeviceContext->HSSetShader(nullptr, nullptr, 0);
-	//gDeviceContext->DSSetShader(nullptr, nullptr, 0);
-	//gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
+	tex = 0;
+	gDeviceContext->IASetInputLayout(gVertexLayout);
+	
+	//rita ut glowen**********************************************************************************************
+	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	//TurnZBufferOff();
+	UINT32 vertexPosTex = sizeof(float) * 5;
+	gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
+	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
+	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
+	gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
 
-	//gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
-	//gDeviceContext->PSSetShaderResources(0, 1, &glow->shaderResourceView);
-	//gDeviceContext->IASetVertexBuffers(0, 1, &glow->planeVertexBuffer, &vertexPosTex, &offset2);
-	//gDeviceContext->Draw(4, 0);
-	//TurnZBufferOn();
+	gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
+	gDeviceContext->PSSetShaderResources(0, 1, &glow->shaderResourceView);
+	gDeviceContext->IASetVertexBuffers(0, 1, &glow->planeVertexBuffer, &vertexPosTex, &offset2);
+	gDeviceContext->Draw(4, 0);
+	TurnZBufferOn();
 	//************************************************************************************************************
 
 	//gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -1131,6 +1132,9 @@ void RenderEngine::Update(float dt){
 void RenderEngine::Release(){
 	delete quadTree;
 	quadTree = NULL;
+
+	delete glow;
+	glow = NULL;
 
 	gDevice->Release();
 	depthStencilBuffer->Release();
