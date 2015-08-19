@@ -27,8 +27,10 @@ bool HeightMap::LoadSplatMap(wstring texture1, wstring texture2, wstring texture
 	//nChars = MultiByteToWideChar(CP_ACP, 0, texture1, -1, NULL, 0);// required size, CP_ACP används vid temporära saker, sista parametern satt till 0 ger storleken som behövs för buffern
 	//textureWCHAR1 = new WCHAR[nChars];
 	//MultiByteToWideChar(CP_ACP, 0, texture1, -1, (LPWSTR)textureWCHAR1, nChars);
-	//hr = DirectX::CreateWICTextureFromFile(gDevice, texture1.c_str(), nullptr, &tex1shaderResourceView);
-	hr = DirectX::CreateDDSTextureFromFile(gDevice, texture1.c_str(), nullptr, &tex1shaderResourceView);
+	hr = CreateWICTextureFromFile(gDevice, texture1.c_str(), nullptr, &tex1shaderResourceView);
+	if (FAILED(hr)){
+		hr = CreateDDSTextureFromFile(gDevice, texture1.c_str(), nullptr, &tex1shaderResourceView);
+	}
 	//hr = CreateDDSTextureFromFile(gDevice, L"Grass.png", nullptr, &tex1shaderResourceView);
 	if (FAILED(hr)){
 		return false;
@@ -39,8 +41,10 @@ bool HeightMap::LoadSplatMap(wstring texture1, wstring texture2, wstring texture
 	nChars = MultiByteToWideChar(CP_ACP, 0, texture2, -1, NULL, 0);
 	textureWCHAR2 = new WCHAR[nChars];
 	MultiByteToWideChar(CP_ACP, 0, texture2, -1, (LPWSTR)textureWCHAR2, nChars);*/
-	//hr = DirectX::CreateWICTextureFromFile(gDevice, gDeviceContext, texture2.c_str(), nullptr, &tex2shaderResourceView);
-	hr = DirectX::CreateDDSTextureFromFile(gDevice, texture2.c_str(), nullptr, &tex2shaderResourceView);
+	hr = CreateWICTextureFromFile(gDevice, texture2.c_str(), nullptr, &tex2shaderResourceView);
+	if (FAILED(hr)){
+		hr = CreateDDSTextureFromFile(gDevice, texture2.c_str(), nullptr, &tex2shaderResourceView);
+	}
 	if (FAILED(hr)){
 		return false;
 	}
@@ -50,8 +54,10 @@ bool HeightMap::LoadSplatMap(wstring texture1, wstring texture2, wstring texture
 	nChars = MultiByteToWideChar(CP_ACP, 0, texture3, -1, NULL, 0);
 	textureWCHAR3 = new WCHAR[nChars];
 	MultiByteToWideChar(CP_ACP, 0, texture3, -1, (LPWSTR)textureWCHAR3, nChars);*/
-	//hr = DirectX::CreateWICTextureFromFile(gDevice, gDeviceContext, texture3.c_str(), nullptr, &tex3shaderResourceView);
-	hr = DirectX::CreateDDSTextureFromFile(gDevice, texture3.c_str(), nullptr, &tex3shaderResourceView);
+	hr = CreateWICTextureFromFile(gDevice, texture3.c_str(), nullptr, &tex3shaderResourceView);
+	if (FAILED(hr)){
+		hr = CreateDDSTextureFromFile(gDevice, texture3.c_str(), nullptr, &tex3shaderResourceView);
+	}
 	if (FAILED(hr)){
 		return false;
 	}
@@ -61,8 +67,10 @@ bool HeightMap::LoadSplatMap(wstring texture1, wstring texture2, wstring texture
 	nChars = MultiByteToWideChar(CP_ACP, 0, splatMap, -1, NULL, 0);
 	textureWCHARsplat = new WCHAR[nChars];
 	MultiByteToWideChar(CP_ACP, 0, splatMap, -1, (LPWSTR)textureWCHARsplat, nChars);*/
-	//hr = DirectX::CreateWICTextureFromFile(gDevice, gDeviceContext, splatMap.c_str(), nullptr, &splatshaderResourceView);
-	hr = DirectX::CreateDDSTextureFromFile(gDevice, splatMap.c_str(), nullptr, &splatshaderResourceView);
+	hr = CreateWICTextureFromFile(gDevice, splatMap.c_str(), nullptr, &splatshaderResourceView);
+	if (FAILED(hr)){
+		hr = CreateDDSTextureFromFile(gDevice, splatMap.c_str(), nullptr, &splatshaderResourceView);
+	}
 	if (FAILED(hr)){
 		return false;
 	}

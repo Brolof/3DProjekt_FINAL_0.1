@@ -68,11 +68,16 @@ public:
 	}
 
 	void CalculateWorld(){ //denna ska kallas innan man skickar in den i GPUn
-		world = scale * rot * pos; //stämmer detta?
+		if (isStatic == false)
+			world = scale * rot * pos; //stämmer detta?
 	}
 
 	void SetActive(bool a){
 		isActive = a; //används ifall vi vill stänga av detta object, tex när man plockar upp den
+	}
+
+	void SetStatic(bool b){
+		isStatic = b;
 	}
 
 	bool GetActive(){ return isActive; }
