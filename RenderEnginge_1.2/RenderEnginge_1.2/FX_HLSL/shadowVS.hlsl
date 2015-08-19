@@ -28,9 +28,12 @@ cbuffer CamBuffer : register (b4)
 
 struct VS_IN
 {
-	float3 Pos : POSITION;
-	float2 Tex : TEXCOORD;
-	float3 normals : NORMAL;
+
+	float3 Pos		: POSITION;
+	float2 Tex		: TEXCOORD;
+	float3 normals	: NORMAL;
+	float3 tangent : TANGENT;
+
 
 };
 
@@ -39,11 +42,15 @@ struct VS_OUT
 	float4 Pos		: POSITION;
 	float2 Tex		: TEXCOORD;
 	float3 normals	: NORMAL;
+	float3 tangent : TANGENT;
+
+	
 	//LightViewPos for shadow calc
 	float4 wPos		: SV_POSITION;
 	float4 lightViewPos : TEXCOORD1;
 	float3 lightPos : TEXCOORD2;
 	float3 viewDir : TEXCOORD3;
+	
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -65,7 +72,7 @@ VS_OUT VS_main(VS_IN input)
 	// Calculate the position of the vertex against the world, view, and projection matrices.
 	inputpos = mul(inputpos, WorldSpace);
 	inputpos = mul(inputpos, View);
-	inputpos = mul(inputpos, Projection);
+	inputpos = mul(inputpos, Projection); 
 	output.wPos = inputpos;
 
 	output.Pos = mul(float4(input.Pos, 1.0f), WorldSpace);
@@ -73,12 +80,15 @@ VS_OUT VS_main(VS_IN input)
 	output.lightViewPos = mul(inputpos2, WorldSpace);
 	output.lightViewPos = mul(output.lightViewPos, lightView2);
 	output.lightViewPos = mul(output.lightViewPos, lightProjection2);
-	//output.lightViewPos = float4(1, 0, 0, 1);
+
 	// Store the texture coordinates for the pixel shader.
 	output.Tex = input.Tex;
 
 	// Calculate the normal vector against the world matrix only.
 	output.normals = mul(input.normals, (float3x3)WorldSpace);
+
+	//NORMAL MAPPING
+	output.tangent = mul(input.tangent, (float3x3)WorldSpace);
 
 	// Normalize the normal vector.
 	output.normals = normalize(output.normals);
@@ -91,9 +101,9 @@ VS_OUT VS_main(VS_IN input)
 	output.lightPos = normalize(output.lightPos);
 
 	// Determine the viewing direction based on the position of the camera and the position of the vertex in the world.
-	output.viewDir = viewPoint.xyz - worldPosition.xyz;
+	output.viewDir = viewPoint.xyz;// -worldPosition.xyz;
 
 	// Normalize the viewing direction vector.
-	output.viewDir = normalize(output.viewDir);
+	//output.viewDir = normalize(output.viewDir);
 	return output;
 };

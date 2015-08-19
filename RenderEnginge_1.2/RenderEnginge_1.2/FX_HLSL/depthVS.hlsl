@@ -14,9 +14,10 @@ cbuffer World : register (b0)
 
 struct VertexInputType
 {
-	float3 position : POSITION;
-	float2 Tex : TEXCOORD;
-	float3 normals : NORMAL;
+	float3 position		: POSITION;
+	float2 Tex		: TEXCOORD;
+	float3 normals	: NORMAL;
+	float3 tangent : TANGENT;
 };
 
 struct PixelInputType

@@ -27,7 +27,7 @@ RenderEngine::RenderEngine(HINSTANCE hInstance, std::string name, UINT scrW, UIN
 // DESTRUCTOR
 
 RenderEngine::~RenderEngine(){ //destruktor
-
+	RenderEngine::Release();
 }
 
 
@@ -60,22 +60,39 @@ bool RenderEngine::Init(){
 	// Sets and creates viewport
 	SetViewport();
 	
+	//LIGHT
+	//Deafult Lights
+	//Dir light1                    PLACE IN OWN FUNCTION LATER
+	PrimaryLights.lDir.Ambient = XMFLOAT4(0.12f, 0.12f, 0.12f, 0.2f);
+	PrimaryLights.lDir.Diffuse = XMFLOAT4(0.15f, 0.15f, 0.15f, 1.0f);
+	PrimaryLights.lDir.Specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 2.0f);
+	PrimaryLights.lDir.Dir = XMFLOAT3(0.0f, -10.0f, 0.8f);
+	PrimaryLights.lDir.Pad = 0.0f;
+	////////////LIGHTS/////////////////////////////////////////////////////
+
+	// Deafult Lights
+	////Padding
+	MatBuffer1.pad = 0.0f;
+	//Eyepos
+	MatBuffer1.gEyePos = Vector3(camPosition.x, camPosition.y, camPosition.z);
+	// Makes a deafualt mat
+	MatBuffer1.gMaterial.Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	MatBuffer1.gMaterial.Diffuse = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	MatBuffer1.gMaterial.Specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 3.0f);
+	MatBuffer1.gMaterial.Reflection = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	//
 
 	CreatePlaneDataAndBuffers();
-
 
 	//Set Camera values
 	//fpsCam.SetPosition(0.0f, 0.4f, -6.0f);
 	camPosition = Vector4(0.0f, 10.70f, 0.0f, 0.0f);
-	camPosition2 = Vector4(0.0f, 5.0f, 0.0f, 0.0f);
 	fpsCam.SetLens(0.25f*3.14f, screen_Width / screen_Height, 1.0f, 100.0f);
-	lightCam.SetLens(0.25f*3.14f, SHADOWMAP_WIDTH / SHADOWMAP_HEIGHT, 1.0f, 100.0f);
-	m_orthoMatrix= XMMatrixOrthographicLH(20.0f, 20.0f, 1.0f, 100.0f);
-	//Shadow map init
-	
 
-	//Keyboard and mouse handlers
-	
+	//Shadow map init
+	shadowMap = new ShadowMap;
+	shadowMap->SetShadowMapConstants(1024, 50.0f, 1.0f, 2, 50.0f);
+	shadowMap->CreateShadowMap(gDevice, PrimaryLights.lDir, XMFLOAT4(0.0f, 20.0f, -10.0f, 0.0f));
 
 	//Initialize Shaders and triangle data
 	Shaders();
@@ -84,7 +101,7 @@ bool RenderEngine::Init(){
 	intArrayTex = theCustomImporter.GetindexArray();
 	renderObjects = theCustomImporter.GetObjects();
 	TextureFunc();
-
+	
 	for (int i = 0; i < renderObjects.size(); i++) //skapar boundingboxar för objecten
 	{
 		renderObjects[i]->CreateBBOXVertexBuffer(gDevice);
@@ -165,8 +182,8 @@ void RenderEngine::SetViewport()
 
 	shadowVP.Width = (float)SHADOWMAP_WIDTH;
 	shadowVP.Height = (float)SHADOWMAP_HEIGHT;
-	shadowVP.MinDepth = 0.0f;
-	shadowVP.MaxDepth = 1.0f;
+	shadowVP.MinDepth = SHADOWMAP_NEAR;
+	shadowVP.MaxDepth = SHADOWMAP_DEPTH;
 	shadowVP.TopLeftX = 0;
 	shadowVP.TopLeftY = 0;
 }
@@ -190,16 +207,16 @@ void RenderEngine::fpscounter()
 		float mspf = 1000.0f / fps;
 		float timer = gTimer.TotalTime();
 		// Makes a String for the window handler
-		std::wostringstream outs;
+
 
 		outs.precision(6);
 		outs << mainwname << L" "
 			<< L"        FPS: " << fps << L" "
 			<< L"        Frame Time: " << mspf << L" (ms)"
 			<< L"        Time: " << timer << L" sec";
-
+	
 		//Prints the text in the window handler
-		SetWindowText(hWindow, "Shadows soon");// outs.str().c_str());
+		SetWindowText(hWindow, "Shadows, BF-Culling, Normal Mapping, BinImport, ");// outs.str().c_str());
 
 		// Reset for next fps.
 		framecount = 0;
@@ -292,11 +309,12 @@ void RenderEngine::TextureFunc(){
 
 
 	HRESULT texCheck;
-	texCheck = CreateDDSTextureFromFile(gDevice, L"Textures/terrain.dds", nullptr, &ddsTex1);
+	texCheck = CreateWICTextureFromFile(gDevice, L"Textures//maleNormalmap2.jpg", nullptr, &normalMap);
+	texCheck = CreateDDSTextureFromFile(gDevice, L"Textures/normalTest.jpg", nullptr, &ddsTex1);
 	texCheck = CreateDDSTextureFromFile(gDevice, L"Textures/shark.dds", nullptr, &ddsTex2);
 	texCheck = CreateDDSTextureFromFile(gDevice, L"Textures/stone.dds", nullptr, &AdsResourceView);
 	texCheck = CreateDDSTextureFromFile(gDevice, L"Textures/NPC.dds", nullptr, &NpcRV);
-	texCheck = CreateWICTextureFromFile(gDevice, L"Textures/hippo.jpg", nullptr, &ddsTex3);
+	texCheck = CreateWICTextureFromFile(gDevice, L"Textures/normalTest.jpg", nullptr, &ddsTex3);
 
 	vector<string> texNames = theCustomImporter.GettexNameArray();
 	RSWArray = new ID3D11ShaderResourceView*[texNames.size()];
@@ -314,7 +332,7 @@ void RenderEngine::TextureFunc(){
 
 // COMPILE SHADERS FROM .HLSL FILES
 
-HRESULT CompileShader(_In_ LPCWSTR srcFile, _In_ LPCSTR entryPoint, _In_ LPCSTR profile, _Outptr_ ID3DBlob** blob)
+HRESULT RenderEngine::CompileShader(_In_ LPCWSTR srcFile, _In_ LPCSTR entryPoint, _In_ LPCSTR profile, _Outptr_ ID3DBlob** blob)
 {
 	if (!srcFile || !entryPoint || !profile || !blob)
 		return E_INVALIDARG;
@@ -360,7 +378,7 @@ HRESULT CompileShader(_In_ LPCWSTR srcFile, _In_ LPCSTR entryPoint, _In_ LPCSTR 
 
 void RenderEngine::Shaders(){
 
-	HRESULT ShaderTest;
+	HRESULT ShaderTest = 0;
 	
 	//MAKE SAMPLERS
 	D3D11_SAMPLER_DESC samplerDesc;
@@ -383,11 +401,11 @@ void RenderEngine::Shaders(){
 	samplerDesc.MaxAnisotropy = 16;
 	gDevice->CreateSamplerState(&samplerDesc2, &sampState2);
 	//DEAFULT SHADERS
-
+	ID3DBlob* layoutblobl = nullptr;
 	//create vertex shader6
 	ID3DBlob* pVS = nullptr;
 	ShaderTest = CompileShader(L"FX_HLSL/deafultVS.hlsl", "VS_main", "vs_5_0", &pVS);
-	ShaderTest = gDevice->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &gVertexShader);
+	KUK = gDevice->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &gVertexShader);
 
 	//create vertex depth
 	ID3DBlob* dVS = nullptr;
@@ -404,25 +422,42 @@ void RenderEngine::Shaders(){
 	ShaderTest = CompileShader(L"FX_HLSL/shadowVS.hlsl", "VS_main", "vs_5_0", &pSVS);
  	ShaderTest = gDevice->CreateVertexShader(pSVS->GetBufferPointer(), pSVS->GetBufferSize(), nullptr, &shadowVertexShader);
 
+	// INPUT LAYOUT MÅSTE VARA ANPASSAD TILL VERTEX SHADER
+	// INPUT LAYOUT MÅSTE VARA ANPASSAD TILL VERTEX SHADER
+	// INPUT LAYOUT MÅSTE VARA ANPASSAD TILL VERTEX SHADER
+	// INPUT LAYOUT MÅSTE VARA ANPASSAD TILL VERTEX SHADER
+	// INPUT LAYOUT MÅSTE VARA ANPASSAD TILL VERTEX SHADER
+	// INPUT LAYOUT MÅSTE VARA ANPASSAD TILL VERTEX SHADER
+
 
 	//create input layout (verified using vertex shader)
 	D3D11_INPUT_ELEMENT_DESC inputDesc[] = {
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+	
+	};
+	//create input layout (verified using vertex shader)
+	D3D11_INPUT_ELEMENT_DESC inputDesc2[] = {
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+
 	};
-	ShaderTest = gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gVertexLayout);
+	HRESULT ShaderTest2;
+	KUK = gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pSVS->GetBufferPointer(), pSVS->GetBufferSize(), &gVertexLayout);
+	KUK = gDevice->CreateInputLayout(inputDesc2, ARRAYSIZE(inputDesc2), ddVS->GetBufferPointer(), ddVS->GetBufferSize(), &gVertexLayout2);
 
 	D3D11_INPUT_ELEMENT_DESC inputDescPosOnly[] = {
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
-	gDevice->CreateInputLayout(inputDescPosOnly, ARRAYSIZE(inputDescPosOnly), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gWireFrameLayout);
+	ShaderTest2 = gDevice->CreateInputLayout(inputDescPosOnly, ARRAYSIZE(inputDescPosOnly), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gWireFrameLayout);
 	
-
 	//Create geometry shader
 	ID3DBlob* gGS = nullptr;
 	ShaderTest = CompileShader(L"FX_HLSL/BackFaceGShader.hlsl", "gs_main", "gs_5_0", &gGS);
-	ShaderTest = gDevice->CreateGeometryShader(gGS->GetBufferPointer(), gGS->GetBufferSize(), nullptr, &gBackFaceShader);
+ 	ShaderTest = gDevice->CreateGeometryShader(gGS->GetBufferPointer(), gGS->GetBufferSize(), nullptr, &gBackFaceShader);
 
 	//create pixel shader
 	ID3DBlob* pPS = nullptr;
@@ -454,8 +489,9 @@ void RenderEngine::Shaders(){
 
 	////create shadow pixel shader
 	ID3DBlob* pSPS = nullptr;
-	ShaderTest = CompileShader(L"FX_HLSL/shadowPS.hlsl", "PS_main", "ps_4_1", &pSPS);
-	ShaderTest = gDevice->CreatePixelShader(pSPS->GetBufferPointer(), pSPS->GetBufferSize(), nullptr, &shadowPixelShader);
+	ShaderTest = CompileShader(L"FX_HLSL/shadowPS.hlsl", "PS_main", "ps_5_0", &pSPS);
+
+   	ShaderTest = gDevice->CreatePixelShader(pSPS->GetBufferPointer(), pSPS->GetBufferSize(), nullptr, &shadowPixelShader);
 	
 
 	//WIREFRAME	
@@ -490,24 +526,25 @@ void RenderEngine::CreatePlaneDataAndBuffers(){
 		float x, y, z;
 		float ux, uy;
 		float nx, ny, nz;
+
 	}
 	PlaneVertices[4] =
 	{
 		-1.0f, -1.0f, -1.0f,		//v0 
 		0.0f, 1.0f,			//t0
-		0.0f, 0.0f, -1.0f,		//n0
+		0.0f, 1.0f, 1.0f,		//		//n3
 
 		-1.0f, 1.0f, -1.0f,		//v1
 		0.0f, 0.0f,				//t1
-		0.0f, 0.0f, -1.0f,		//n1
+		0.0f, 1.0f, 1.0f,			//n3
 
 		1.0f, -1.0f, -1.0f,		//v2
 		1.0f, 1.0f,			//t2
-		0.0f, 0.0f, -1.0f,		//n2
+		0.0f, 1.0f, 1.0f,			//n3
 
 		1.0f, 1.0f, -1.0f,		//v3
 		1.0f, 0.0f,			//t3
-		0.0f, 0.0f, -1.0f,		//n3
+		0.0f, 1.0f, 1.0f	//n3
 	};
 
 
@@ -530,7 +567,14 @@ void RenderEngine::CreatePlaneDataAndBuffers(){
 	transformbuffer.ByteWidth = sizeof(World);
 	BufferTest = gDevice->CreateBuffer(&transformbuffer, NULL, &gWorld);
 
+	D3D11_BUFFER_DESC transformbuffer2;
+	memset(&transformbuffer2, 0, sizeof(transformbuffer2));
+	transformbuffer2.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	transformbuffer2.Usage = D3D11_USAGE_DEFAULT;
+	transformbuffer2.ByteWidth = sizeof(World2);
+	BufferTest = gDevice->CreateBuffer(&transformbuffer2, NULL, &gWorld2);
 
+	
 	// Rotatation And transform World Buffer
 	D3D11_BUFFER_DESC lightMatrixBDesc;
 	memset(&lightMatrixBDesc, 0, sizeof(lightMatrixBDesc));
@@ -570,6 +614,16 @@ void RenderEngine::CreatePlaneDataAndBuffers(){
 	MatBufferDesc.MiscFlags = 0;
 	MatBufferDesc.ByteWidth = sizeof(MatView);
 	BufferTest = gDevice->CreateBuffer(&MatBufferDesc, NULL, &MatBuffer);
+
+	//Options buffer
+	D3D11_BUFFER_DESC OBufferDesc;
+	OBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	memset(&OBufferDesc, 0, sizeof(OBufferDesc));
+	OBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	OBufferDesc.CPUAccessFlags = 0;
+	OBufferDesc.MiscFlags = 0;
+	OBufferDesc.ByteWidth = sizeof(Options);
+	BufferTest = gDevice->CreateBuffer(&OBufferDesc, NULL, &shaderTest);
 
 	
 	// No backface culling description
@@ -829,7 +883,7 @@ void RenderEngine::Render(){
 
 	//Matrix2 computation
 
-	camRotationMatrix2 = XMMatrixRotationRollPitchYaw(camPitch2, camYaw2, 0);
+	camRotationMatrix2 = XMMatrixRotationRollPitchYaw(0, 0, 0);
 
 	camTarget2 = XMVector3TransformCoord(DefaultForward2, camRotationMatrix2);
 	camTarget2 = XMVector3Normalize(camTarget2);
@@ -838,13 +892,7 @@ void RenderEngine::Render(){
 	camForward2 = XMVector3TransformCoord(DefaultForward2, camRotationMatrix2);
 	camUp2 = XMVector3Cross(camForward2, camRight2);
 
-	camPosition2 += moveLeftRight2*camRight2;
-	camPosition2 += moveBackForward2*camForward2;
-
-	moveLeftRight2 = 0.0f;
-	moveBackForward2 = 0.0f;
-
-	camTarget2 = camPosition2 + camTarget2;
+	camTarget2 = Vector4(0.0f, 0.0f, 1.0f, 0.0f);// camPosition2 + camTarget2;
 
 	fpsCamLook2 = XMMatrixLookAtLH(camPosition2, camTarget2, camUp2);
 
@@ -861,25 +909,6 @@ void RenderEngine::Render(){
 	Mouse->GetDeviceState(sizeof(DIMOUSESTATE), &mouseCurrState);
 	Keyboard->GetDeviceState(sizeof(keyboardState), (LPVOID)&keyboardState);
 
-	////////////LIGHTS/////////////////////////////////////////////////////
-
-	// Deafult Lights
-	//Dir light1
-	PrimaryLights.lDir.Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 0.2f);
-	PrimaryLights.lDir.Diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
-	PrimaryLights.lDir.Specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 2.0f);
-	PrimaryLights.lDir.Dir = XMFLOAT3(0.0f, -10.0f, 0.0f);
-	PrimaryLights.lDir.Pad = 0.0f;
-
-	////Padding
-	MatBuffer1.pad = 0.0f;
-	//Eyepos
-	MatBuffer1.gEyePos = Vector3(camPosition.x, camPosition.y, camPosition.z);
-	// Makes a deafualt mat
-	MatBuffer1.gMaterial.Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-	MatBuffer1.gMaterial.Diffuse = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
-	MatBuffer1.gMaterial.Specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 3.0f);
-	MatBuffer1.gMaterial.Reflection = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
 
 	//// Update lightbuffer
 
@@ -891,11 +920,13 @@ void RenderEngine::Render(){
 	gDeviceContext->UpdateSubresource(MatBuffer, 0, NULL, &MatBuffer1, 0, 0);
 	gDeviceContext->PSSetConstantBuffers(1, 1, &MatBuffer);
 
-
-	//STORE VALUES
-
+	//STORE VALUE
 	gDeviceContext->UpdateSubresource(ViewBuffer, 0, NULL, &ViewP, 0, 0);
 	gDeviceContext->VSSetConstantBuffers(4, 1, &ViewBuffer);
+
+
+	gDeviceContext->UpdateSubresource(ViewBuffer, 0, NULL, &ViewP, 0, 0);
+	gDeviceContext->GSSetConstantBuffers(4, 1, &ViewBuffer);
 
 	////////////LIGHTS/////////////////////////////////////////////////////
 
@@ -903,235 +934,117 @@ void RenderEngine::Render(){
 	gDeviceContext->RSSetState(NULL);
 	gDeviceContext->RSSetState(NoBcull);
 
-	SetPosition(0, 10, 0);
-	SetDirection(PrimaryLights.lDir.Dir.x, PrimaryLights.lDir.Dir.y, PrimaryLights.lDir.Dir.z);
-	SetLookAt(PrimaryLights.lDir.Dir.x, PrimaryLights.lDir.Dir.y, PrimaryLights.lDir.Dir.z);
-	GenerateProjectionMatrix(100.0f, 1.0f);
-	GenerateViewMatrix();
+	// SHADOW DEPTH RENDER PASS//
+	shadowMap->DrawDepthMap(renderObjects, gDeviceContext);
+	shadowTexture = shadowMap->GetSRV();
 
-	// SHADOW DEPTH TO TEXTURE RENDERING //
-
-	// SET MATRIXES FOR DEPTHRENDER
-	XMMATRIX  lightViewMatrix, lightProjectionMatrix, lightOrthoMatrix,lightworld;
-
-	lightViewMatrix = fpsCamLook2;
-	lightProjectionMatrix = m_orthoMatrix;// lightCam.Proj();
-	lightworld = identityM;
-	//Store matrixes into buffer
-	XMStoreFloat4x4(&WorldMatrix1.View, XMMatrixTranspose(lightViewMatrix));
-	XMStoreFloat4x4(&WorldMatrix1.Projection, XMMatrixTranspose(lightProjectionMatrix));
-	XMStoreFloat4x4(&WorldMatrix1.WorldSpace, XMMatrixTranspose(lightworld));
-	XMStoreFloat4x4(&WorldMatrix1.InvWorld, XMMatrixTranspose(WorldInv));
-	XMStoreFloat4x4(&WorldMatrix1.lightView, XMMatrixTranspose(lightViewMatrix));
-	XMStoreFloat4x4(&WorldMatrix1.lightProjection, XMMatrixTranspose(lightProjectionMatrix));
-
-	gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
-	gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
-
-	// SET TARGET AND DEPTHSTENCIL FOR DEPTH RENDER
-	//ID3D11RenderTargetView* renderTargetViewDepthMap[1] = { 0 };
-	float black[] = { 0, 0, 0, 1 };
-
-	gDeviceContext->RSSetViewports(1, &shadowVP);
-	gDeviceContext->OMSetRenderTargets(1, &renderTargetViewMap, m_depthStencilView);
-	gDeviceContext->ClearRenderTargetView(renderTargetViewMap, black);
-	gDeviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0.0f);
-
-	//RENDER DEPTH BELOW
-
-	UINT32 vertexSize3= sizeof(float)* 8;
-	UINT32 offset3 = 0;
-
-	gDeviceContext->IASetInputLayout(gVertexLayout);
-	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	gDeviceContext->VSSetShader(dVertexShader, nullptr, 0);
-	gDeviceContext->PSSetShader(dPixelShader, nullptr, 0);
-
-	for (int i = 0; i < renderObjects.size(); i++)
-	{
-		gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->vertexBuffer, &vertexSize3, &offset3);
-		gDeviceContext->Draw(renderObjects[i]->nrElements * 3, 0);
-	}
-
-	/////
-
-	//NORMAL RENDER PASS FROM EYE POS //
-
-	//Set BackGround Color
+	//NORMAL RENDER PASS FROM EYE POS 
 	gDeviceContext->OMSetRenderTargets(1, &gBackRufferRenderTargetView, gDepthStencilView);
 	gDeviceContext->RSSetViewports(1, &vp);
 	float clearColor[] = { 0, 0.3, 0.7f, 1.0f };
 	gDeviceContext->ClearRenderTargetView(gBackRufferRenderTargetView, clearColor);
 	gDeviceContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
-
-
 	int tex = 0;
 
-	//Store matrixes into buffer
+	//WVP AND OTHERS
 	XMStoreFloat4x4(&WorldMatrix1.View, XMMatrixTranspose(CamView));
 	XMStoreFloat4x4(&WorldMatrix1.Projection, XMMatrixTranspose(CamProjection));
 	XMStoreFloat4x4(&WorldMatrix1.WorldSpace, XMMatrixTranspose(identityM));
-	XMStoreFloat4x4(&WorldMatrix1.InvWorld, XMMatrixTranspose(lightViewMatrix));
-	XMStoreFloat4x4(&WorldMatrix1.lightView, XMMatrixTranspose(lightViewMatrix));
-	XMStoreFloat4x4(&WorldMatrix1.lightProjection, XMMatrixTranspose(lightProjectionMatrix));
-
-
+	XMStoreFloat4x4(&WorldMatrix1.InvWorld, XMMatrixTranspose(XMMatrixInverse(NULL, identityM)));
+	XMStoreFloat4x4(&WorldMatrix1.lightView, XMMatrixTranspose(shadowMap->GetLightView()));
+	XMStoreFloat4x4(&WorldMatrix1.lightProjection, XMMatrixTranspose(shadowMap->GetLightProj()));
 
 	gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
-
 	gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
 
+	//LIGHT MATRIXS
+	XMStoreFloat4x4(&LightMatrix1.lightView, XMMatrixTranspose(shadowMap->GetLightView()));
+	XMStoreFloat4x4(&LightMatrix1.lightProjection, XMMatrixTranspose(shadowMap->GetLightProj()));
 
-
-	//Store matrixes into buffer
-	XMStoreFloat4x4(&LightMatrix1.lightView, XMMatrixTranspose(lightViewMatrix));
-	XMStoreFloat4x4(&LightMatrix1.lightProjection, XMMatrixTranspose(lightProjectionMatrix));
-
-
-
+	//LIGHT INFO BUFFER
 	gDeviceContext->UpdateSubresource(gLMat, 0, NULL, &LightMatrix1, 0, 0);
-
 	gDeviceContext->VSSetConstantBuffers(1, 1, &gLMat);
 
+	//SHADER OPTIONS
+	gDeviceContext->UpdateSubresource(shaderTest, 0, NULL, &optionStruct, 0, 0);
+	gDeviceContext->PSSetConstantBuffers(3, 1, &shaderTest);
 
-	
-	//BACKFACE CULLING
-
-	//gDeviceContext->GSSetShader(gBackFaceShader, nullptr, 0);
-
-
-	UINT32 vertexSize2 = sizeof(float) * 8;
+	UINT32 vertexSize2 = sizeof(float) * 11;
 	UINT32 offset2 = 0;
-
 	tex = 0;
 	gDeviceContext->IASetInputLayout(gVertexLayout);
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	gDeviceContext->VSSetShader(shadowVertexShader, nullptr, 0);
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
+	////BACKFACE CULLING
+	if (Bculling == TRUE)
+	gDeviceContext->GSSetShader(gBackFaceShader, nullptr, 0);
+	else if (Bculling == FALSE)
+	gDeviceContext->GSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->PSSetShader(shadowPixelShader, nullptr, 0);
+
 	// Set the sampler states to the pixel shader.
 	gDeviceContext->PSSetSamplers(0, 1, &sampState1);
 	gDeviceContext->PSSetSamplers(1, 1, &sampState2);
 
-
-	gDeviceContext->PSSetShaderResources(1, 1, &shaderResourceViewMap);
+	gDeviceContext->PSSetShaderResources(1, 1, &shadowTexture);
+	gDeviceContext->PSSetShaderResources(2, 1, &ddsTex3);
 	for (int i = 0; i < renderObjects.size(); i++)
 	{
+		if (i == 4){
+			gDeviceContext->PSSetShaderResources(2, 1, &normalMap);
+		}
 		tex = intArrayTex[renderObjects[i]->indexT];
 		gDeviceContext->PSSetShaderResources(0, 1, &RSWArray[tex]);
 
 		gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->vertexBuffer, &vertexSize2, &offset2);
-		
-
 		gDeviceContext->Draw(renderObjects[i]->nrElements * 3, 0);
 	}
 
-	////WIREFRAME!!!
-	//gDeviceContext->VSSetShader(gWireFrameVertexShader, nullptr, 0);
-	//gDeviceContext->PSSetShader(gWireFramePixelShader, nullptr, 0);
-	//gDeviceContext->IASetInputLayout(gWireFrameLayout);
-	//gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
-	//UINT32 vertexWireFrameSize = sizeof(float) * 3;
-
-	//for (int i = 0; i < renderObjects.size(); i++)
-	//{
-	//	//tex = intArrayTex[renderObjects[i]->indexT];
-	//	gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->boundingBoxVertexBuffer, &vertexWireFrameSize, &offset2);
-
-	//	gDeviceContext->Draw(16, 0);
-	//}
+	//RENDER TEST PLANES
+	TurnZBufferOff();
+	UINT32 vertexSize = sizeof(float)* 8;
+	UINT32 offset = 0;
+	WorldGun = XMMatrixScaling(0.25f, 0.25f, 0.0f) * XMMatrixTranslation(0.75f, -0.75f, 0.0f);
+	XMStoreFloat4x4(&WorldMatrix2.WVP, XMMatrixTranspose(WorldGun));
+	gDeviceContext->UpdateSubresource(gWorld2, 0, NULL, &WorldMatrix2, 0, 0);
+	gDeviceContext->VSSetConstantBuffers(3, 1, &gWorld2);
 
 
-	//////////////////////////// Draw Terrain Onto Map
-	//// Here we will draw our map, which is just the terrain from the mapCam's view
-
-	//// Set our maps Render Target
-	//gDeviceContext->OMSetRenderTargets(1, &renderTargetViewMap, gDepthStencilView);
-
-	//// Now clear the render target
-	//gDeviceContext->ClearRenderTargetView(renderTargetViewMap, clearColor);
-	//gDeviceContext->RSSetViewports(1, &shadowVP);
-	//// Update the map's camera
-	//XMVECTOR mapCamPosition = XMVectorSet(5.0f, 5.0f, 5.0f, 0.0f);
-	//XMVECTOR mapCamTarget = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
-	//XMVECTOR mapCamUp = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+	gDeviceContext->IASetInputLayout(gVertexLayout2);
+	gDeviceContext->IASetVertexBuffers(0, 1, &gVertexBuffer, &vertexSize, &offset);
+	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	gDeviceContext->VSSetShader(shader2DVS, nullptr, 0);
+	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
+	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
+	gDeviceContext->GSSetShader(nullptr, nullptr, 0);
+	gDeviceContext->PSSetShader(shader2DPS, nullptr, 0);
+	gDeviceContext->PSSetShaderResources(0, 1, &ddsTex3);
 
 
-	////Set the View matrix
-	//mapView = XMMatrixLookAtLH(mapCamPosition, mapCamTarget, mapCamUp);
-	//mapProjection = XMMatrixOrthographicLH(SHADOWMAP_WIDTH, SHADOWMAP_HEIGHT, 1.0f, 100.0f);
-	//// Since we just drew the terrain, and all the states are already set the way we want them
-	//// (besides the render target) we just need to provide the shaders with the new WVP and draw the terrain again
-	//XMStoreFloat4x4(&WorldMatrix1.View, XMMatrixTranspose(CamView));
-	//XMStoreFloat4x4(&WorldMatrix1.Projection, XMMatrixTranspose(CamProjection));
-	//XMStoreFloat4x4(&WorldMatrix1.WorldSpace, XMMatrixTranspose(identityM));
-	//XMStoreFloat4x4(&WorldMatrix1.InvWorld, XMMatrixTranspose(WorldInv));
-	//XMStoreFloat4x4(&WorldMatrix1.lightView, XMMatrixTranspose(CamView));
-	//XMStoreFloat4x4(&WorldMatrix1.lightProjection, XMMatrixTranspose(CamProjection));
+	gDeviceContext->Draw(4, 0);
+
+	WorldGun = XMMatrixScaling(0.25f, 0.25f, 0.0f) * XMMatrixTranslation(0.75f, -0.25f, 0.0f);
+	XMStoreFloat4x4(&WorldMatrix2.WVP, XMMatrixTranspose(WorldGun));
+	gDeviceContext->UpdateSubresource(gWorld2, 0, NULL, &WorldMatrix2, 0, 0);
+	gDeviceContext->VSSetConstantBuffers(3, 1, &gWorld2);
+
+	gDeviceContext->IASetInputLayout(gVertexLayout2);
+	gDeviceContext->IASetVertexBuffers(0, 1, &gVertexBuffer, &vertexSize, &offset);
+	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	gDeviceContext->VSSetShader(shader2DVS, nullptr, 0);
+	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
+	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
+	gDeviceContext->GSSetShader(nullptr, nullptr, 0);
+	gDeviceContext->PSSetShader(shader2DPS, nullptr, 0);
+	gDeviceContext->PSSetShaderResources(0, 1, &shadowTexture);
 
 
-	//XMStoreFloat4x4(&WorldMatrix1.WVP, XMMatrixTranspose(CamView*CamProjection*identityM));
+	gDeviceContext->Draw(4, 0);
+	
+	TurnZBufferOn();
 
-	//gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
-	//gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
-	//UINT32 vertexSize3 = sizeof(float) * 8;
-	//UINT32 offset3 = 0;
-
-	//tex = 0;
-	//gDeviceContext->IASetInputLayout(gVertexLayout);
-	//gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	//gDeviceContext->VSSetShader(dVertexShader, nullptr, 0);
-	//gDeviceContext->HSSetShader(nullptr, nullptr, 0);
-	//gDeviceContext->DSSetShader(nullptr, nullptr, 0);
-	//gDeviceContext->PSSetShader(dPixelShader, nullptr, 0);
-	//// Set the sampler states to the pixel shader.
-	//gDeviceContext->PSSetSamplers(0, 1, &sampState1);
-	//gDeviceContext->PSSetSamplers(1, 1, &sampState2);
-
-	////BACKFACE CULLING
-	////if (Bculling == TRUE)
-	////else if (Bculling == FALSE)
-	////	gDeviceContext->GSSetShader(nullptr, nullptr, 0);
-
-	////gDeviceContext->GSSetShader(gBackFaceShader, nullptr, 0);
-
-	//for (int i = 0; i < renderObjects.size(); i++)
-	//{
-	//	tex = intArrayTex[renderObjects[i]->indexT];
-	//	gDeviceContext->PSSetShaderResources(0, 1, &RSWArray[tex]);
-	//	gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->vertexBuffer, &vertexSize3, &offset3);
-
-	//	gDeviceContext->Draw(renderObjects[i]->nrElements * 3, 0);
-	//}
-
-	//// DRAW FROM MAP PERSPECTIVE
-
-
-
-	//gDeviceContext->OMSetRenderTargets(1, &gBackRufferRenderTargetView, gDepthStencilView);
-	//	TurnZBufferOff();
-	////RENDER TestPlane 2 Tris 
-	//UINT32 vertexSize = sizeof(float)* 8;
-	//UINT32 offset = 0;
-	// WorldGun = XMMatrixScaling(0.5f, 0.5f, 0.0f) * XMMatrixTranslation(0.5f, -0.5f, 0.0f);
-	// XMStoreFloat4x4(&WorldMatrix1.WVP, XMMatrixTranspose(WorldGun));
-	//gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
-	//gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
-
-
-	//gDeviceContext->IASetInputLayout(gVertexLayout);
-	//gDeviceContext->IASetVertexBuffers(0, 1, &gVertexBuffer, &vertexSize, &offset);
-	//gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-	//gDeviceContext->VSSetShader(shader2DVS, nullptr, 0);
-	//gDeviceContext->HSSetShader(nullptr, nullptr, 0);
-	//gDeviceContext->DSSetShader(nullptr, nullptr, 0);
-	//gDeviceContext->PSSetShader(shader2DPS, nullptr, 0);
-	//gDeviceContext->PSSetShaderResources(0, 1, &shaderResourceViewMap);
-
-	//gDeviceContext->Draw(4, 0);
-	//TurnZBufferOn();
 	//växla back/front buffer
 	gSwapChain->Present(0, 0); 
 }
@@ -1150,9 +1063,9 @@ void RenderEngine::Update(float dt){
 
 void RenderEngine::Release(){
 
+	shadowMap->~ShadowMap();
 	gDevice->Release();
 	depthStencilBuffer->Release();
-
 	m_Input->Shutdown();
 	delete m_Input;
 	m_Input = 0;
@@ -1438,17 +1351,13 @@ void RenderEngine::InputHandler()
 
 	if ((keyboardState[DIK_E] & 0x80) && zoom != 1)
 	{
-		camPosition = camPosition + Vector4(0.1f, 0.2f, 0.45f, 0);
-		//GunPitch += 0.15f;
-		//GunRotationMatrix = XMMatrixRotationX(40);
+		fpsCam.SetLens(0.25f*3.14f, screen_Width / screen_Height, 1.0f, 100.0f);
 		zoom = 1;
 
 	}
 	if ((keyboardState[DIK_R] & 0x80) && zoom == 1)
 	{
-		camPosition = camPosition - Vector4(0.1f, 0.2f, 0.45f, 0);
-		//GunPitch -=   0.15f;
-		//GunRotationMatrix = XMMatrixRotationY(10);
+		fpsCam.SetLens(0.6f*3.14f, screen_Width / screen_Height, 1.0f, 100.0f);
 		zoom = 0;
 
 	}
@@ -1488,6 +1397,39 @@ void RenderEngine::InputHandler()
 		camPitch += mouseCurrState.lY * speed / 4;
 
 		mouseLastState = mouseCurrState;
+	}
+	if (keyboardState[DIK_F1] & 0x80)
+	{
+		optionStruct.option1 = 1;
+	};
+	
+	if (keyboardState[DIK_F2] & 0x80)
+	{
+		optionStruct.option1 = 0;
+	};
+	if (keyboardState[DIK_F3] & 0x80)
+	{
+		optionStruct.option2 = 1;
+	};
+	if (keyboardState[DIK_F4] & 0x80)
+	{
+		optionStruct.option2 = 0;
+	}
+	if (keyboardState[DIK_F5] & 0x80)
+	{
+		optionStruct.option5 = 1;
+	}
+	if (keyboardState[DIK_F6] & 0x80)
+	{
+		optionStruct.option6 = 1;
+	}
+	if (keyboardState[DIK_F7] & 0x80)		
+	{
+		optionStruct.option7 = 1;
+	}
+	if (keyboardState[DIK_F8] & 0x80)
+	{
+		optionStruct.option8 = 1;
 	}
 
 
@@ -1568,358 +1510,6 @@ void RenderEngine::CheckFrustumContains(int nrSplits, int index){
 	}
 }
 
-
-
-
-
-
-
-//========================================================================\\
-//=============================OLD RENDER STUFF===========================\\
-//========================================================================\\
-//                                    |
-//									  |
-//									  v
-
-
-
-
-
-//////////////////////////////////////////////////////////
-///////////////// RENDER FUNCTIONTS //////////////////
-//////////////////////////////////////////////////////////
-
-//UINT32 bufferElementSize = sizeof(Float3);
-//UINT32 offset1 = 0;
-
-//gDeviceContext->IASetInputLayout(gWireFrameLayout);
-//gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
-
-//gDeviceContext->VSSetShader(gWireFrameVertexShader, nullptr, 0);
-//gDeviceContext->HSSetShader(nullptr, nullptr, 0);
-//gDeviceContext->DSSetShader(nullptr, nullptr, 0);
-//gDeviceContext->GSSetShader(nullptr, nullptr, 0);
-//gDeviceContext->PSSetShader(gWireFramePixelShader, nullptr, 0);
-//for each(QuadTreeInstance box in quadTree){
-//	ContainmentType test = frustum.Contains(box.box);
-//	if (test == 2 || test == 1)
-//		gDeviceContext->PSSetShader(gWireFramePixelShader, nullptr, 0);
-//	else
-//		gDeviceContext->PSSetShader(gWireFramePixelShaderCONTAINTEST, nullptr, 0);
-//	gDeviceContext->IASetVertexBuffers(0, 1, &box.boxBuffer, &bufferElementSize, &offset1);
-//	gDeviceContext->Draw(16, 0);
-//}
-
-//RENDER OBJ FILES
-//
-//for each (GameObject var in gameObjects)
-//{
-//	UINT32 vertexSize = sizeof(float) * 8;
-//	UINT32 offset = 0;
-//	count += 1;
-//
-//	if (count == 1){
-//		gDeviceContext->PSSetShaderResources(0, 1, &ddsTex1);
-//	}
-//	else if (count == 2){
-//		gDeviceContext->PSSetShaderResources(0, 1, &ddsTex3);
-//	}
-//	else if (count == 3){
-//		gDeviceContext->PSSetShaderResources(0, 1, &ddsTex3);
-//	}
-//	else if (count == 4){
-//		gDeviceContext->PSSetShaderResources(0, 1, &NpcRV);
-//	}
-//
-//	gDeviceContext->IASetInputLayout(gVertexLayout);
-//	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-//	gDeviceContext->IASetVertexBuffers(0, 1, &var.gVertexBuffer, &vertexSize, &offset);
-//	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-//
-//	gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
-//	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
-//	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
-//	if (Bculling == TRUE)
-//		gDeviceContext->GSSetShader(gBackFaceShader, nullptr, 0);
-//	else if (Bculling == FALSE)
-//		gDeviceContext->GSSetShader(nullptr, nullptr, 0);
-//	gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
-//
-//	if ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && clicktest == 1)
-//	{
-//		clicktest = 0;
-//		hit = FALSE;
-//	}
-//
-//	if ((GetKeyState(VK_LBUTTON) & 0x100) != 0 && clicktest != 1)
-//	{
-//		float tempDist;
-//		float closestDist = FLT_MAX;
-//
-//		Vector4 prwsPos, prwsDir;
-//		TestInterSection(screen_Width / 2, screen_Height / 2, prwsPos, prwsDir);
-//		tempDist = pick(prwsPos, prwsDir, var.verteciesPos, var.verteciesIndex, identityM);
-//		ShootScore++;
-//		if (tempDist < closestDist)
-//		{
-//			closestDist = tempDist;
-//			hitIndex += 1;
-//			_RPT1(0, "Clicks : %d \n", ShootScore);
-//			_RPT1(0, "Hits : %d \n", hitIndex);
-//			_RPT1(0, "Closest dist: %f \n", closestDist);
-//			_RPT1(0, "Obj Name : %s \n", var.ObjName);
-//			hit = TRUE;
-//		}
-//
-//		clicktest = 1;
-//		if (hit == TRUE){
-//			gDeviceContext->PSSetShader(hitPixelShader, nullptr, 0);
-//		}
-//	}
-//
-	//if (var.isStatic == true){ //statiska objekt ska endast renderas om de är inom frustumet
-	//	if (var.render == true){
-	//		var.visibleThisFrame = false;//reseta denna, används vid frustum checken. (om ingen annan box har sagt att denna ska renderas denna framen, nästa box får inte ändra resultatet)
-	//		//var.render = false;				
-	//		gDeviceContext->Draw(var.nrElements * 3, 0);
-
-	//	}
-
-	//}
-	//else
-//	gDeviceContext->Draw(var.nrElements * 3, 0);
-//
-//}
-
-//Render Heightmap´s
-
-//BOXARNA TILL GAMEOBJECTSEN.................................
-/*bufferElementSize = sizeof(Float3);
-offset1 = 0;
-
-gDeviceContext->IASetInputLayout(gWireFrameLayout);
-gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
-
-gDeviceContext->VSSetShader(gWireFrameVertexShader, nullptr, 0);
-gDeviceContext->HSSetShader(nullptr, nullptr, 0);
-gDeviceContext->DSSetShader(nullptr, nullptr, 0);
-gDeviceContext->GSSetShader(nullptr, nullptr, 0);
-gDeviceContext->PSSetShader(gWireFramePixelShader, nullptr, 0);
-for each (GameObject var in gameObjects)
-{
-ContainmentType test = frustum.Contains(var.bbox);
-if (test == 2 || test == 1)
-gDeviceContext->PSSetShader(gWireFramePixelShader, nullptr, 0);
-else
-gDeviceContext->PSSetShader(gWireFramePixelShaderCONTAINTEST, nullptr, 0);
-gDeviceContext->IASetVertexBuffers(0, 1, &var.boxBuffer, &bufferElementSize, &offset1);
-gDeviceContext->Draw(16, 0);
-}
-*/
-
-//Render Heightmap´s
-
-//for each (HeightMapObject var in HeightMapObjects)
-//{
-//	UINT32 vertexSize = sizeof(float)* 8;
-//	UINT32 offset = 0;
-
-//	gDeviceContext->IASetInputLayout(gVertexLayout);
-//	gDeviceContext->IASetVertexBuffers(0, 1, &var.gVertexBuffer, &vertexSize, &offset);
-//	gDeviceContext->IASetIndexBuffer(var.gIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-//	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-//	gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
-//	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
-//	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
-//	gDeviceContext->GSSetShader(nullptr, nullptr, 0);
-//	//gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
-//	gDeviceContext->PSSetShader(splatMapPixelShader, nullptr, 0);
-//	//Bind texture to object
-//	//gDeviceContext->PSSetShaderResources(0, 1, &ddsTex1);
-//	gDeviceContext->PSSetShaderResources(0, 1, &var.tex1shaderResourceView);
-//	gDeviceContext->PSSetShaderResources(1, 1, &var.tex2shaderResourceView);
-//	gDeviceContext->PSSetShaderResources(2, 1, &var.tex3shaderResourceView);
-//	gDeviceContext->PSSetShaderResources(3, 1, &var.splatshaderResourceView);
-
-//	//gDeviceContext->PSSetShaderResources(0, 1, &var.splatshaderResourceView);
-
-//	gDeviceContext->DrawIndexed((var.nmrElement), 0, 0);
-//}
-
-//RENDER TestPlane 2 Tris 
-//UINT32 vertexSize = sizeof(float)* 8;
-//UINT32 offset = 0;
-
-//gDeviceContext->IASetInputLayout(gVertexLayout);
-//gDeviceContext->IASetVertexBuffers(0, 1, &gVertexBuffer, &vertexSize, &offset);
-//gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-
-//gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
-//gDeviceContext->HSSetShader(nullptr, nullptr, 0);
-//gDeviceContext->DSSetShader(nullptr, nullptr, 0);
-//gDeviceContext->GSSetShader(nullptr, nullptr, 0);
-//gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
-
-//gDeviceContext->Draw(4, 0);
-
-
-
-// %%%%%%%%%%%%%%%%%% BEFORE SHADOWS BINARY FORMAT RENDER %%%%%%%%%%%%%%%%%%%%%
-
-//
-//UINT32 vertexSize2 = sizeof(float) * 8;
-//UINT32 offset2 = 0;
-//int tex = 0;
-//gDeviceContext->IASetInputLayout(gVertexLayout);
-//gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-//if (Bculling == TRUE)
-//gDeviceContext->GSSetShader(gBackFaceShader, nullptr, 0);
-//else if (Bculling == FALSE)
-//gDeviceContext->GSSetShader(nullptr, nullptr, 0);
-//gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
-//gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
-//gDeviceContext->PSSetSamplers(0, 1, &sampState1);
-//for (int i = 0; i < renderObjects.size(); i++)
-//{
-//
-//	tex = intArrayTex[renderObjects[i]->indexT];
-//	gDeviceContext->PSSetShaderResources(0, 1, &RSWArray[tex]);
-//	gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->vertexBuffer, &vertexSize2, &offset2);
-//
-//
-//	gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
-//
-//	gDeviceContext->Draw(renderObjects[i]->nrElements * 3, 0);
-//}
-//
-//
-////PointLight 1
-//PrimaryLights.lPoint.Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-//PrimaryLights.lPoint.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-//PrimaryLights.lPoint.Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.2f);
-//PrimaryLights.lPoint.Pos = XMFLOAT3(0.0f, 5.0f, 0.0f);
-//PrimaryLights.lPoint.Range = 1.2f;
-//PrimaryLights.lPoint.Attenuation = XMFLOAT3(0.01f, 0.1f, 0.1f);
-////PointLight 2
-//PrimaryLights.lPoint1.Ambient = XMFLOAT4(0.2f, 0.9f, 0.2f, 1.0f);
-//PrimaryLights.lPoint1.Diffuse = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
-//PrimaryLights.lPoint1.Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.2f);
-//PrimaryLights.lPoint1.Pos = XMFLOAT3(8.57735f, 1.57735f, 2.07735f);
-//PrimaryLights.lPoint1.Range = 0.0f;
-//PrimaryLights.lPoint1.Attenuation = XMFLOAT3(0.01f, 0.001f, 0.001f);
-////SpotLight 1
-//PrimaryLights.lSpot.Ambient = XMFLOAT4(0.2f, 0.2f, 0.9f, 1.0f);
-//PrimaryLights.lSpot.Diffuse = XMFLOAT4(0.4f, 0.3f, 0.3f, 1.0f);
-//PrimaryLights.lSpot.Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.2f);
-//PrimaryLights.lSpot.Dir = XMFLOAT3(0.0, 0.0f, 1.0f);
-//PrimaryLights.lSpot.Attenuation = XMFLOAT3(0.1f, 0.1f, 0.1f);
-//PrimaryLights.lSpot.Pos = XMFLOAT3(1.0f, 2.0f, 2.0f);
-//PrimaryLights.lSpot.Range = 1000.0f;
-//PrimaryLights.lSpot.Spot = 1.0f;
-
-
-//SHADOW CALCS I THANK?
-
-void RenderEngine::SetPosition(float x, float y, float z)
-{
-	m_position = Vector3(x, y, z);
-	return;
-}
-//The SetLookAt function sets the m_lookAt vector so that we can set where the light is looking at.This vector is used to build the light's view matrix.
-
-void RenderEngine::SetLookAt(float x, float y, float z)
-{
-	m_lookAt.x = x;
-	m_lookAt.y = y;
-	m_lookAt.z = z;
-	return;
-}
-
-
-
-XMFLOAT3 RenderEngine::GetPosition()
-{
-	return m_position;
-}
-//The view matrix for the light is built using the up vector, the lookAt vector, and the position of the light.
-
-void RenderEngine::GenerateViewMatrix()
-{
-	Vector3 up;
-	Vector3 lookatt;
-
-	// Setup the vector that points upwards.
-	up.x = 0.0f;
-	up.y = 1.0f;
-	up.z = 0.0f;
-
-	// Create the view matrix from the three vectors.
-	m_viewMatrix = XMMatrixLookAtLH(m_position, m_lookAt, up);
-
-	return;
-}
-//The projection matrix for the light is built using the field of view,
-//viewing aspect ratio, and the near and far plane of the light range.
-//The light we are projecting is more of a square spotlight than a true point light, 
-//but this is necessary since we need to align with the sampling from a square shadow map texture.That is why the field of view and aspect ratio are setup for a square projection.
-
-void RenderEngine::GenerateProjectionMatrix(float screenDepth, float screenNear)
-{
-	float fieldOfView, screenAspect;
-
-
-	// Setup field of view and screen aspect for a square light source.
-	fieldOfView = (float)3.14f / 2.0f;
-	screenAspect = 1.0f;
-
-	// Create the projection matrix for the light.
-	 m_projectionMatrix = XMMatrixPerspectiveFovLH( fieldOfView, screenAspect, screenNear, screenDepth);
-
-	return;
-}
-//We also have two new functions to return the view and projection matrices.
-
-void RenderEngine::GetViewMatrix(XMMATRIX& viewMatrix)
-{
-	viewMatrix = m_viewMatrix;
-	return;
-}
-
-
-void RenderEngine::GetProjectionMatrix(XMMATRIX& projectionMatrix)
-{
-	projectionMatrix = m_projectionMatrix;
-	return;
-}
-
-void RenderEngine::GenerateOrthoMatrix(float width, float depthPlane, float nearPlane)
-{
-	// Create the orthographic matrix for the light.
-	m_orthoMatrix=XMMatrixOrthographicLH( width, width, nearPlane, depthPlane);
-
-	return;
-}
-
-
-void RenderEngine::GetOrthoMatrix(XMMATRIX& orthoMatrix)
-{
-	orthoMatrix = m_orthoMatrix;
-	return;
-}
-//Helper functions for directional lighting have also been added.
-
-void RenderEngine::SetDirection(float x, float y, float z)
-{
-	m_direction = Vector3(x, y, z);
-	return;
-}
-
-
-XMFLOAT3 RenderEngine::GetDirection()
-{
-	return m_direction;
-}
 
 void RenderEngine::TurnZBufferOn()
 {

@@ -19,17 +19,17 @@
 
 /////////////////////
 #include "GameTimer.h"
-#include "lights.h"
 #include "OBJ.h"
 #include "Input.h"
 #include "HeightMap.h"
-#include "Cam.h"
 #include "GameObject.h"
 #include "RenderToTexture.h"
 #include "debugwindowclass.h"
 #include "DDSTextureLoader.h"
 #include "WICTextureLoader.h"
 #include "BINimporter.h"
+#include "ShadowMap.h"
+
 //#include "depthClass.h"
 
 #include "SimpleMath.h"
@@ -61,8 +61,8 @@ public:
 	bool hit;
 
 	std::unique_ptr<SpriteBatch> spriteBatch;
-
-
+	SpriteFont* spritefont;
+			std::wostringstream outs;
 public:
 	//Window Constructor
 	RenderEngine(HINSTANCE hInstance, std::string name, UINT scrW, UINT scrH);
@@ -82,8 +82,10 @@ public:
 	BINimporter theCustomImporter;
 	vector<int> intArrayTex;
 	std::vector<GameObjects*> renderObjects;
-	
+
 	//Shadows
+	ShadowMap* shadowMap;
+	ID3D11ShaderResourceView* shadowTexture = nullptr;
 	
 
 public:
@@ -134,9 +136,8 @@ public:
 	void Shaders();
 	void TextureFunc();
 
-	//Rotation matrix
-	XMMATRIX SharkRotation;
 
+	HRESULT CompileShader(_In_ LPCWSTR srcFile, _In_ LPCSTR entryPoint, _In_ LPCSTR profile, _Outptr_ ID3DBlob** blob);
 	//Picking
 	void TestInterSection(float mouseX, float mouseY, Vector4& pickRayInWorldSpacePos, Vector4& pickRayInWorldSpaceDir);
 	float pick(Vector4 pickRayInWorldSpacePos, Vector4 pickRayInWorldSpaceDir, std::vector<XMFLOAT3>& vertPosArray, std::vector<int>& indexPosArray, XMMATRIX& worldSpace);
@@ -144,12 +145,17 @@ public:
 
 	//Message handler
 	LRESULT MsgProc(HWND hwindow, UINT msg, WPARAM wParam, LPARAM lParam);
-	
+	HRESULT KUK = 0;
+
 
 	//Bool to test Backface culling
 	bool Bculling = FALSE;
 	bool Bcullingcheck = FALSE;
-
+	struct World2
+	{
+		XMFLOAT4X4 WVP;
+	};
+	World2 WorldMatrix2;
 	//Structs for cBuffers
 	struct World
 	{
@@ -373,23 +379,27 @@ protected:
 	//Buffers
 	ID3D11Buffer* gVertexBuffer = nullptr;
 	ID3D11Buffer* gVertexBuffer2 = nullptr;
-	ID3D11Buffer* gWorld = nullptr;;
+	ID3D11Buffer* gWorld = nullptr;
+	ID3D11Buffer* gWorld2 = nullptr;
 	ID3D11Buffer* ViewBuffer = nullptr;
-	ID3D11Buffer* gLights = nullptr;;
-	ID3D11Buffer* PrimaryLightBuffer = nullptr;;
-	ID3D11Buffer* MatBuffer = nullptr;;
+	ID3D11Buffer* gLights = nullptr;
+	ID3D11Buffer* PrimaryLightBuffer = nullptr;
+	ID3D11Buffer* MatBuffer = nullptr;
 	ID3D11Buffer* shadowBuffer = nullptr;
 	ID3D11Buffer* gLMat = nullptr;
+	
 	//Shader resources for textures and more
 	ID3D11ShaderResourceView* ddsTex1= nullptr;
 	ID3D11ShaderResourceView* ddsTex2 = nullptr;
 	ID3D11ShaderResourceView* ddsTex3 = nullptr;
+	ID3D11ShaderResourceView*   normalMap = nullptr;
 	ID3D11ShaderResourceView* AdsResourceView = nullptr;
 	ID3D11ShaderResourceView* NpcRV = nullptr;
 	ID3D11ShaderResourceView** RSWArray = nullptr;
 
 	//Vertex/geometry layout desc
 	ID3D11InputLayout* gVertexLayout = nullptr;
+	ID3D11InputLayout* gVertexLayout2 = nullptr;
 	ID3D11InputLayout* gWireFrameLayout = nullptr;
 	
 
@@ -446,6 +456,7 @@ protected:
 	ID3D11ShaderResourceView* shaderResourceDepthMap;
 	ID3D11DepthStencilView* m_depthStencilView;
 
+	
 	// MAY WORK
 	ID3D11Texture2D* renderTargetTextureMap;
 	ID3D11RenderTargetView* renderTargetViewMap;
@@ -453,7 +464,7 @@ protected:
 	ID3D11Texture2D* m_depthStencilBuffer = nullptr;
 	D3D11_VIEWPORT shadowVP;
 	// Our render to textures camera's view and projection matrices
-	XMMATRIX mapView;
+	XMMATRIX rotMatrix;
 	XMMATRIX mapProjection;
 
 
@@ -490,7 +501,7 @@ protected:
 	Vector4 camPosition2;
 	Vector4 camTarget2;
 	Vector4 camUp2;// = Vector4(0.0f, 1.0f, 0.0f, 0.0f);;
-	Vector4 DefaultForward2 = Vector4(0.0f, -1.0f, 0.0f, 0.0f);
+	Vector4 DefaultForward2 = Vector4(0.0f, -1.0f, 1.0f, 0.0f);
 	Vector4 DefaultRight2 = Vector4(1.0f, 0.0f, 0.0f, 0.0f);
 	Vector4 camForward2 = Vector4(0.0f, 0.0f, 1.0f, 0.0f);
 	Vector4 camRight2 = Vector4(1.0f, 0.0f, 0.0f, 0.0f);
@@ -500,13 +511,25 @@ protected:
 	XMMATRIX CamProjection2;
 	XMMATRIX CamView2;
 
-	float moveLeftRight2 = 0.0f;
-	float moveBackForward2 = 0.0f;
 	float camYaw2 = 0.0f;
 	float camPitch2 = 0.0f;
-	float speed2 = 0.0f;
-	float boost2 = 0.0f;
-	float zoom2 = 0.0f;
 
+
+
+	// SHADER TESTER
+	ID3D11Buffer* shaderTest = nullptr;
+	//Structs for cBuffers
+	struct Options
+	{
+		int option1;
+		int option2;
+		int option3;
+		int option4;
+		int option5;
+		int option6;
+		int option7;
+		int option8;
+	};
+	Options optionStruct;
 
 };

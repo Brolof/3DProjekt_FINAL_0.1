@@ -1,13 +1,8 @@
 //VERTEX SHADER
-cbuffer World : register (b0)
+cbuffer World2 : register (b3)
 {
-	matrix View;
-	matrix Projection;
-	matrix WorldSpace;
-	matrix WorldSpaceInv;
 	matrix WVP;
-	matrix lightView;
-	matrix lightProjection;
+	
 };
 
 
@@ -23,7 +18,7 @@ struct VS_OUT
 {
 	float4 Pos : SV_POSITION;
 	float2 Tex : TEXCOORD;
-	float3 tunormal : NORMAL;
+	float4 tunormal : NORMAL;
 };
 
 //-----------------------------------------------------------------------------------------
@@ -40,7 +35,6 @@ VS_OUT VS_main(VS_IN input)
 
 		output.Pos = outpos;
 	output.Tex = input.Tex;
-	output.tunormal = input.tunormal;
-
+	output.tunormal = float4(input.tunormal,1.0f);
 	return output;
 }

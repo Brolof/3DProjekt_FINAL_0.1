@@ -1,0 +1,21 @@
+﻿Build started 8/18/2015 5:12:16 PM.
+     1>Project "F:\DirectX\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\RenderEnginge_1.2.vcxproj" on node 2 (Build target(s)).
+     1>Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"F:\DirectX\3DProjekt_FINAL_0.1\RenderEnginge_1.2\x64\Release\RenderEnginge_1.2.exe" /NOLOGO DirectXTK.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"F:\DirectX\3DProjekt_FINAL_0.1\RenderEnginge_1.2\x64\Release\RenderEnginge_1.2.pdb" /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"F:\DirectX\3DProjekt_FINAL_0.1\RenderEnginge_1.2\x64\Release\RenderEnginge_1.2.lib" /MACHINE:X64 x64\Release\BINimporter.obj
+         x64\Release\Cam.obj
+         x64\Release\depthClass.obj
+         x64\Release\GameTimer.obj
+         x64\Release\HeightMap.obj
+         x64\Release\Input.obj
+         x64\Release\OBJ.obj
+         x64\Release\RenderEngine.obj
+         x64\Release\RenderToTexture.obj
+         x64\Release\ShadowMap.obj
+         x64\Release\Winmain.obj
+         F:\DirectX\3DProjekt_FINAL_0.1\DirectXTK\Bin\Desktop_2013\x64\Release\DirectXTK.lib
+     1>LINK : fatal error LNK1181: cannot open input file 'DirectXTK.lib'
+     1>Done Building Project "F:\DirectX\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\RenderEnginge_1.2.vcxproj" (Build target(s)) -- FAILED.
+
+Build FAILED.
+
+Time Elapsed 00:00:00.09
