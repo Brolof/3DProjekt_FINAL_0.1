@@ -15,7 +15,16 @@ private:
 
 	struct BlurConstantStruct{
 		float screenSize; //på ett håll i taget!
-		float pad3[3];
+		float blurAmount;
+		float pad3[2];
+
+		BlurConstantStruct(){
+			screenSize = 1024;
+			blurAmount = 1.5f;
+			pad3[0] = 0.0f;
+			pad3[1] = 0.0f;
+			
+		}
 	};
 
 	struct GlowConstantStruct{
@@ -75,8 +84,8 @@ public:
 	Glow(ID3D11Device *gDevice, ID3D11DeviceContext *gDeviceContext, int screen_Width, int screen_Height, ID3D11VertexShader *glowVS, ID3D11PixelShader *glowPS, ID3DBlob* glowBlob){
 		this->gDevice = gDevice;
 		this->gDeviceContext = gDeviceContext;
-		this->screen_Width = screen_Width; //dessa går att ändra
-		this->screen_Height = screen_Height;
+		this->screen_Width = screen_Width / 3; //dessa går att ändra
+		this->screen_Height = screen_Height / 3;
 		this->glowVertexShader = glowVS;
 		this->glowPixelShader = glowPS;
 		this->glowBlob = glowBlob;

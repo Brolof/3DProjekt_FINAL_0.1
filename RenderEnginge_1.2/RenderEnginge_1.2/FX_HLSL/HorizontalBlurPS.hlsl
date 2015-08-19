@@ -27,10 +27,10 @@ float4 main(VS_OUT input) : SV_TARGET
 
 	// Create the weights that each neighbor pixel will contribute to the blur.
 	weight0 = 1.0f;
-	weight1 = 0.9f;
+	weight1 = 0.6f;
 	weight2 = 0.55f;
-	weight3 = 0.18f;
-	weight4 = 0.1f;
+	weight3 = 0.5f;
+	weight4 = 0.4f;
 
 	// Create a normalized value to average the weights out a bit.
 	normalization = (weight0 + 2.0f * (weight1 + weight2 + weight3 + weight4));
@@ -58,5 +58,6 @@ float4 main(VS_OUT input) : SV_TARGET
 
 	//float4 texDiffuse = TextureToBeBlured.Sample(sampWrap, input.tex);
 	color.a = 1.0f;
-	return test;
+	//return float4(1, 0, 0, 1);
+	return color;
 }

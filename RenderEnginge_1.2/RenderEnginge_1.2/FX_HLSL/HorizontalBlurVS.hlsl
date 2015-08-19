@@ -14,7 +14,8 @@ cbuffer World : register (c0)
 
 cbuffer Horizontal : register (b1){
 	float screenSize; //på ett håll i taget!
-	float3 pad3;
+	float blurAmount;
+	float2 pad3;
 }
 
 
@@ -55,7 +56,7 @@ VS_OUT VS_main(VS_IN input)
 	//output.Pos = mul(float4(input.Pos, 1.0f), WorldSpace);
 	
 	output.Tex = input.Tex;
-	float texelSize = 1.0f / screenSize;
+	float texelSize = 1.0f / screenSize * blurAmount; //multiplicera denna för mer blur
 
 	output.texCoord1 = input.Tex + float2(texelSize * -4.0f, 0.0f); //adda i u
 	output.texCoord2 = input.Tex + float2(texelSize * -3.0f, 0.0f);

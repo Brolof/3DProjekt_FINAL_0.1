@@ -93,21 +93,38 @@ void Glow::CreatePlaneAndBuffers(){
 	}
 	PlaneVertices[4] =
 	{
-		-0.5f, -0.5f, -0.5f,		//v0 
+		-1.0f, -1.0f, -1.0f,		//v0 
 		0.0f, 1.0f,			//t0
 		
 
-		-0.5f, 0.5f, -0.5f,		//v1
+		-1.0f, 1.0f, -1.0f,		//v1
 		0.0f, 0.0f,				//t1
 		
 
-		0.5f, -0.5f, -0.5f,		//v2
+		1.0f, -1.0f, -1.0f,		//v2
 		1.0f, 1.0f,			//t2
 		
 
-		0.5f, 0.5f, -0.5f,		//v3
+		1.0f, 1.0f, -1.0f,		//v3
 		1.0f, 0.0f			//t3	
 	};
+	//PlaneVertices[4] =
+	//{
+	//	-0.5f, -0.5f, -0.5f,		//v0 
+	//	0.0f, 1.0f,			//t0
+
+
+	//	-0.5f, 0.5f, -0.5f,		//v1
+	//	0.0f, 0.0f,				//t1
+
+
+	//	0.5f, -0.5f, -0.5f,		//v2
+	//	1.0f, 1.0f,			//t2
+
+
+	//	0.5f, 0.5f, -0.5f,		//v3
+	//	1.0f, 0.0f			//t3	
+	//};
 
 
 	// VertexBuffer description
@@ -197,5 +214,26 @@ void Glow::ApplyBlurOnGlowHorizontal(ID3D11VertexShader *VS, ID3D11PixelShader *
 }
 
 void Glow::ApplyBlurOnGlowVertical(ID3D11VertexShader *VS, ID3D11PixelShader *PS){
+	UINT32 vertexPosTex = 5 * sizeof(float);
+	UINT offset2 = 0;
+	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP); //ta bort denna sen kanske
 
+	gDeviceContext->RSSetViewports(1, &glowViewPort);
+	float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+	gDeviceContext->IASetInputLayout(glowInputLayout);
+	gDeviceContext->ClearRenderTargetView(renderTargetView, clearColor);
+	gDeviceContext->OMSetRenderTargets(1, &renderTargetView, depthStencilView);
+
+	//gDeviceContext->ClearRenderTargetView(renderTargetView, clearColor);
+	gDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+	gDeviceContext->VSSetShader(VS, nullptr, 0);
+	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
+	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
+	gDeviceContext->PSSetShader(PS, nullptr, 0);
+	gDeviceContext->VSSetConstantBuffers(1, 1, &verticalConstantBuffer);
+
+	gDeviceContext->PSSetShaderResources(0, 1, &tempShaderResourceView);
+	gDeviceContext->IASetVertexBuffers(0, 1, &planeVertexBuffer, &vertexPosTex, &offset2);
+	gDeviceContext->Draw(4, 0); //rita till ännu ett render target
 }

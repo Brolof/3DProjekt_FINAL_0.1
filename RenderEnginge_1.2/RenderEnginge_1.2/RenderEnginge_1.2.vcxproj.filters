@@ -146,6 +146,12 @@
     <FxCompile Include="FX_HLSL\HorizontalBlurPS.hlsl">
       <Filter>Resource Files\PixelShaders</Filter>
     </FxCompile>
+    <FxCompile Include="FX_HLSL\VerticalBlurVS.hlsl">
+      <Filter>Resource Files\VertexShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\VerticalBlurPS.hlsl">
+      <Filter>Resource Files\PixelShaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Headers\RenderToTexture.h">
