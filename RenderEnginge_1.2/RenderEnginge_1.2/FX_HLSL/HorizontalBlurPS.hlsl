@@ -44,6 +44,7 @@ float4 main(VS_OUT input) : SV_TARGET
 
 	color = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
+	float4 test = TextureToBeBlured.Sample(sampClamp, input.texCoord1);
 	// Add the nine horizontal pixels to the color by the specific weight of each.
 	color += TextureToBeBlured.Sample(sampClamp, input.texCoord1) * weight4;
 	color += TextureToBeBlured.Sample(sampClamp, input.texCoord2) * weight3;
@@ -57,5 +58,5 @@ float4 main(VS_OUT input) : SV_TARGET
 
 	//float4 texDiffuse = TextureToBeBlured.Sample(sampWrap, input.tex);
 	color.a = 1.0f;
-	return color;
+	return test;
 }

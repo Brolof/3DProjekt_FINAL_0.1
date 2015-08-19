@@ -929,23 +929,12 @@ void RenderEngine::Render(){
 	UINT32 vertexSize2 = sizeof(float) * 8;
 	UINT32 offset2 = 0;
 
-
+	float clearColor[] = { 0.0f, 0.3f, 0.7f, 1.0f };
+	UINT32 vertexPosTex = sizeof(float) * 5;
 	//GLOWTEST!!!!!!!!!
 	tex = 0;
 	glow->DrawToGlowMap();
-	//gDeviceContext->RSSetViewports(1, &vp);
-	//Set BackGround Color
-	float clearColor[] = { 0.0f, 0.3f, 0.7f, 1.0f };
-	/*gDeviceContext->ClearRenderTargetView(gBackRufferRenderTargetView, clearColor);
-	gDeviceContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
-	gDeviceContext->OMSetRenderTargets(1, &gBackRufferRenderTargetView, gDepthStencilView);*/
-
-
-	gDeviceContext->IASetInputLayout(gVertexLayout);
-	gDeviceContext->VSSetShader(shadowVertexShader, nullptr, 0);
-	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
-	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
-	gDeviceContext->PSSetShader(shadowPixelShader, nullptr, 0);
+	
 	gDeviceContext->PSSetSamplers(0, 1, &sampState1);
 	gDeviceContext->PSSetSamplers(1, 1, &sampState2);
 
@@ -964,6 +953,19 @@ void RenderEngine::Render(){
 		
 	}
 	//kör om med blur här!!!!!!!!!
+	gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
+	glow->ApplyBlurOnGlowHorizontal(horizontalBlurVertexShader, horizontalBlurPixelShader);
+	glow->ApplyBlurOnGlowVertical(verticalBlurVertexShader, verticalBlurPixelShader);
+	
+	/*gDeviceContext->VSSetShader(horizontalBlurVertexShader, nullptr, 0);
+	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
+	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
+	gDeviceContext->PSSetShader(horizontalBlurPixelShader, nullptr, 0);*/
+
+	//gDeviceContext->PSSetShaderResources(0, 1, &glow->shaderResourceView);
+	//gDeviceContext->IASetVertexBuffers(0, 1, &glow->planeVertexBuffer, &vertexPosTex, &offset2);
+	//gDeviceContext->Draw(4, 0); //rita till ännu ett render target
+	
 
 //******************************************************************************************************
 
@@ -980,7 +982,6 @@ void RenderEngine::Render(){
 	//rita ut glowen**********************************************************************************************
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	//TurnZBufferOff();
-	UINT32 vertexPosTex = sizeof(float) * 5;
 	gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
@@ -990,7 +991,7 @@ void RenderEngine::Render(){
 	gDeviceContext->PSSetShaderResources(0, 1, &glow->shaderResourceView);
 	gDeviceContext->IASetVertexBuffers(0, 1, &glow->planeVertexBuffer, &vertexPosTex, &offset2);
 	gDeviceContext->Draw(4, 0);
-	TurnZBufferOn();
+	//TurnZBufferOn();
 	//************************************************************************************************************
 
 	//gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

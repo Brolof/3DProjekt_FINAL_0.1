@@ -12,7 +12,7 @@ cbuffer World : register (c0)
 	matrix lightProjection;
 };
 
-cbuffer Horizontal : register (c1){
+cbuffer Horizontal : register (b1){
 	float screenSize; //på ett håll i taget!
 	float3 pad3;
 }
@@ -48,8 +48,8 @@ VS_OUT VS_main(VS_IN input)
 	float4 inputpos = float4(input.Pos, 1.0f);
 	
 	inputpos = mul(inputpos, WorldSpace);
-	inputpos = mul(inputpos, View);
-	inputpos = mul(inputpos, Projection);
+	//inputpos = mul(inputpos, View);
+	//inputpos = mul(inputpos, Projection);
 	output.Pos = inputpos;
 
 	//output.Pos = mul(float4(input.Pos, 1.0f), WorldSpace);

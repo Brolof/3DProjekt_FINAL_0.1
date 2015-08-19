@@ -37,11 +37,12 @@ void Glow::CreateTextures(){
 	textureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	textureDesc.SampleDesc.Count = 1;
 	textureDesc.Usage = D3D11_USAGE_DEFAULT;
-	textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE; //texturen är bunden till både ett rendertarget och en subresource
 	textureDesc.CPUAccessFlags = 0;
 	textureDesc.MiscFlags = 0;
 
 	gDevice->CreateTexture2D(&textureDesc, NULL, &renderTargetTexture);
+	gDevice->CreateTexture2D(&textureDesc, NULL, &tempRenderTargetTexture);
 
 	/////////////////////// Render to texture's Render Target
 	// Setup the description of the render target view.
@@ -51,6 +52,7 @@ void Glow::CreateTextures(){
 
 	// Create the render target view.
 	gDevice->CreateRenderTargetView(renderTargetTexture, &renderTargetViewDesc, &renderTargetView);
+	gDevice->CreateRenderTargetView(tempRenderTargetTexture, &renderTargetViewDesc, &tempRenderTargetView);
 
 	shaderResourceViewDesc.Format = textureDesc.Format;//samma format som renderTargetTexturen
 	shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
@@ -59,7 +61,7 @@ void Glow::CreateTextures(){
 
 	// Create the shader resource view.
 	gDevice->CreateShaderResourceView(renderTargetTexture, &shaderResourceViewDesc, &shaderResourceView);
-
+	gDevice->CreateShaderResourceView(tempRenderTargetTexture, &shaderResourceViewDesc, &tempShaderResourceView); //temporär SRV som kan behöva användas med blur
 
 	//DepthBuffer
 	D3D11_TEXTURE2D_DESC depthStencilDesc;
@@ -121,6 +123,9 @@ void Glow::CreatePlaneAndBuffers(){
 
 	
 	//constant buffers!!
+	horizontalConstantStruct.screenSize = screen_Width;
+	verticalConstantStruct.screenSize = screen_Height;
+
 	D3D11_BUFFER_DESC blurBufferDesc;
 	memset(&blurBufferDesc, 0, sizeof(blurBufferDesc));
 	blurBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
@@ -134,6 +139,17 @@ void Glow::CreatePlaneAndBuffers(){
 	blurBufferDesc2.Usage = D3D11_USAGE_DEFAULT;
 	blurBufferDesc2.ByteWidth = sizeof(verticalConstantStruct);
 	gDevice->CreateBuffer(&blurBufferDesc2, NULL, &verticalConstantBuffer);
+
+	gDeviceContext->UpdateSubresource(horizontalConstantBuffer, 0, NULL, &horizontalConstantStruct, 0, 0);
+	gDeviceContext->UpdateSubresource(verticalConstantBuffer, 0, NULL, &verticalConstantStruct, 0, 0);
+	//glowConstantStruct.glowThreshHold = this->glowThreshHold;
+	//glowConstantStruct.glowValue = this->glowValue;
+	D3D11_BUFFER_DESC blurBufferDesc3;
+	memset(&blurBufferDesc3, 0, sizeof(blurBufferDesc3));
+	blurBufferDesc3.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	blurBufferDesc3.Usage = D3D11_USAGE_DEFAULT;
+	blurBufferDesc3.ByteWidth = sizeof(glowConstantStruct);
+	HRESULT kpasta = gDevice->CreateBuffer(&blurBufferDesc3, NULL, &glowConstantBuffer);
 }
 
 void Glow::DrawToGlowMap(){
@@ -145,9 +161,41 @@ void Glow::DrawToGlowMap(){
 	gDeviceContext->ClearRenderTargetView(renderTargetView, clearColor);
 	gDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 	
+	gDeviceContext->UpdateSubresource(glowConstantBuffer, 0, NULL, &glowConstantStruct, 0, 0);
+	gDeviceContext->PSSetConstantBuffers(3, 1, &glowConstantBuffer);
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST); //ta bort denna sen kanske
 	gDeviceContext->VSSetShader(glowVertexShader, nullptr, 0);
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->PSSetShader(glowPixelShader, nullptr, 0);
+}
+
+
+void Glow::ApplyBlurOnGlowHorizontal(ID3D11VertexShader *VS, ID3D11PixelShader *PS){
+	UINT32 vertexPosTex = 5 * sizeof(float);
+	UINT offset2 = 0;
+	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP); //ta bort denna sen kanske
+
+	gDeviceContext->RSSetViewports(1, &glowViewPort);
+	float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+	gDeviceContext->IASetInputLayout(glowInputLayout);
+	gDeviceContext->ClearRenderTargetView(tempRenderTargetView, clearColor);
+	gDeviceContext->OMSetRenderTargets(1, &tempRenderTargetView, depthStencilView);
+
+	//gDeviceContext->ClearRenderTargetView(renderTargetView, clearColor);
+	gDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+	gDeviceContext->VSSetShader(VS, nullptr, 0);
+	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
+	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
+	gDeviceContext->PSSetShader(PS, nullptr, 0);
+	gDeviceContext->VSSetConstantBuffers(1, 1, &horizontalConstantBuffer);
+
+	gDeviceContext->PSSetShaderResources(0, 1, &shaderResourceView);
+	gDeviceContext->IASetVertexBuffers(0, 1, &planeVertexBuffer, &vertexPosTex, &offset2);
+	gDeviceContext->Draw(4, 0); //rita till ännu ett render target
+}
+
+void Glow::ApplyBlurOnGlowVertical(ID3D11VertexShader *VS, ID3D11PixelShader *PS){
+
 }
