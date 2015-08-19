@@ -1,9 +1,9 @@
-﻿Build started 8/13/2015 2:04:54 PM.
-     1>Project "F:\DirectX\3DProjekt_FINAL_0.1\DirectXTK\DirectXTK_Desktop_2013.vcxproj" on node 2 (Rebuild target(s)).
+﻿Build started 2015-08-19 13:58:13.
+     1>Project "D:\New folder\3DProjekt_FINAL_0.1\DirectXTK\DirectXTK_Desktop_2013.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /IC:\OSKAR\3DProjectet_1.2\DirectXTK\Inc /IC:\OSKAR\3DProjectet_1.2\DirectXTK\Inc /IF:\DirectX\3DProjekt_FINAL_0.1\DirectXTK\Inc /Zi /nologo /W4 /WX- /Od /D _WIN32_WINNT=0x0600 /D _WIN7_PLATFORM_UPDATE /D WIN32 /D _DEBUG /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:fast /Zc:wchar_t /Zc:forScope /Yc"pch.h" /Fp"Bin\Desktop_2013\x64\Debug\DirectXTK.pch" /Fo"Bin\Desktop_2013\x64\Debug\\" /Fd"Bin\Desktop_2013\x64\Debug\DirectXTK.pdb" /Gd /TP /errorReport:prompt Src\pch.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /IC:\OSKAR\3DProjectet_1.2\DirectXTK\Inc /IC:\OSKAR\3DProjectet_1.2\DirectXTK\Inc /I"D:\New folder\3DProjekt_FINAL_0.1\DirectXTK\Inc" /Zi /nologo /W4 /WX- /Od /D _WIN32_WINNT=0x0600 /D _WIN7_PLATFORM_UPDATE /D WIN32 /D _DEBUG /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:fast /Zc:wchar_t /Zc:forScope /Yc"pch.h" /Fp"Bin\Desktop_2013\x64\Debug\DirectXTK.pch" /Fo"Bin\Desktop_2013\x64\Debug\\" /Fd"Bin\Desktop_2013\x64\Debug\DirectXTK.pdb" /Gd /TP /errorReport:prompt Src\pch.cpp
          pch.cpp
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /IC:\OSKAR\3DProjectet_1.2\DirectXTK\Inc /IC:\OSKAR\3DProjectet_1.2\DirectXTK\Inc /IF:\DirectX\3DProjekt_FINAL_0.1\DirectXTK\Inc /Zi /nologo /W4 /WX- /Od /D _WIN32_WINNT=0x0600 /D _WIN7_PLATFORM_UPDATE /D WIN32 /D _DEBUG /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:fast /Zc:wchar_t /Zc:forScope /Yu"pch.h" /Fp"Bin\Desktop_2013\x64\Debug\DirectXTK.pch" /Fo"Bin\Desktop_2013\x64\Debug\\" /Fd"Bin\Desktop_2013\x64\Debug\DirectXTK.pdb" /Gd /TP /errorReport:prompt Src\AlphaTestEffect.cpp Src\BasicEffect.cpp Src\CommonStates.cpp Src\DDSTextureLoader.cpp Src\DGSLEffect.cpp Src\DGSLEffectFactory.cpp Src\DualTextureEffect.cpp Src\BinaryReader.cpp Src\EffectCommon.cpp Src\EffectFactory.cpp Src\EnvironmentMapEffect.cpp Src\GamePad.cpp Src\GeometricPrimitive.cpp Src\Model.cpp Src\ModelLoadCMO.cpp Src\ModelLoadSDKMESH.cpp Src\ModelLoadVBO.cpp Src\ScreenGrab.cpp Src\SimpleMath.cpp Src\SkinnedEffect.cpp Src\SpriteBatch.cpp Src\PrimitiveBatch.cpp Src\SpriteFont.cpp Src\VertexTypes.cpp Src\WICTextureLoader.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /IC:\OSKAR\3DProjectet_1.2\DirectXTK\Inc /IC:\OSKAR\3DProjectet_1.2\DirectXTK\Inc /I"D:\New folder\3DProjekt_FINAL_0.1\DirectXTK\Inc" /Zi /nologo /W4 /WX- /Od /D _WIN32_WINNT=0x0600 /D _WIN7_PLATFORM_UPDATE /D WIN32 /D _DEBUG /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:fast /Zc:wchar_t /Zc:forScope /Yu"pch.h" /Fp"Bin\Desktop_2013\x64\Debug\DirectXTK.pch" /Fo"Bin\Desktop_2013\x64\Debug\\" /Fd"Bin\Desktop_2013\x64\Debug\DirectXTK.pdb" /Gd /TP /errorReport:prompt Src\AlphaTestEffect.cpp Src\BasicEffect.cpp Src\CommonStates.cpp Src\DDSTextureLoader.cpp Src\DGSLEffect.cpp Src\DGSLEffectFactory.cpp Src\DualTextureEffect.cpp Src\BinaryReader.cpp Src\EffectCommon.cpp Src\EffectFactory.cpp Src\EnvironmentMapEffect.cpp Src\GamePad.cpp Src\GeometricPrimitive.cpp Src\Model.cpp Src\ModelLoadCMO.cpp Src\ModelLoadSDKMESH.cpp Src\ModelLoadVBO.cpp Src\ScreenGrab.cpp Src\SimpleMath.cpp Src\SkinnedEffect.cpp Src\SpriteBatch.cpp Src\PrimitiveBatch.cpp Src\SpriteFont.cpp Src\VertexTypes.cpp Src\WICTextureLoader.cpp
          WICTextureLoader.cpp
          VertexTypes.cpp
          SpriteFont.cpp
@@ -59,9 +59,9 @@
          Bin\Desktop_2013\x64\Debug\SpriteFont.obj
          Bin\Desktop_2013\x64\Debug\VertexTypes.obj
          Bin\Desktop_2013\x64\Debug\WICTextureLoader.obj
-         DirectXTK_Desktop_2013.vcxproj -> F:\DirectX\3DProjekt_FINAL_0.1\DirectXTK\Bin\Desktop_2013\x64\Debug\DirectXTK.lib
-     1>Done Building Project "F:\DirectX\3DProjekt_FINAL_0.1\DirectXTK\DirectXTK_Desktop_2013.vcxproj" (Rebuild target(s)).
+         DirectXTK_Desktop_2013.vcxproj -> D:\New folder\3DProjekt_FINAL_0.1\DirectXTK\Bin\Desktop_2013\x64\Debug\DirectXTK.lib
+     1>Done Building Project "D:\New folder\3DProjekt_FINAL_0.1\DirectXTK\DirectXTK_Desktop_2013.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:06.08
+Time Elapsed 00:00:11.89
