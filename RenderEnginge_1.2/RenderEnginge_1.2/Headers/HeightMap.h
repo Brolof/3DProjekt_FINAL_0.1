@@ -1,3 +1,5 @@
+#pragma once
+
 #include <vector>
 #include <DirectXMath.h>
 #include <DirectXMathMatrix.inl>
@@ -11,6 +13,7 @@
 #include "DDSTextureLoader.h"
 #include <windowsx.h>
 #include <string>
+#include "RenderEngine.h"
 
 
 
@@ -46,6 +49,11 @@ protected:
 public:
 	HeightMap(ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext);
 	~HeightMap(){}
+	bool ImportHeightmap(char *f, wstring texture1, wstring texture2, wstring texture3, wstring splatMap){
+		if (LoadHeightMap(f) == false) return false;
+		if (LoadSplatMap(texture1, texture2, texture3, splatMap) == false) return false;
+		return true;
+	}
 	bool LoadHeightMap(char* fileName);
 	bool LoadSplatMap(wstring texture1, wstring texture2, wstring texture3, wstring splatMap);
 
