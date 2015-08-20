@@ -3,7 +3,7 @@
 #define RENDERENGINE_H
 #endif
 
-
+//CRUCIAL
 #include <windows.h>
 #include <DirectXMath.h>
 #include <DirectXMathMatrix.inl>
@@ -17,7 +17,7 @@
 #include <memory>
 
 
-/////////////////////
+//INCLUDES
 #include "GameTimer.h"
 #include "OBJ.h"
 #include "Input.h"
@@ -28,10 +28,13 @@
 #include "DDSTextureLoader.h"
 #include "WICTextureLoader.h"
 #include "BINimporter.h"
+
+//VISUAL
 #include "ShadowMap.h"
+#include "QuadTree.h"
+#include "Glow.h"
 
-//#include "depthClass.h"
-
+//SIMPLIFIERS
 #include "SimpleMath.h"
 #include "SpriteFont.h"
 #include "SpriteBatch.h"
@@ -60,9 +63,8 @@ public:
 
 	bool hit;
 
-	std::unique_ptr<SpriteBatch> spriteBatch;
-	SpriteFont* spritefont;
-			std::wostringstream outs;
+
+	std::wostringstream outs;
 public:
 	//Window Constructor
 	RenderEngine(HINSTANCE hInstance, std::string name, UINT scrW, UINT scrH);
@@ -75,14 +77,25 @@ public:
 	int Run();
 	void Update(float dt);
 	void Render();
-	void subRender(int view);
 	virtual void Release();
 	void InputHandler();
-	void renderToTexture();
+
+	// MESH IMPORTER
 	BINimporter theCustomImporter;
 	vector<int> intArrayTex;
+
+	//MESH ARRAY
 	std::vector<GameObjects*> renderObjects;
 
+	///MESH ARRAY WITH TRANSPARENT OBJECTS
+	std::vector<GameObjects*> transparentObjects; //dessa är de ända som kommer sorteras från avstånd av kameran
+	
+	// QUADTREE CULLING
+	QuadTree *quadTree = nullptr;
+	
+	//GLOW
+	Glow *glow = nullptr;;
+	
 	//Shadows
 	ShadowMap* shadowMap;
 	ID3D11ShaderResourceView* shadowTexture = nullptr;
@@ -90,10 +103,6 @@ public:
 
 public:
 	void AddObject(GameObjects gObj);
-	//ShadowMap* ShadowShader = new ShadowMap;
-	
-	//depthClass*	depthTexture = new depthClass;
-
 
 	//Fps camera
 	Vector4 camPosition;
@@ -126,7 +135,6 @@ public:
 
 	//Import Functions
 	void ImportObj(char* geometryFileName, char* materialFileName, ID3D11Device* gDev);// , bool isStatic, XMMATRIX startPosMatrix);
-	void ImportHeightmap(char* HeightMapFileName, wstring tex1File, wstring tex2File, wstring tex3File, wstring texSplatFile);
 
 	//Window name
 	std::wstring mainwname;
@@ -151,11 +159,12 @@ public:
 	//Bool to test Backface culling
 	bool Bculling = FALSE;
 	bool Bcullingcheck = FALSE;
+
+	////STRUCT DESCRIPTIONS FOR CBUFFERS
 	struct World2
 	{
 		XMFLOAT4X4 WVP;
 	};
-	World2 WorldMatrix2;
 	//Structs for cBuffers
 	struct World
 	{
@@ -169,14 +178,12 @@ public:
 		XMFLOAT4X4 lightView;
 		XMFLOAT4X4 lightProjection;
 	};
-	World WorldMatrix1;
+
 	struct LightMatrix{
 	//Shadow matrixs
 	XMFLOAT4X4 lightView;
 	XMFLOAT4X4 lightProjection;
 	};
-	LightMatrix LightMatrix1;
-
 	//LightBuffers
 	struct LightStruct{
 		
@@ -185,15 +192,46 @@ public:
 
 	};
 	float lightmove = 0;
-	LightStruct PrimaryLights;
-
+	
 	struct MatView{
 		Material gMaterial;
 		XMFLOAT3	gEyePos;
 		float	pad;
 
 	};
+	
+	struct WorldWireFrame{
+		XMFLOAT4X4 View;
+		XMFLOAT4X4 Projection;
+		XMFLOAT4X4 WorldSpace;
+	};
+
+	struct HeightmapInfo{
+		float heightElements;
+		XMFLOAT3 pad1;
+
+		HeightmapInfo hmInfoConstant(){
+			pad1.x = 1;
+			pad1.y = 1;
+			pad1.z = 1;
+		}
+	};
+	//ViewPoint struct
+	struct ViewBufferStruct{
+		XMFLOAT3 viewPoint;
+		float pad;
+	};
+
+	//STRUCTS FOR CBUFFERS
+	WorldWireFrame WorldMatrixWF;
+	HeightmapInfo heightmapInfo;
 	MatView MatBuffer1;
+	World2 WorldMatrix2;
+	LightMatrix LightMatrix1;
+	LightStruct PrimaryLights;
+	World WorldMatrix1;
+	ViewBufferStruct ViewP;
+
 
 	//VertexBuffer for picking, saves vertexpositions
 	struct VertexPos{
@@ -259,24 +297,21 @@ public:
 		}
 	};
 	std::vector<GameObject> gameObjects;
-	//ViewPoint struct
-	struct ViewBufferStruct{
-		XMFLOAT3 viewPoint;
-		float pad;
-	};
-	ViewBufferStruct ViewP;
 
+	void ImportHeightmap(char* HeightMapFileName, wstring tex1File, wstring tex2File, wstring tex3File, wstring texSplatFile);
 	//Struct for HeightMap
-	struct HeightMapObject{						 
-		ID3D11Buffer* gIndexBuffer;		
+	struct HeightMapObject{
+		ID3D11Buffer* gIndexBuffer;
 		ID3D11Buffer* gVertexBuffer;
 		int nmrElement;
 		ID3D11ShaderResourceView* tex1shaderResourceView = nullptr;
 		ID3D11ShaderResourceView* tex2shaderResourceView = nullptr;
 		ID3D11ShaderResourceView* tex3shaderResourceView = nullptr;
 		ID3D11ShaderResourceView* splatshaderResourceView = nullptr;
-	};											 
-	std::vector<HeightMapObject> HeightMapObjects;
+
+		HeightmapInfo HMInfoConstant;
+	};
+	std::vector<HeightMapObject*> heightMapObjects;
 
 	//quadtree!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	struct Float3{
@@ -289,66 +324,7 @@ public:
 	};
 
 
-	struct QuadTreeInstance{
-		vector<GameObject> gameObjectsToRender;
-		//vector<QuadTreeInstance> children;
-		BoundingBox box;
-		ID3D11Buffer *boxBuffer = nullptr;
-
-		void SetValues(BoundingBox b, ID3D11Device* gDevice){
-			box = b;
-			std::vector<Float3> boxVertPoints;
-
-			boxVertPoints.push_back(Float3(box.Center.x - box.Extents.x, box.Center.y - box.Extents.y, box.Center.z - box.Extents.z)); //0,0,0
-			boxVertPoints.push_back(Float3(box.Center.x + box.Extents.x, box.Center.y - box.Extents.y, box.Center.z - box.Extents.z)); //1,0,0
-			boxVertPoints.push_back(Float3(box.Center.x + box.Extents.x, box.Center.y + box.Extents.y, box.Center.z - box.Extents.z)); //1,1,0
-			boxVertPoints.push_back(Float3(box.Center.x - box.Extents.x, box.Center.y + box.Extents.y, box.Center.z - box.Extents.z)); //0,1,0
-			boxVertPoints.push_back(Float3(box.Center.x - box.Extents.x, box.Center.y - box.Extents.y, box.Center.z - box.Extents.z)); //0,0,0
-
-			boxVertPoints.push_back(Float3(box.Center.x - box.Extents.x, box.Center.y - box.Extents.y, box.Center.z + box.Extents.z)); //0,0,1
-			boxVertPoints.push_back(Float3(box.Center.x + box.Extents.x, box.Center.y - box.Extents.y, box.Center.z + box.Extents.z)); //1,0,1
-			boxVertPoints.push_back(Float3(box.Center.x + box.Extents.x, box.Center.y + box.Extents.y, box.Center.z + box.Extents.z)); //1,1,1
-			boxVertPoints.push_back(Float3(box.Center.x - box.Extents.x, box.Center.y + box.Extents.y, box.Center.z + box.Extents.z)); //0,1,1
-			boxVertPoints.push_back(Float3(box.Center.x - box.Extents.x, box.Center.y - box.Extents.y, box.Center.z + box.Extents.z)); //0,0,1
-
-			boxVertPoints.push_back(Float3(box.Center.x + box.Extents.x, box.Center.y - box.Extents.y, box.Center.z + box.Extents.z)); //1,0,1
-			boxVertPoints.push_back(Float3(box.Center.x + box.Extents.x, box.Center.y - box.Extents.y, box.Center.z - box.Extents.z)); //1,0,0
-			boxVertPoints.push_back(Float3(box.Center.x + box.Extents.x, box.Center.y + box.Extents.y, box.Center.z - box.Extents.z)); //1,1,0
-			boxVertPoints.push_back(Float3(box.Center.x + box.Extents.x, box.Center.y + box.Extents.y, box.Center.z + box.Extents.z)); //1,1,1
-			boxVertPoints.push_back(Float3(box.Center.x - box.Extents.x, box.Center.y + box.Extents.y, box.Center.z + box.Extents.z)); //0,1,1
-			boxVertPoints.push_back(Float3(box.Center.x - box.Extents.x, box.Center.y + box.Extents.y, box.Center.z - box.Extents.z)); //0,1,0
-
-
-			D3D11_BUFFER_DESC bDesc;
-			ZeroMemory(&bDesc, sizeof(D3D11_BUFFER_DESC));
-			bDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-			bDesc.Usage = D3D11_USAGE_DEFAULT;
-			bDesc.ByteWidth = sizeof(Float3)* (boxVertPoints.size());
-
-			D3D11_SUBRESOURCE_DATA data;
-			data.pSysMem = boxVertPoints.data();//<--------
-			HRESULT VertexBufferChecker = gDevice->CreateBuffer(&bDesc, &data, &boxBuffer);
-		}
-
-		void TestContains(vector<GameObject> gameObjectsPossibleHit){ //skicka in alla gameobjects i världen, (gameObjectsInWorldSpace)
-			for each (GameObject ob in gameObjectsPossibleHit)
-			{
-				if (ob.isStatic == true){ //bara de statiska objekten ska kunna cullas
-					ContainmentType test = box.Contains(ob.bbox);
-					if (test == 2 || test == 1){ //1 = intersects, 2 = contains, testa ifall nått gameobject ligger i just denna boxen, om den gör det så lägg till den
-						gameObjectsToRender.push_back(ob);
-					}
-				}
-			}
-		}
-	};
-	vector<QuadTreeInstance> quadTree;
-	void ListQuadTree(int nrSplits, XMFLOAT3 center, XMFLOAT3 extents);
-	void CheckFrustumContains(int nrSplits, int);
-	int nrSplitsTree = 2; //<-------- ÄNDRA DENNA OM VI BEHÖVER FLER SPLITS I QUADTRÄDET
-	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
+	
 	//Window handlers
 	HWND hWindow;
 	HINSTANCE hInstance;
@@ -357,7 +333,7 @@ public:
 	bool InitWindow();
 	bool InitDirect3D(HWND);
 
-protected:
+	public:
 	
 	//Core varibles for often use
 	std::string applicationName;
@@ -367,6 +343,12 @@ protected:
 
 	BoundingFrustum frustum;
 
+	//VIEWPORTS
+	D3D11_VIEWPORT vp;
+
+	//MATRIX
+	XMMATRIX identityM = XMMatrixIdentity();
+	XMMATRIX quadMatrix;
 	//Core functions for windown and program setup
 	ID3D11Device* gDevice = nullptr;
 	ID3D11DeviceContext* gDeviceContext = nullptr;
@@ -381,6 +363,7 @@ protected:
 	ID3D11Buffer* gVertexBuffer2 = nullptr;
 	ID3D11Buffer* gWorld = nullptr;
 	ID3D11Buffer* gWorld2 = nullptr;
+	ID3D11Buffer* heightmapInfoConstant;
 	ID3D11Buffer* ViewBuffer = nullptr;
 	ID3D11Buffer* gLights = nullptr;
 	ID3D11Buffer* PrimaryLightBuffer = nullptr;
@@ -401,17 +384,24 @@ protected:
 	ID3D11InputLayout* gVertexLayout = nullptr;
 	ID3D11InputLayout* gVertexLayout2 = nullptr;
 	ID3D11InputLayout* gWireFrameLayout = nullptr;
-	
+	ID3D11InputLayout* gSplatmapLayout = nullptr;
+
+	//GLOW BLOB THAT TAKES A TRIP TO GLOW.H
+	ID3DBlob* glowBlob = nullptr;
 
 	//Samplers
 	ID3D11SamplerState* sampState1 = nullptr;
 	ID3D11SamplerState* sampState2 = nullptr;
 	//Shaders
+	ID3D11VertexShader* splatMapVertexShader = nullptr;
 	ID3D11VertexShader* gVertexShader = nullptr;
 	ID3D11VertexShader* dVertexShader = nullptr;
 	ID3D11VertexShader* shadowVertexShader = nullptr;
 	ID3D11VertexShader* gWireFrameVertexShader = nullptr;
 	ID3D11VertexShader* shader2DVS = nullptr;
+	ID3D11VertexShader* glowVertexShader = nullptr;
+	ID3D11VertexShader* horizontalBlurVertexShader = nullptr;
+	ID3D11VertexShader* verticalBlurVertexShader = nullptr;
 
 	ID3D11GeometryShader* gGeometryShader = nullptr;
 	ID3D11GeometryShader* gBackFaceShader = nullptr;
@@ -424,97 +414,29 @@ protected:
 	ID3D11PixelShader* gWireFramePixelShader = nullptr;
 	ID3D11PixelShader* gWireFramePixelShaderCONTAINTEST = nullptr;
 	ID3D11PixelShader* shader2DPS = nullptr;
+	ID3D11PixelShader* glowPixelShader = nullptr;
+	ID3D11PixelShader* horizontalBlurPixelShader = nullptr;
+	ID3D11PixelShader* verticalBlurPixelShader = nullptr;
+
 
 
 	//Render States
 	ID3D11RasterizerState* NoBcull;
-
-	D3D11_VIEWPORT vp;
-	// SHADOW THINGS
-
-
-	public:
-		const int SHADOWMAP_WIDTH = 1024;
-		const int SHADOWMAP_HEIGHT = 1024;
-		const float SHADOWMAP_DEPTH = 100.0f;
-		const float SHADOWMAP_NEAR = 1.0f;
-
-	UINT32 vertexSize3 = sizeof(float) * 8;
-	UINT32 offset3 = 0;
-
-	//World perObjCBData;
-	XMMATRIX WVP;
-	ID3D11DepthStencilState* gDepthStencilState = nullptr;
-	
-	
-	//Shadow implement
-	//The Camera Matrices are now defined in the camera class (mainCamera)
-	Camera lightCam;
-	//RENDER TO TEXTURE
-	ID3D11Texture2D* depthMap;
-	
-	ID3D11ShaderResourceView* shaderResourceDepthMap;
-	ID3D11DepthStencilView* m_depthStencilView;
-
-	
-	// MAY WORK
-	ID3D11Texture2D* renderTargetTextureMap;
-	ID3D11RenderTargetView* renderTargetViewMap;
-	ID3D11ShaderResourceView* shaderResourceViewMap;
-	ID3D11Texture2D* m_depthStencilBuffer = nullptr;
-	D3D11_VIEWPORT shadowVP;
-	// Our render to textures camera's view and projection matrices
-	XMMATRIX rotMatrix;
-	XMMATRIX mapProjection;
-
-
-	XMMATRIX identityM2;
-	XMMATRIX WorldInv2;
-
-	void GenerateViewMatrix();
-	void GenerateProjectionMatrix(float, float);
-	void GenerateOrthoMatrix(float, float, float);
-	void GetOrthoMatrix(XMMATRIX&);
-	void SetDirection(float, float, float);
-	void GetViewMatrix(XMMATRIX&);
-	void GetProjectionMatrix(XMMATRIX&);
-	void SetPosition(float, float, float);
-	void SetLookAt(float, float, float);
-	void TurnZBufferOn();
-	void TurnZBufferOff();
-	XMFLOAT3 GetPosition();
-	XMFLOAT3 GetDirection();
-
-	Vector3 m_direction;
-	Vector3 m_position;
-	Vector3 m_lookAt;
-	XMMATRIX m_viewMatrix;
-	XMMATRIX m_projectionMatrix;
-	XMMATRIX m_orthoMatrix;
-	ID3D11DepthStencilState* m_depthDisabledStencilState;
-	ID3D11DepthStencilState* m_depthStencilState;
 	ID3D11Buffer* d2dIndexBuffer;
 	int m_bitmapWidth, m_bitmapHeight = 100;
 
-
-	//light camera
-	Vector4 camPosition2;
-	Vector4 camTarget2;
-	Vector4 camUp2;// = Vector4(0.0f, 1.0f, 0.0f, 0.0f);;
-	Vector4 DefaultForward2 = Vector4(0.0f, -1.0f, 1.0f, 0.0f);
-	Vector4 DefaultRight2 = Vector4(1.0f, 0.0f, 0.0f, 0.0f);
-	Vector4 camForward2 = Vector4(0.0f, 0.0f, 1.0f, 0.0f);
-	Vector4 camRight2 = Vector4(1.0f, 0.0f, 0.0f, 0.0f);
-
-	XMMATRIX camRotationMatrix2;
-	XMMATRIX fpsCamLook2;
-	XMMATRIX CamProjection2;
-	XMMATRIX CamView2;
-
-	float camYaw2 = 0.0f;
-	float camPitch2 = 0.0f;
+	//blendstates and transparency
+	void BlendStates();
+	ID3D11BlendState *transparency;
+	ID3D11RasterizerState *counterCWCullmode; //dessa används vid transpareny mojs
+	ID3D11RasterizerState *CWCullmode;
 
 
+	//ENABLE/DISABLE DEPTH
+	ID3D11DepthStencilState* m_depthDisabledStencilState;
+	ID3D11DepthStencilState* m_depthStencilState;
+	void TurnZBufferOn();
+	void TurnZBufferOff();
 
 	// SHADER TESTER
 	ID3D11Buffer* shaderTest = nullptr;

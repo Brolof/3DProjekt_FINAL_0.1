@@ -27,8 +27,10 @@ bool HeightMap::LoadSplatMap(wstring texture1, wstring texture2, wstring texture
 	//nChars = MultiByteToWideChar(CP_ACP, 0, texture1, -1, NULL, 0);// required size, CP_ACP används vid temporära saker, sista parametern satt till 0 ger storleken som behövs för buffern
 	//textureWCHAR1 = new WCHAR[nChars];
 	//MultiByteToWideChar(CP_ACP, 0, texture1, -1, (LPWSTR)textureWCHAR1, nChars);
-	//hr = DirectX::CreateWICTextureFromFile(gDevice, texture1.c_str(), nullptr, &tex1shaderResourceView);
-	hr = DirectX::CreateDDSTextureFromFile(gDevice, texture1.c_str(), nullptr, &tex1shaderResourceView);
+	hr = CreateWICTextureFromFile(gDevice, texture1.c_str(), nullptr, &tex1shaderResourceView);
+	if (FAILED(hr)){
+		hr = CreateDDSTextureFromFile(gDevice, texture1.c_str(), nullptr, &tex1shaderResourceView);
+	}
 	//hr = CreateDDSTextureFromFile(gDevice, L"Grass.png", nullptr, &tex1shaderResourceView);
 	if (FAILED(hr)){
 		return false;
@@ -39,8 +41,10 @@ bool HeightMap::LoadSplatMap(wstring texture1, wstring texture2, wstring texture
 	nChars = MultiByteToWideChar(CP_ACP, 0, texture2, -1, NULL, 0);
 	textureWCHAR2 = new WCHAR[nChars];
 	MultiByteToWideChar(CP_ACP, 0, texture2, -1, (LPWSTR)textureWCHAR2, nChars);*/
-	//hr = DirectX::CreateWICTextureFromFile(gDevice, gDeviceContext, texture2.c_str(), nullptr, &tex2shaderResourceView);
-	hr = DirectX::CreateDDSTextureFromFile(gDevice, texture2.c_str(), nullptr, &tex2shaderResourceView);
+	hr = CreateWICTextureFromFile(gDevice, texture2.c_str(), nullptr, &tex2shaderResourceView);
+	if (FAILED(hr)){
+		hr = CreateDDSTextureFromFile(gDevice, texture2.c_str(), nullptr, &tex2shaderResourceView);
+	}
 	if (FAILED(hr)){
 		return false;
 	}
@@ -50,8 +54,10 @@ bool HeightMap::LoadSplatMap(wstring texture1, wstring texture2, wstring texture
 	nChars = MultiByteToWideChar(CP_ACP, 0, texture3, -1, NULL, 0);
 	textureWCHAR3 = new WCHAR[nChars];
 	MultiByteToWideChar(CP_ACP, 0, texture3, -1, (LPWSTR)textureWCHAR3, nChars);*/
-	//hr = DirectX::CreateWICTextureFromFile(gDevice, gDeviceContext, texture3.c_str(), nullptr, &tex3shaderResourceView);
-	hr = DirectX::CreateDDSTextureFromFile(gDevice, texture3.c_str(), nullptr, &tex3shaderResourceView);
+	hr = CreateWICTextureFromFile(gDevice, texture3.c_str(), nullptr, &tex3shaderResourceView);
+	if (FAILED(hr)){
+		hr = CreateDDSTextureFromFile(gDevice, texture3.c_str(), nullptr, &tex3shaderResourceView);
+	}
 	if (FAILED(hr)){
 		return false;
 	}
@@ -61,8 +67,10 @@ bool HeightMap::LoadSplatMap(wstring texture1, wstring texture2, wstring texture
 	nChars = MultiByteToWideChar(CP_ACP, 0, splatMap, -1, NULL, 0);
 	textureWCHARsplat = new WCHAR[nChars];
 	MultiByteToWideChar(CP_ACP, 0, splatMap, -1, (LPWSTR)textureWCHARsplat, nChars);*/
-	//hr = DirectX::CreateWICTextureFromFile(gDevice, gDeviceContext, splatMap.c_str(), nullptr, &splatshaderResourceView);
-	hr = DirectX::CreateDDSTextureFromFile(gDevice, splatMap.c_str(), nullptr, &splatshaderResourceView);
+	hr = CreateWICTextureFromFile(gDevice, splatMap.c_str(), nullptr, &splatshaderResourceView);
+	if (FAILED(hr)){
+		hr = CreateDDSTextureFromFile(gDevice, splatMap.c_str(), nullptr, &splatshaderResourceView);
+	}
 	if (FAILED(hr)){
 		return false;
 	}
@@ -79,7 +87,7 @@ bool HeightMap::LoadSplatMap(wstring texture1, wstring texture2, wstring texture
 	return true;
 }
 
-bool HeightMap::LoadHeightMap(char* fileName){
+bool HeightMap::LoadHeightMap(char* fileName){ //MAPPEN MÅSTE VARA LIKA STOR PÅ BÅDA HÅLL!!!!!!
 	//8 bits bild!! kan gå mellan 0-255, char är 1 byte, alltså 8 bit! unsgined char går mellan 0-255 MINST
 
 	BITMAPFILEHEADER bitmapFH; //information about file
@@ -103,46 +111,39 @@ bool HeightMap::LoadHeightMap(char* fileName){
 	int imageSize = hmI.terrainWidth * hmI.terrainHeight * 3; //rgb (*3)
 	heights = new unsigned char[imageSize]; //denna kommer hålla arrayen av chars kommer innehålla datan från bilden, 0-255 eller mer
 
-	int facesCount = (hmI.terrainWidth - 1) * (hmI.terrainHeight - 1) * 2;//*2 pga att man får antal quads
+	int facesCount = (hmI.terrainWidth - 1) * (hmI.terrainHeight - 1) * 2;//*2 pga att man får antal quads, men vill ha i tris
 
 	//fseek(pFile, bitmapFH.bfOffBits, SEEK_SET); //placerar pFile i början på filen, fseek används för att flytta runt pekare i filer så man kan läsa därifrån
 	////SEEK_SET = Beginning of file, offset från beginning of file : bitmapFH.bfOffBits.    bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
 
 	//fread(heights, 1, imageSize, pFile); //store:a alla värden i heights
+	fseek(pFile, bitmapFH.bfOffBits, SEEK_SET);
+
+	// Read in the bitmap image data.
+	fread(heights, 1, imageSize, pFile);
+
 	fclose(pFile);
 
-	ifstream hFile;
-	hFile.open(fileName, std::ifstream::binary);
-	hFile.read((char*)&heights[0], (streamsize)imageSize);
-
-	//if (hFile.is_open == true){
-	//	std::vector<unsigned char> heights(width * height); //vector konstruktor
 	std::vector<Vertex> vertecies;
-	vertexHeightsArray.resize((hmI.terrainHeight * hmI.terrainWidth));
-	//hFile.read((char *)&heights[0], (std::streamsize)heights.size()); //store:a alla filens värden i heights
+	vertexHeightsArray.resize((hmI.terrainHeight * hmI.terrainWidth)); //den man går på!
+
+
+	//per vertex
+	heightElements = hmI.terrainWidth;
 
 	int offsetColors = 0; //används för att kunna hoppa över GB
-	//per vertex
+
 	int widthWhole = (int)hmI.terrainWidth, heightWhole = (int)hmI.terrainHeight; //terrain values in nr verts
 	for (int h = 0; h < hmI.terrainHeight; h++){ //kanske inte -1
 		for (int w = 0; w < hmI.terrainWidth; w++){
 			Vertex tempV;
 			tempV.x = w * gridSize;
-			//tempV.y = (float)(heights[(h * hmI.terrainHeight) + w]) * heightMultiplier; //-----------------------------
 			tempV.y = (float)heights[offsetColors];
-			tempV.y = tempV.y * heightMultiplier; //höjden
-			//tempV.y = 0;
+			tempV.y = tempV.y * heightMultiplier; //höjden			
 			vertexHeightsArray[h * widthWhole + w] = tempV.y;//fyller denna med alla höjd värden för att sedan användas när man går på terrängen
 			tempV.z = -h * gridSize; //minus becuz LH och RH
-			tempV.nx = 0;
+
 			tempV.ny = 1;
-			tempV.nz = 0;
-
-			/*tempV.u = (float)(w / (width - 1));
-			tempV.v = (float)(h / (height - 1));*/
-
-			tempV.u = 0;
-			tempV.v = 0;
 
 			vertecies.push_back(tempV);
 			offsetColors = offsetColors + 3;
@@ -160,6 +161,9 @@ bool HeightMap::LoadHeightMap(char* fileName){
 	int UIndex = 0;
 	int VIndex = 0;
 
+	//int terWidth = hmI.terrainWidth;
+	//int terHeight = hmI.terrainHeight;
+
 	for (int h = 0; h < hmI.terrainHeight - 1; h++){
 		for (int w = 0; w < hmI.terrainWidth - 1; w++){
 
@@ -169,36 +173,48 @@ bool HeightMap::LoadHeightMap(char* fileName){
 			indecies[inIndex] = start;
 			vertecies[start].u = UIndex;
 			vertecies[start].v = VIndex;
+			/*vertecies[start].alphaU = (float)UIndex / terWidth;
+			vertecies[start].alphaV = (float)VIndex / terHeight;*/
 			inIndex++;
 			nrElements++;
 			//top right
 			indecies[inIndex] = start + 1;
 			vertecies[start + 1].u = UIndex + 1;
 			vertecies[start + 1].v = VIndex;
+			/*vertecies[start + 1].alphaU = (float)UIndex + 1 / terWidth;
+			vertecies[start + 1].alphaV = (float)VIndex / terHeight;*/
 			inIndex++;
 			nrElements++;
 			//bottom left
 			indecies[inIndex] = start + widthWhole;
 			vertecies[start + widthWhole].u = UIndex;
 			vertecies[start + widthWhole].v = VIndex + 1;
+			/*vertecies[start + widthWhole].alphaU = (float)UIndex / terWidth;
+			vertecies[start + widthWhole].alphaV = (float)VIndex + 1 / terHeight;*/
 			inIndex++;
 			nrElements++;
 			//bottom right
 			indecies[inIndex] = start + 1 + widthWhole;
 			vertecies[start + 1 + widthWhole].u = UIndex + 1;
 			vertecies[start + 1 + widthWhole].v = VIndex + 1;
+			/*vertecies[start + 1 + widthWhole].alphaU = (float)UIndex + 1 / terWidth;
+			vertecies[start + 1 + widthWhole].alphaV = (float)VIndex + 1 / terHeight;*/
 			inIndex++;
 			nrElements++;
 			//bottom left
 			indecies[inIndex] = start + widthWhole;
 			vertecies[start + widthWhole].u = UIndex;
 			vertecies[start + widthWhole].v = VIndex + 1;
+			/*vertecies[start + widthWhole].alphaU = (float)UIndex / terWidth;
+			vertecies[start + widthWhole].alphaV = (float)VIndex + 1 / terHeight;*/
 			inIndex++;
 			nrElements++;
 			//top right
 			indecies[inIndex] = start + 1;
 			vertecies[start + 1].u = UIndex + 1;
 			vertecies[start + 1].v = VIndex;
+			/*vertecies[start + 1].alphaU = (float)UIndex + 1 / terWidth;
+			vertecies[start + 1].alphaV = (float)VIndex / terHeight;*/
 			inIndex++;
 			nrElements++;
 

@@ -138,9 +138,11 @@
     <ClCompile Include="Source\Cam.cpp" />
     <ClCompile Include="Source\depthClass.cpp" />
     <ClCompile Include="Source\GameTimer.cpp" />
+    <ClCompile Include="Source\Glow.cpp" />
     <ClCompile Include="Source\HeightMap.cpp" />
     <ClCompile Include="Source\Input.cpp" />
     <ClCompile Include="Source\OBJ.cpp" />
+    <ClCompile Include="Source\QuadTree.cpp" />
     <ClCompile Include="Source\RenderEngine.cpp" />
     <ClCompile Include="Source\RenderToTexture.cpp" />
     <ClCompile Include="Source\ShadowMap.cpp" />
@@ -304,17 +306,7 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="FX_HLSL\WireFrameVS.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
+    <FxCompile Include="FX_HLSL\WireFrameVS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Headers\BINimporter.h" />
@@ -323,10 +315,12 @@
     <ClInclude Include="Headers\Entity.h" />
     <ClInclude Include="Headers\GameObject.h" />
     <ClInclude Include="Headers\GameTimer.h" />
+    <ClInclude Include="Headers\Glow.h" />
     <ClInclude Include="Headers\HeightMap.h" />
     <ClInclude Include="Headers\Input.h" />
     <ClInclude Include="Headers\lights.h" />
     <ClInclude Include="Headers\OBJ.h" />
+    <ClInclude Include="Headers\QuadTree.h" />
     <ClInclude Include="Headers\RenderEngine.h" />
     <ClInclude Include="Headers\RenderToTexture.h" />
     <ClInclude Include="Headers\ShadowMap.h" />

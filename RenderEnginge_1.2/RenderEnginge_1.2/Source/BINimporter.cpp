@@ -20,13 +20,6 @@ void BINimporter::ImportBIN(ID3D11Device* gDevice, char* fileName){
 		testTexNameArray.push_back(meshInfo.name.c_str());
 
 
-		if (i>335)
-		{
-			int bajs = 2;
-		}
-
-
-
 		fbxFile.read((char*)&meshInfo.meshType, sizeof(int));
 
 		fbxFile.read((char*)&meshInfo.nrAnimations, sizeof(int));
@@ -164,34 +157,6 @@ void BINimporter::ImportBIN(ID3D11Device* gDevice, char* fileName){
 
 			faces.push_back(tempFaceData);
 
-			//Get the vector describing one edge of our triangle (edge 0,2)
-			vecX = verPos[faces[y].indexPos[2] - 1].x - verPos[faces[y].indexPos[0] - 1].x;
-			vecY = verPos[faces[y].indexPos[2] - 1].y - verPos[faces[y].indexPos[0] - 1].y;
-			vecZ = verPos[faces[y].indexPos[2] - 1].z - verPos[faces[y].indexPos[0] - 1].z;
-			edge1 = XMVectorSet(vecX, vecY, vecZ, 0.0f);	//Create our first edge
-
-			//Get the vector describing another edge of our triangle (edge 2,1)
-			vecX = verPos[faces[y].indexPos[0] - 1].x - verPos[faces[y].indexPos[1] - 1].x;
-			vecY = verPos[faces[y].indexPos[0] - 1].y - verPos[faces[y].indexPos[1] - 1].y;
-			vecZ = verPos[faces[y].indexPos[0] - 1].z - verPos[faces[y].indexPos[1] - 1].z;
-			edge2 = XMVectorSet(vecX, vecY, vecZ, 0.0f);	//Create our second edge
-
-			///////////////**************new**************////////////////////
-			//Find first texture coordinate edge 2d vector
-			tcU1 = verUV[faces[y].indexUV[2] - 1].x - verUV[faces[y].indexUV[0] - 1].x;
-			tcV1 = verUV[faces[y].indexUV[2] - 1].y - verUV[faces[y].indexUV[0] - 1].y;
-
-			//Find second texture coordinate edge 2d vector
-			tcU2 = verUV[faces[y].indexUV[0] - 1].x - verUV[faces[y].indexUV[1] - 1].x;
-			tcV2 = verUV[faces[y].indexUV[0] - 1].y - verUV[faces[y].indexUV[1] - 1].y;
-			//Find tangent using both tex coord edges and position edges
-
-			tangent.x = (tcV1 * XMVectorGetX(edge1) - tcV2 * XMVectorGetX(edge2)) * (1.0f / (tcU1 * tcV2 - tcU2 * tcV1));
-			tangent.y = (tcV1 * XMVectorGetY(edge1) - tcV2 * XMVectorGetY(edge2)) * (1.0f / (tcU1 * tcV2 - tcU2 * tcV1));
-			tangent.z = (tcV1 * XMVectorGetZ(edge1) - tcV2 * XMVectorGetZ(edge2)) * (1.0f / (tcU1 * tcV2 - tcU2 * tcV1));
-
-			tempTangent.push_back(tangent);
-		
 			//skapa facet (vertiserna)!
 			tempVertex.vertPos = verPos[faces[y].indexPos[2] - 1];
 			tempVertex.vertUV = verUV[faces[y].indexUV[2] - 1];
@@ -277,6 +242,17 @@ void BINimporter::ImportBIN(ID3D11Device* gDevice, char* fileName){
 			bTemp.Extents = XMFLOAT3(extentX, extentY, extentZ);
 
 			GameObjects* tempP = new GameObjects(meshVertexBuffer, bTemp, false, bTemp.Center, true, false);
+			//TEST MED FRUSTUM CULLING
+			if (centerX < -1.2f){
+				tempP->SetStatic(true);
+				//tempP->isTransparent = true;
+			}
+			else{
+				tempP->SetStatic(false);
+				tempP->isTransparent = true; //bara för att testa och separera objekt, ta bort detta sen och ersätt med en import där man kan välja vad det ska va i maya
+			}
+			//****************************
+
 			tempP->material.Diffuse = KD;
 			tempP->material.Ambient = KA;
 			tempP->material.Specular = KS;
@@ -285,16 +261,9 @@ void BINimporter::ImportBIN(ID3D11Device* gDevice, char* fileName){
 			tempP->indexT = mesnNumberInt;
 			mesnNumberInt++;
 			binObj.push_back(tempP);
+			if (tempP->isTransparent == true)
+				transparentObj.push_back(tempP);
 		}
-		//delete meshVertexBuffer
-
-		//for (int i = 0; i < nrOfAnimations; i++){
-
-		//}
-
-		//for (int i = 0; i < nrOfBones; i++){
-
-		//}
 
 
 
@@ -347,7 +316,5 @@ void BINimporter::ImportBIN(ID3D11Device* gDevice, char* fileName){
 
 		}
 	}
-
-	int qbajs = 0;
 
 }
