@@ -60,9 +60,6 @@
     <ClCompile Include="Source\OBJ.cpp">
       <Filter>Source Files\Main</Filter>
     </ClCompile>
-    <ClCompile Include="Source\RenderEngine.cpp">
-      <Filter>Source Files\Main</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Winmain.cpp">
       <Filter>Source Files\Main</Filter>
     </ClCompile>
@@ -76,6 +73,9 @@
       <Filter>Source Files\Visual</Filter>
     </ClCompile>
     <ClCompile Include="Source\Glow.cpp">
+      <Filter>Source Files\Main</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RenderEngine.cpp">
       <Filter>Source Files\Main</Filter>
     </ClCompile>
   </ItemGroup>
@@ -133,6 +133,24 @@
     </FxCompile>
     <FxCompile Include="FX_HLSL\LightHelper.fx">
       <Filter>Resource Files\PixelShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\GlowPS.hlsl">
+      <Filter>Resource Files\PixelShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\HorizontalBlurPS.hlsl">
+      <Filter>Resource Files\PixelShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\VerticalBlurPS.hlsl">
+      <Filter>Resource Files\PixelShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\GlowVS.hlsl">
+      <Filter>Resource Files\VertexShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\HorizontalBlurVS.hlsl">
+      <Filter>Resource Files\VertexShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\VerticalBlurVS.hlsl">
+      <Filter>Resource Files\VertexShaders</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

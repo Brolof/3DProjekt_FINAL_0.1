@@ -237,3 +237,7 @@ void Glow::ApplyBlurOnGlowVertical(ID3D11VertexShader *VS, ID3D11PixelShader *PS
 	gDeviceContext->IASetVertexBuffers(0, 1, &planeVertexBuffer, &vertexPosTex, &offset2);
 	gDeviceContext->Draw(4, 0); //rita till ännu ett render target
 }
+
+void Glow::SetPosTexVertexLayout(){
+	gDeviceContext->IASetInputLayout(glowInputLayout);
+}

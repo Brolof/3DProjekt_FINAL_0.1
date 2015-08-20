@@ -1,9 +1,9 @@
-﻿Build started 8/20/2015 4:54:19 PM.
-     1>Project "F:\DirectX\3DProjektGitHub\3DProjekt_FINAL_0.1\DirectXTK\DirectXTK_Desktop_2013.vcxproj" on node 2 (Build target(s)).
+﻿Build started 2015-08-20 23:00:12.
+     1>Project "C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\DirectXTK\DirectXTK_Desktop_2013.vcxproj" on node 2 (Build target(s)).
      1>Lib:
-         DirectXTK_Desktop_2013.vcxproj -> F:\DirectX\3DProjektGitHub\3DProjekt_FINAL_0.1\DirectXTK\Bin\Desktop_2013\x64\Debug\DirectXTK.lib
-     1>Done Building Project "F:\DirectX\3DProjektGitHub\3DProjekt_FINAL_0.1\DirectXTK\DirectXTK_Desktop_2013.vcxproj" (Build target(s)).
+         DirectXTK_Desktop_2013.vcxproj -> C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\DirectXTK\Bin\Desktop_2013\x64\Debug\DirectXTK.lib
+     1>Done Building Project "C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\DirectXTK\DirectXTK_Desktop_2013.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:00.03
+Time Elapsed 00:00:00.10

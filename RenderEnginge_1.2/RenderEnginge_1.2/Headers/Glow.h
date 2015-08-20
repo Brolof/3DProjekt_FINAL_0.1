@@ -41,7 +41,7 @@ private:
 		}
 	};
 	float glowThreshHold = 0.99f;
-	float glowValue = 0.0f;
+	float glowValue = 1.0f;
 	
 	BlurConstantStruct horizontalConstantStruct;
 	BlurConstantStruct verticalConstantStruct;
@@ -102,4 +102,5 @@ public:
 	void DrawToGlowMap();
 	void ApplyBlurOnGlowHorizontal(ID3D11VertexShader *VS, ID3D11PixelShader *PS);
 	void ApplyBlurOnGlowVertical(ID3D11VertexShader *VS, ID3D11PixelShader *PS);
+	void SetPosTexVertexLayout();
 };

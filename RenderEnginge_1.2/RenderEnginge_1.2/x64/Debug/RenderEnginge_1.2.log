@@ -1,20 +1,21 @@
-﻿Build started 8/20/2015 10:00:17 PM.
-     1>Project "F:\DirectX\3DProjektGitHub\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\RenderEnginge_1.2.vcxproj" on node 2 (Build target(s)).
+﻿Build started 2015-08-20 23:13:27.
+     1>Project "C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\RenderEnginge_1.2.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /IF:\DirectX\3DProjektGitHub\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers /IC:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers /IF:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\Headers /IC:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\Headers /Zi /nologo /W3 /WX- /sdl /Od /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Debug\\" /Fd"x64\Debug\vc120.pdb" /Gd /TP /errorReport:prompt BINimporter.cpp
-         BINimporter.cpp
-     1>f:\directx\3dprojektgithub\3dprojekt_final_0.1\renderenginge_1.2\renderenginge_1.2\headers\GameObject.h(79): warning C4267: '=' : conversion from 'size_t' to 'UINT', possible loss of data
-     1>f:\directx\3dprojektgithub\3dprojekt_final_0.1\renderenginge_1.2\renderenginge_1.2\headers\GameObject.h(145): warning C4305: 'argument' : truncation from 'double' to 'float'
-     1>f:\directx\3dprojektgithub\3dprojekt_final_0.1\renderenginge_1.2\renderenginge_1.2\headers\GameObject.h(151): warning C4305: 'argument' : truncation from 'double' to 'float'
-     1>BINimporter.cpp(116): warning C4101: 'tcV1' : unreferenced local variable
-     1>BINimporter.cpp(120): warning C4101: 'vecZ' : unreferenced local variable
-     1>BINimporter.cpp(116): warning C4101: 'tcV2' : unreferenced local variable
-     1>BINimporter.cpp(116): warning C4101: 'tcU1' : unreferenced local variable
-     1>BINimporter.cpp(120): warning C4101: 'vecY' : unreferenced local variable
-     1>BINimporter.cpp(116): warning C4101: 'tcU2' : unreferenced local variable
-     1>BINimporter.cpp(120): warning C4101: 'vecX' : unreferenced local variable
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /IF:\DirectX\3DProjektGitHub\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers /IC:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers /IF:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\Headers /IC:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\Headers /Zi /nologo /W3 /WX- /sdl /Od /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Debug\\" /Fd"x64\Debug\vc120.pdb" /Gd /TP /errorReport:prompt Source\RenderEngine.cpp
+         RenderEngine.cpp
+     1>c:\users\simon\downloads\programmering\3dprojectfinal\3dprojekt_final_0.1\renderenginge_1.2\renderenginge_1.2\headers\GameObject.h(79): warning C4267: '=' : conversion from 'size_t' to 'UINT', possible loss of data
+     1>c:\users\simon\downloads\programmering\3dprojectfinal\3dprojekt_final_0.1\renderenginge_1.2\renderenginge_1.2\headers\GameObject.h(145): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\simon\downloads\programmering\3dprojectfinal\3dprojekt_final_0.1\renderenginge_1.2\renderenginge_1.2\headers\GameObject.h(151): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\simon\downloads\programmering\3dprojectfinal\3dprojekt_final_0.1\renderenginge_1.2\renderenginge_1.2\headers\QuadTree.h(59): warning C4267: '=' : conversion from 'size_t' to 'UINT', possible loss of data
+     1>C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers\RenderEngine.h(292): warning C4267: '=' : conversion from 'size_t' to 'UINT', possible loss of data
+     1>Source\RenderEngine.cpp(90): warning C4244: 'argument' : conversion from 'UINT' to 'float', possible loss of data
+     1>Source\RenderEngine.cpp(884): warning C4305: 'initializing' : truncation from 'double' to 'float'
+     1>Source\RenderEngine.cpp(1250): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
+     1>Source\RenderEngine.cpp(1460): warning C4305: '+=' : truncation from 'double' to 'float'
+     1>Source\RenderEngine.cpp(1470): warning C4244: 'argument' : conversion from 'UINT' to 'float', possible loss of data
+     1>Source\RenderEngine.cpp(1476): warning C4244: 'argument' : conversion from 'UINT' to 'float', possible loss of data
        Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"F:\DirectX\3DProjektGitHub\3DProjekt_FINAL_0.1\RenderEnginge_1.2\x64\Debug\RenderEnginge_1.2.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"F:\DirectX\3DProjektGitHub\3DProjekt_FINAL_0.1\RenderEnginge_1.2\x64\Debug\RenderEnginge_1.2.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"F:\DirectX\3DProjektGitHub\3DProjekt_FINAL_0.1\RenderEnginge_1.2\x64\Debug\RenderEnginge_1.2.lib" /MACHINE:X64 x64\Debug\BINimporter.obj
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\x64\Debug\RenderEnginge_1.2.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\x64\Debug\RenderEnginge_1.2.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\x64\Debug\RenderEnginge_1.2.lib" /MACHINE:X64 x64\Debug\BINimporter.obj
          x64\Debug\ShadowMap.obj
          x64\Debug\Cam.obj
          x64\Debug\depthClass.obj
@@ -27,10 +28,10 @@
          x64\Debug\RenderEngine.obj
          x64\Debug\RenderToTexture.obj
          x64\Debug\Winmain.obj
-         F:\DirectX\3DProjektGitHub\3DProjekt_FINAL_0.1\DirectXTK\Bin\Desktop_2013\x64\Debug\DirectXTK.lib
-         RenderEnginge_1.2.vcxproj -> F:\DirectX\3DProjektGitHub\3DProjekt_FINAL_0.1\RenderEnginge_1.2\x64\Debug\RenderEnginge_1.2.exe
-     1>Done Building Project "F:\DirectX\3DProjektGitHub\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\RenderEnginge_1.2.vcxproj" (Build target(s)).
+         C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\DirectXTK\Bin\Desktop_2013\x64\Debug\DirectXTK.lib
+         RenderEnginge_1.2.vcxproj -> C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\x64\Debug\RenderEnginge_1.2.exe
+     1>Done Building Project "C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\RenderEnginge_1.2.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:01.27
+Time Elapsed 00:00:03.41
