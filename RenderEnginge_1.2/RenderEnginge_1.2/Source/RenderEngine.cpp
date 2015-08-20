@@ -934,45 +934,48 @@ void RenderEngine::Render(){
 	gDeviceContext->PSSetSamplers(0, 1, &sampState1);
 	gDeviceContext->PSSetSamplers(1, 1, &sampState2);
 
-	gDeviceContext->PSSetShaderResources(1, 1, &shadowTexture);
-	gDeviceContext->PSSetShaderResources(2, 1, &ddsTex3);
-	for (int i = 0; i < renderObjects.size(); i++)
-	{
-		/*if (renderObjects[i]->GetActive() == true && renderObjects[i]->isTransparent == false){
-			renderObjects[i]->CalculateWorld();*/
+	//gDeviceContext->PSSetShaderResources(1, 1, &shadowTexture);
+	//gDeviceContext->PSSetShaderResources(2, 1, &ddsTex3);
+	//for (int i = 0; i < renderObjects.size(); i++)
+	//{
+	//	/*if (renderObjects[i]->GetActive() == true && renderObjects[i]->isTransparent == false){
+	//		renderObjects[i]->CalculateWorld();*/
 
-			if (i == 4){
-				gDeviceContext->PSSetShaderResources(2, 1, &normalMap);
-			}
-			tex = intArrayTex[renderObjects[i]->indexT];
-			gDeviceContext->PSSetShaderResources(0, 1, &RSWArray[tex]);
+	//		if (i == 4){
+	//			gDeviceContext->PSSetShaderResources(2, 1, &normalMap);
+	//		}
+	//		tex = intArrayTex[renderObjects[i]->indexT];
+	//		gDeviceContext->PSSetShaderResources(0, 1, &RSWArray[tex]);
 
-			gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->vertexBuffer, &vertexSize2, &offset2);
-			gDeviceContext->Draw(renderObjects[i]->nrElements * 3, 0);
-		
-	}
+	//		gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->vertexBuffer, &vertexSize2, &offset2);
+	//		gDeviceContext->Draw(renderObjects[i]->nrElements * 3, 0);
+	//	
+	//}
 	//           GLOW RENDER
 
 	//rendera alla objecten på glowmapen, endast ljusa färger kommer med på denna map!
-	//glow->DrawToGlowMap();
-	//for (int i = 0; i < renderObjects.size(); i++) //objekten i scenen
-	//{
+	
+	glow->DrawToGlowMap();
+	for (int i = 0; i < renderObjects.size(); i++) //objekten i scenen
+	{
 
-	//	XMStoreFloat4x4(&WorldMatrix1.WorldSpace, XMMatrixTranspose(renderObjects[i]->world));
-	//	gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
-	//	gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
+		XMStoreFloat4x4(&WorldMatrix1.WorldSpace, XMMatrixTranspose(renderObjects[i]->world));
+		gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
+		gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
 
-	//	tex = intArrayTex[renderObjects[i]->indexT];
-	//	gDeviceContext->PSSetShaderResources(0, 1, &RSWArray[tex]);
-	//	gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->vertexBuffer, &vertexSize2, &offset2);
+		tex = intArrayTex[renderObjects[i]->indexT];
+		gDeviceContext->PSSetShaderResources(0, 1, &RSWArray[tex]);
+		gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->vertexBuffer, &vertexSize2, &offset2);
 
-	//	gDeviceContext->Draw(renderObjects[i]->nrElements * 3, 0);
+		gDeviceContext->Draw(renderObjects[i]->nrElements * 3, 0);
 
-	//}
+	}
 	//kör om med blur här!!!!!!!!!
-	//eviceContext->UpdateSuaderResourceView); //inte tempShader sen
-	////gDeviceContext->IASetVertexBuffers(0, 1, &glow->planeVertexBuffer, &vertexPosTex, &offset2);
-	////gDeviceContext->Draw(4, 0);
+	gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
+	//BÅDA DESSA MÅSTE VARA MED!!!!
+	glow->ApplyBlurOnGlowHorizontal(horizontalBlurVertexShader, horizontalBlurPixelShader);
+	glow->ApplyBlurOnGlowVertical(verticalBlurVertexShader, verticalBlurPixelShader);
+
 	////*************************************************************************************************************
 
 	//for (int i = 0; i < transparentObjects.size(); i++){
