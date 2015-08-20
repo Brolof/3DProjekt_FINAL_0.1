@@ -5,7 +5,7 @@ void BINimporter::ImportBIN(ID3D11Device* gDevice, char* fileName){
 	fbxFile.open(fileName, ifstream::binary);
 
 	FileInfo fileInfo;
- fbxFile.read((char*)&fileInfo.nrMeshes, sizeof(int));
+	fbxFile.read((char*)&fileInfo.nrMeshes, sizeof(int));
 	fbxFile.read((char*)&fileInfo.nrLights, sizeof(int));
 	//fbxFile.read((char*)&fileInfo.nrMaterials, sizeof(int));
 
@@ -18,13 +18,6 @@ void BINimporter::ImportBIN(ID3D11Device* gDevice, char* fileName){
 		fbxFile.read((char*)meshInfo.name.c_str(), meshInfo.nrTex);
 		std::string qs = std::to_string(meshInfo.nrTex);
 		testTexNameArray.push_back(meshInfo.name.c_str());
-
-
-		if (i>335)
-		{
-			int bajs = 2;
-		}
-
 
 
 		fbxFile.read((char*)&meshInfo.meshType, sizeof(int));
@@ -104,6 +97,9 @@ void BINimporter::ImportBIN(ID3D11Device* gDevice, char* fileName){
 			fbxFile.read((char*)&temp3.x, sizeof(float));
 			fbxFile.read((char*)&temp3.y, sizeof(float));
 			fbxFile.read((char*)&temp3.z, sizeof(float));
+			//temp3.x = temp3.x*(-1);
+			//	temp3.y = temp3.y*(-1);
+			//	temp3.z = temp3.z*(-1);
 			verTangent.push_back(temp3);
 		}
 
@@ -113,34 +109,51 @@ void BINimporter::ImportBIN(ID3D11Device* gDevice, char* fileName){
 		Int4 tempVerIndex;
 		VertexData tempVertex;
 		FaceData tempFaceData;
+
+		//tangent stuff
+		std::vector<XMFLOAT3> tempTangent;
+		XMFLOAT3 tangent = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		float tcU1, tcV1, tcU2, tcV2;
+		///////////////**************new**************////////////////////
+
+		//Used to get vectors (sides) from the position of the verts
+		float vecX, vecY, vecZ;
+
+		//Two edges of our triangle
+		XMVECTOR edge1 = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+		XMVECTOR edge2 = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+
+		//BUILD FACE DATA
 		for (int y = 0; y < nrOfFaces; y++){
 			fbxFile.read((char*)&tempVerIndex.x, sizeof(int));
 			fbxFile.read((char*)&tempVerIndex.y, sizeof(int));
 			fbxFile.read((char*)&tempVerIndex.z, sizeof(int));
+			fbxFile.read((char*)&tempVerIndex.w, sizeof(int));
 
 			tempFaceData.indexPos[0] = tempVerIndex.x;
 			tempFaceData.indexUV[0] = tempVerIndex.y;
 			tempFaceData.indexNor[0] = tempVerIndex.z;
-
-			//tempFaceData.indexTangent[0] = tempVerIndex.w;
+			tempFaceData.indexTangent[0] = tempVerIndex.w;
 
 			fbxFile.read((char*)&tempVerIndex.x, sizeof(int));
 			fbxFile.read((char*)&tempVerIndex.y, sizeof(int));
 			fbxFile.read((char*)&tempVerIndex.z, sizeof(int));
-
+			fbxFile.read((char*)&tempVerIndex.w, sizeof(int));
 
 			tempFaceData.indexPos[1] = tempVerIndex.x;
 			tempFaceData.indexUV[1] = tempVerIndex.y;
 			tempFaceData.indexNor[1] = tempVerIndex.z;
+			tempFaceData.indexTangent[1] = tempVerIndex.w;
 
 			fbxFile.read((char*)&tempVerIndex.x, sizeof(int));
 			fbxFile.read((char*)&tempVerIndex.y, sizeof(int));
 			fbxFile.read((char*)&tempVerIndex.z, sizeof(int));
-
+			fbxFile.read((char*)&tempVerIndex.w, sizeof(int));
 
 			tempFaceData.indexPos[2] = tempVerIndex.x;
 			tempFaceData.indexUV[2] = tempVerIndex.y;
 			tempFaceData.indexNor[2] = tempVerIndex.z;
+			tempFaceData.indexTangent[2] = tempVerIndex.w;
 
 			faces.push_back(tempFaceData);
 
@@ -148,19 +161,19 @@ void BINimporter::ImportBIN(ID3D11Device* gDevice, char* fileName){
 			tempVertex.vertPos = verPos[faces[y].indexPos[2] - 1];
 			tempVertex.vertUV = verUV[faces[y].indexUV[2] - 1];
 			tempVertex.vertNor = verNor[faces[y].indexNor[2] - 1];
-			//tempVertex.vertTangent = verTangent[0];
+			tempVertex.vertTangent = verTangent[faces[y].indexTangent[2] - 1]; // verTangent[faces[y].indexTangent[2] - 1];
 			vertecies.push_back(tempVertex); //vertex 1 i triangeln
 
 			tempVertex.vertPos = verPos[faces[y].indexPos[1] - 1];
 			tempVertex.vertUV = verUV[faces[y].indexUV[1] - 1];
 			tempVertex.vertNor = verNor[faces[y].indexNor[1] - 1];
-			//tempVertex.vertTangent = verTangent[0];
+			tempVertex.vertTangent = verTangent[faces[y].indexTangent[1] - 1];// verTangent[faces[y].indexTangent[1] - 1];;
 			vertecies.push_back(tempVertex); //vertex 2 i triangeln
 
 			tempVertex.vertPos = verPos[faces[y].indexPos[0] - 1];
 			tempVertex.vertUV = verUV[faces[y].indexUV[0] - 1];
 			tempVertex.vertNor = verNor[faces[y].indexNor[0] - 1];
-			//tempVertex.vertTangent = verTangent[0];
+			tempVertex.vertTangent = verTangent[faces[y].indexTangent[0] - 1];// verTangent[faces[y].indexTangent[0] - 1];
 			vertecies.push_back(tempVertex); //vertex 3 i triangeln
 		}
 
@@ -169,16 +182,16 @@ void BINimporter::ImportBIN(ID3D11Device* gDevice, char* fileName){
 		bDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 		bDesc.Usage = D3D11_USAGE_DEFAULT;
 		bDesc.ByteWidth = (UINT)(sizeof(VertexData)*(vertecies.size()));
+		bDesc.CPUAccessFlags = 0;
+		bDesc.MiscFlags = 0;
+		bDesc.StructureByteStride = 0;
 
 		D3D11_SUBRESOURCE_DATA data;
 		data.pSysMem = vertecies.data();//<--------
+		data.SysMemPitch = 0;
+		data.SysMemSlicePitch = 0;
 		HRESULT VertexBufferChecker = gDevice->CreateBuffer(&bDesc, &data, &meshVertexBuffer);
 
-		//delete verPos;
-		//delete verNor;
-		//delete verUV;
-		//delete verTangent;
-		//delete faces;
 
 		verPos.clear();
 		verNor.clear();
@@ -229,7 +242,6 @@ void BINimporter::ImportBIN(ID3D11Device* gDevice, char* fileName){
 			bTemp.Extents = XMFLOAT3(extentX, extentY, extentZ);
 
 			GameObjects* tempP = new GameObjects(meshVertexBuffer, bTemp, false, bTemp.Center, true, false);
-
 			//TEST MED FRUSTUM CULLING
 			if (centerX < -1.2f){
 				tempP->SetStatic(true);
@@ -252,15 +264,6 @@ void BINimporter::ImportBIN(ID3D11Device* gDevice, char* fileName){
 			if (tempP->isTransparent == true)
 				transparentObj.push_back(tempP);
 		}
-		//delete meshVertexBuffer
-
-		//for (int i = 0; i < nrOfAnimations; i++){
-
-		//}
-
-		//for (int i = 0; i < nrOfBones; i++){
-
-		//}
 
 
 
@@ -313,7 +316,5 @@ void BINimporter::ImportBIN(ID3D11Device* gDevice, char* fileName){
 
 		}
 	}
-
-	int qbajs = 0;
 
 }
