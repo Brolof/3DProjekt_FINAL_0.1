@@ -164,7 +164,7 @@ float4 PS_main(VS_OUT input) : SV_TARGET
 				//	reflection = normalize(2 * lightIntensity * input.normal - float3(0, -10, 0));
 				reflection = normalize(2 * lightIntensity * input.normal.xyz - float3(0, -10, 0));
 				// Determine the amount of specular light based on the reflection vector, viewing direction, and specular power.
-				specular = pow(saturate(dot(reflection, toEye)), 10.0f);
+				specular = pow(saturate(dot(reflection, toEye)), 100.0f);
 
 			}
 			}
@@ -186,7 +186,7 @@ float4 PS_main(VS_OUT input) : SV_TARGET
 
 	// Combine the light and texture color.
 	color = color;// *textureColor;
-	color = saturate(color);
+	color = saturate(color) ;
 
 //NEW//
 
@@ -225,7 +225,7 @@ float4 PS_main(VS_OUT input) : SV_TARGET
 	}
 
 
-	color2 = textureColor*(Diffuse);
+	color2 = textureColor*(Diffuse)+Specular;
 
 //NEW//
 

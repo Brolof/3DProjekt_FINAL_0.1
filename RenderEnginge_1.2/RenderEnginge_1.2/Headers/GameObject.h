@@ -5,12 +5,12 @@
 struct MatInfo
 {
 	MatInfo()
-		: Emissive(0.0f, 0.0f, 0.0f, 1.0f),
-		Ambient(0.1f, 0.1f, 0.1f, 1.0f),
-		Diffuse(1.0f, 1.0f, 1.0f, 1.0f),
-		Specular(1.0f, 1.0f, 1.0f, 1.0f),
-		SpecPow(128.0f),
-		UseTexture(0){}
+	: Emissive(0.0f, 0.0f, 0.0f, 1.0f),
+	Ambient(0.1f, 0.1f, 0.1f, 1.0f),
+	Diffuse(1.0f, 1.0f, 1.0f, 1.0f),
+	Specular(1.0f, 1.0f, 1.0f, 1.0f),
+	SpecPow(128.0f),
+	UseTexture(0){}
 
 	MatInfo(XMFLOAT4 A, XMFLOAT4 D, XMFLOAT4 S, float SP)
 	{
@@ -40,6 +40,7 @@ struct MaterialProperties
 class GameObjects : public Entity{
 public:
 	BoundingBox bbox;
+	BoundingBox originalBBox;
 
 	bool isTransparent;
 
@@ -86,6 +87,7 @@ public:
 	GameObjects(ID3D11Buffer *b, BoundingBox bb, bool transparent, XMFLOAT3 center, bool isActive, bool isStatic) : Entity(center, isActive, isStatic){
 		this->vertexBuffer = b;
 		this->bbox = bb;
+		this->originalBBox = bb;
 		this->isTransparent = transparent;
 
 	}
@@ -93,8 +95,8 @@ public:
 	GameObjects(){}
 
 	~GameObjects(){
-		vertexBuffer->Release();
-		indexBuffer->Release();
+		//vertexBuffer->Release();
+		//indexBuffer->Release();
 	}
 
 	ID3D11Buffer* GetVertexBuffer(){
@@ -108,9 +110,17 @@ public:
 	ID3D11Buffer* GetIndexBuffer(){
 		return indexBuffer;
 	}
+
+	void Translate(float x, float y, float z){
+		BoundingBox b;
+		b = originalBBox;
+		pos = XMMatrixTranslation(x, y, z); //göra pos till en indentitets matris innan detta utförs?
+		b.Transform(b, pos);
+		bbox = b;
+	}
 	/**
 	XMFLOAT3 GetPosition(){
-		return position;
+	return position;
 	}**/
 
 	int nrElements;
@@ -123,8 +133,8 @@ public:
 
 
 protected:
-	
-	
+
+
 };
 
 
@@ -136,7 +146,7 @@ namespace MatPresets
 		XMFLOAT4(0.07568, 0.61424, 0.07568, 1.0),
 		XMFLOAT4(0.633, 0.727811, 0.633, 1.0),
 		float(76.8f));
-		
+
 	const MatInfo Copper(
 		XMFLOAT4(0.19125, 0.0735, 0.0225, 1.0),
 		XMFLOAT4(0.7038, 0.27048, 0.0828, 1.0),

@@ -72,6 +72,15 @@
     <ClCompile Include="Source\BINimporter.cpp">
       <Filter>Source Files\Main</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Glow.cpp">
+      <Filter>Source Files\Visual</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\QuadTree.cpp">
+      <Filter>Source Files\Visual</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Defered.cpp">
+      <Filter>Source Files\Visual</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="FX_HLSL\BackFaceGeometryShader.hlsl">
@@ -122,11 +131,11 @@
     <FxCompile Include="FX_HLSL\shadowVS.hlsl">
       <Filter>Resource Files\VertexShaders</Filter>
     </FxCompile>
-    <FxCompile Include="FX_HLSL\WireFrameVS.hlsl">
-      <Filter>Resource Files\VertexShaders</Filter>
-    </FxCompile>
     <FxCompile Include="FX_HLSL\LightHelper.fx">
       <Filter>Resource Files\PixelShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\WireFrameVS.hlsl">
+      <Filter>Resource Files\VertexShaders</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
@@ -170,6 +179,15 @@
       <Filter>Header Files\Main</Filter>
     </ClInclude>
     <ClInclude Include="Headers\ShadowMap.h">
+      <Filter>Header Files\Visual</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Glow.h">
+      <Filter>Header Files\Visual</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\QuadTree.h">
+      <Filter>Header Files\Visual</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Defered.h">
       <Filter>Header Files\Visual</Filter>
     </ClInclude>
   </ItemGroup>

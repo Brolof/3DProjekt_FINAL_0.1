@@ -45,10 +45,10 @@ std::wstring string2wString(const std::string& s){
 
 bool RenderEngine::Init(){
 
+	HRESULT inputtest;
+
 
 	CoInitialize(nullptr);
-
-	HRESULT inputtest;
 
 	if (!InitWindow()){
 		return false; //gick inte att skapa window
@@ -96,28 +96,34 @@ bool RenderEngine::Init(){
 
 	//Initialize Shaders and triangle data
 	Shaders();
+	BlendStates();
 	InitDirectInput(hInstance);
 	theCustomImporter.ImportBIN(gDevice, "Geometry/testFile.bin");
 	intArrayTex = theCustomImporter.GetindexArray();
+	//GET OBJECTS FROM IMPORTER
 	renderObjects = theCustomImporter.GetObjects();
+	transparentObjects = theCustomImporter.GetTransparentObjects();
 	TextureFunc();
 	
 	for (int i = 0; i < renderObjects.size(); i++) //skapar boundingboxar för objecten
 	{
 		renderObjects[i]->CreateBBOXVertexBuffer(gDevice);
 	}
-	
-	//ImportHeightmap("Textures/8x8Map.bmp", L"Textures/stone.dds", L"Textures/grass.dds", L"Textures/hippo.dds", L"Textures/splatmap.dds");
-	//ImportHeightmap("Textures/JäkligtFinHeightmap.bmp", L"Textures/stone.dds", L"Textures/grass.dds", L"Textures/hippo.dds", L"Textures/splatmap.dds");
 
+	quadTree = new QuadTree(renderObjects, 2, gDevice, XMFLOAT3(10, 10, 10));
+	glow = new Glow(gDevice, gDeviceContext, screen_Width, screen_Height, glowVertexShader, glowPixelShader, glowBlob);
+
+	
+	ImportHeightmap("Textures/JäkligtFinHeightmap.bmp", L"Textures/stone_texture1.dds", L"Textures/happy-smug-sloth.dds", L"Textures/sky_textureball.dds", L"Textures/splatmap_texture.png");
+
+	// CREATE INPUT OBJECT
 	inputtest = m_Input->Initialize(hInstance, hWindow, screen_Width, screen_Height);
+
 	if (inputtest==0) 
 	{
 		MessageBox(hWindow, "Could not initialize the input object.", "Error", MB_OK);
 		return false;
 	}
-
-	ListQuadTree(nrSplitsTree, XMFLOAT3(0, 0, 0), XMFLOAT3(10, 10, 10)); //den första boxen som skickas in är den största (världsboxen)
 
 	return true; //om båda funkade så returnera true (y)
 	
@@ -178,14 +184,6 @@ void RenderEngine::SetViewport()
 	vp.TopLeftX = 0;
 	vp.TopLeftY = 0;
 
-	
-
-	shadowVP.Width = (float)SHADOWMAP_WIDTH;
-	shadowVP.Height = (float)SHADOWMAP_HEIGHT;
-	shadowVP.MinDepth = SHADOWMAP_NEAR;
-	shadowVP.MaxDepth = SHADOWMAP_DEPTH;
-	shadowVP.TopLeftX = 0;
-	shadowVP.TopLeftY = 0;
 }
 
 // FPS COUNTER
@@ -228,85 +226,6 @@ void RenderEngine::fpscounter()
 // CREATE TEXTURES
 
 void RenderEngine::TextureFunc(){
-	//RENDER TO TEXTURE
-	D3D11_TEXTURE2D_DESC textureDesc;
-	D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
-	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
-	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc2;
-	D3D11_TEXTURE2D_DESC depthBufferDesc;
-	///////////////////////// Map's Texture
-	// Initialize the  texture description.
-	ZeroMemory(&textureDesc, sizeof(textureDesc));
-
-	// Setup the texture description.
-	// We will have our map be a square
-	// We will need to have this texture bound as a render target AND a shader resource
-	textureDesc.Width = SHADOWMAP_WIDTH;
-	textureDesc.Height = SHADOWMAP_HEIGHT;
-	textureDesc.MipLevels = 1;
-	textureDesc.ArraySize = 1;
-	textureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;// test later DXGI_FORMAT_R24G8_TYPELESS
-	textureDesc.SampleDesc.Count = 1;
-	textureDesc.Usage = D3D11_USAGE_DEFAULT;
-	textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-	textureDesc.CPUAccessFlags = 0;
-	textureDesc.MiscFlags = 0;
-
-	// Create the texture
-	gDevice->CreateTexture2D(&textureDesc, NULL, &renderTargetTextureMap);
-
-
-	/////////////////////// Render to texture's Render Target
-	// Setup the description of the render target view.
-	renderTargetViewDesc.Format = textureDesc.Format;
-	renderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
-	renderTargetViewDesc.Texture2D.MipSlice = 0;
-
-	// Create the render target view.
-	gDevice->CreateRenderTargetView(renderTargetTextureMap, &renderTargetViewDesc, &renderTargetViewMap);
-
-	/////////////////////// Map's Shader Resource View
-	// Setup the description of the shader resource view.
-	shaderResourceViewDesc.Format = textureDesc.Format;
-	shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
-	shaderResourceViewDesc.Texture2D.MipLevels = 1;
-
-	// Create the shader resource view.
-	gDevice->CreateShaderResourceView(renderTargetTextureMap, &shaderResourceViewDesc, &shaderResourceViewMap);
-
-
-	// Initialize the description of the depth buffer.
-	ZeroMemory(&depthBufferDesc, sizeof(depthBufferDesc));
-
-	// Set up the description of the depth buffer.
-	depthBufferDesc.Width = SHADOWMAP_WIDTH;
-	depthBufferDesc.Height = SHADOWMAP_HEIGHT;
-	depthBufferDesc.MipLevels = 1;
-	depthBufferDesc.ArraySize = 1;
-	depthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	depthBufferDesc.SampleDesc.Count = 1;
-	depthBufferDesc.SampleDesc.Quality = 0;
-	depthBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	depthBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-	depthBufferDesc.CPUAccessFlags = 0;
-	depthBufferDesc.MiscFlags = 0;
-
-	// Create the texture for the depth buffer using the filled out description.
-	gDevice->CreateTexture2D(&depthBufferDesc, NULL, &m_depthStencilBuffer);
-
-	// Initailze the depth stencil view description.
-	ZeroMemory(&depthStencilViewDesc2, sizeof(depthStencilViewDesc2));
-
-	// Set up the depth stencil view description.
-	depthStencilViewDesc2.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	depthStencilViewDesc2.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-	depthStencilViewDesc2.Texture2D.MipSlice = 0;
-
-	// Create the depth stencil view.
-	gDevice->CreateDepthStencilView(m_depthStencilBuffer, &depthStencilViewDesc2, &m_depthStencilView);
-	//RENDER TO TEXTURE
-
 
 	HRESULT texCheck;
 	texCheck = CreateWICTextureFromFile(gDevice, L"Textures//maleNormalmap2.jpg", nullptr, &normalMap);
@@ -400,9 +319,11 @@ void RenderEngine::Shaders(){
 	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
 	samplerDesc.MaxAnisotropy = 16;
 	gDevice->CreateSamplerState(&samplerDesc2, &sampState2);
+
 	//DEAFULT SHADERS
 	ID3DBlob* layoutblobl = nullptr;
-	//create vertex shader6
+
+	//create vertex shaders
 	ID3DBlob* pVS = nullptr;
 	ShaderTest = CompileShader(L"FX_HLSL/deafultVS.hlsl", "VS_main", "vs_5_0", &pVS);
 	KUK = gDevice->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &gVertexShader);
@@ -417,6 +338,22 @@ void RenderEngine::Shaders(){
 	ShaderTest = CompileShader(L"FX_HLSL/deafultTexVS.hlsl", "VS_main", "vs_5_0", &ddVS);
 	ShaderTest = gDevice->CreateVertexShader(ddVS->GetBufferPointer(), ddVS->GetBufferSize(), nullptr, &shader2DVS);
 
+	ID3DBlob* dVS2 = nullptr;
+	ShaderTest = CompileShader(L"FX_HLSL/RGBSplatmapVS.hlsl", "main", "vs_5_0", &dVS2);
+	ShaderTest = gDevice->CreateVertexShader(dVS2->GetBufferPointer(), dVS2->GetBufferSize(), nullptr, &splatMapVertexShader);
+
+	//GLOW SHADERS
+	ShaderTest = CompileShader(L"FX_HLSL/GlowVS.hlsl", "VS_main", "vs_5_0", &glowBlob);
+	ShaderTest = gDevice->CreateVertexShader(glowBlob->GetBufferPointer(), glowBlob->GetBufferSize(), nullptr, &glowVertexShader);
+
+	ID3DBlob* pSVS3 = nullptr;
+	ShaderTest = CompileShader(L"FX_HLSL/HorizontalBlurVS.hlsl", "VS_main", "vs_5_0", &pSVS3);
+	ShaderTest = gDevice->CreateVertexShader(pSVS3->GetBufferPointer(), pSVS3->GetBufferSize(), nullptr, &horizontalBlurVertexShader);
+
+	ID3DBlob* pSVS4 = nullptr;
+	ShaderTest = CompileShader(L"FX_HLSL/VerticalBlurVS.hlsl", "main", "vs_5_0", &pSVS4);
+	ShaderTest = gDevice->CreateVertexShader(pSVS4->GetBufferPointer(), pSVS4->GetBufferSize(), nullptr, &verticalBlurVertexShader);
+
 	//Create shadow vertexShader
 	ID3DBlob* pSVS = nullptr;
 	ShaderTest = CompileShader(L"FX_HLSL/shadowVS.hlsl", "VS_main", "vs_5_0", &pSVS);
@@ -424,11 +361,6 @@ void RenderEngine::Shaders(){
 
 	// INPUT LAYOUT MÅSTE VARA ANPASSAD TILL VERTEX SHADER
 	// INPUT LAYOUT MÅSTE VARA ANPASSAD TILL VERTEX SHADER
-	// INPUT LAYOUT MÅSTE VARA ANPASSAD TILL VERTEX SHADER
-	// INPUT LAYOUT MÅSTE VARA ANPASSAD TILL VERTEX SHADER
-	// INPUT LAYOUT MÅSTE VARA ANPASSAD TILL VERTEX SHADER
-	// INPUT LAYOUT MÅSTE VARA ANPASSAD TILL VERTEX SHADER
-
 
 	//create input layout (verified using vertex shader)
 	D3D11_INPUT_ELEMENT_DESC inputDesc[] = {
@@ -445,15 +377,24 @@ void RenderEngine::Shaders(){
 		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 
 	};
-	HRESULT ShaderTest2;
-	KUK = gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pSVS->GetBufferPointer(), pSVS->GetBufferSize(), &gVertexLayout);
-	KUK = gDevice->CreateInputLayout(inputDesc2, ARRAYSIZE(inputDesc2), ddVS->GetBufferPointer(), ddVS->GetBufferSize(), &gVertexLayout2);
+
+	D3D11_INPUT_ELEMENT_DESC inputDescSplatmap[] = {
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORDALPHA", 0, DXGI_FORMAT_R32G32_FLOAT, 20, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 28, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+	};
 
 	D3D11_INPUT_ELEMENT_DESC inputDescPosOnly[] = {
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
-	ShaderTest2 = gDevice->CreateInputLayout(inputDescPosOnly, ARRAYSIZE(inputDescPosOnly), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gWireFrameLayout);
-	
+
+	//CREATE  THE LAYOUTS
+	ShaderTest = gDevice->CreateInputLayout(inputDescPosOnly, ARRAYSIZE(inputDescPosOnly), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gWireFrameLayout);
+	ShaderTest = gDevice->CreateInputLayout(inputDescSplatmap, ARRAYSIZE(inputDescSplatmap), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gSplatmapLayout);
+	ShaderTest = gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pSVS->GetBufferPointer(), pSVS->GetBufferSize(), &gVertexLayout);
+	ShaderTest = gDevice->CreateInputLayout(inputDesc2, ARRAYSIZE(inputDesc2), ddVS->GetBufferPointer(), ddVS->GetBufferSize(), &gVertexLayout2);
+
 	//Create geometry shader
 	ID3DBlob* gGS = nullptr;
 	ShaderTest = CompileShader(L"FX_HLSL/BackFaceGShader.hlsl", "gs_main", "gs_5_0", &gGS);
@@ -463,7 +404,6 @@ void RenderEngine::Shaders(){
 	ID3DBlob* pPS = nullptr;
 	ShaderTest = CompileShader(L"FX_HLSL/deafultPS.hlsl", "PS_main", "ps_5_0", &pPS);
 	ShaderTest = gDevice->CreatePixelShader(pPS->GetBufferPointer(), pPS->GetBufferSize(), nullptr, &gPixelShader);
-	
 
 	//create hitpixel shader
 	ID3DBlob* pPSH = nullptr;
@@ -483,9 +423,9 @@ void RenderEngine::Shaders(){
 
 	////create height pixel shader
 	ID3DBlob* pPS2 = nullptr;
-	//ShaderTest = CompileShader(L"RGBSplatmapPS.hlsl", "main", "ps_5_0", &pPS2);
-	//ShaderTest = gDevice->CreatePixelShader(pPS2->GetBufferPointer(), pPS2->GetBufferSize(), nullptr, &splatMapPixelShader);
-	//
+	ShaderTest = CompileShader(L"FX_HLSL/RGBSplatmapPS.hlsl", "main", "ps_5_0", &pPS2);
+	ShaderTest = gDevice->CreatePixelShader(pPS2->GetBufferPointer(), pPS2->GetBufferSize(), nullptr, &splatMapPixelShader);
+	
 
 	////create shadow pixel shader
 	ID3DBlob* pSPS = nullptr;
@@ -494,9 +434,8 @@ void RenderEngine::Shaders(){
    	ShaderTest = gDevice->CreatePixelShader(pSPS->GetBufferPointer(), pSPS->GetBufferSize(), nullptr, &shadowPixelShader);
 	
 
-	//WIREFRAME	
-	//ShaderTest = gDevice->CreatePixelShader(pPS2->GetBufferPointer(), pPS2->GetBufferSize(), nullptr, &splatMapPixelShader);
 
+	//WIREFRAME	
 	ShaderTest = CompileShader(L"FX_HLSL/WireFrameVS.hlsl", "main", "vs_5_0", &pVS);
 	ShaderTest = gDevice->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &gWireFrameVertexShader);
 
@@ -506,6 +445,15 @@ void RenderEngine::Shaders(){
 	ShaderTest = CompileShader(L"FX_HLSL/WireFramePSContainsTest.hlsl", "main", "ps_5_0", &pPS2);
 	ShaderTest = gDevice->CreatePixelShader(pPS2->GetBufferPointer(), pPS2->GetBufferSize(), nullptr, &gWireFramePixelShaderCONTAINTEST);
 
+	ShaderTest = CompileShader(L"FX_HLSL/GlowPS.hlsl", "main", "ps_5_0", &pPS2);
+	ShaderTest = gDevice->CreatePixelShader(pPS2->GetBufferPointer(), pPS2->GetBufferSize(), nullptr, &glowPixelShader);
+
+	ShaderTest = CompileShader(L"FX_HLSL/HorizontalBlurPS.hlsl", "main", "ps_5_0", &pPS2);
+	ShaderTest = gDevice->CreatePixelShader(pPS2->GetBufferPointer(), pPS2->GetBufferSize(), nullptr, &horizontalBlurPixelShader);
+
+	ShaderTest = CompileShader(L"FX_HLSL/VerticalBlurPS.hlsl", "main", "ps_5_0", &pPS2);
+	ShaderTest = gDevice->CreatePixelShader(pPS2->GetBufferPointer(), pPS2->GetBufferSize(), nullptr, &verticalBlurPixelShader);
+
 	gGS->Release();
 	pPSH->Release();
 	pPS->Release();
@@ -514,6 +462,8 @@ void RenderEngine::Shaders(){
 	pSVS->Release();
 	ddPS->Release();
 	ddVS->Release();
+	pSVS3->Release();
+
 }
 
 // CREATE BUFFERS AND TEMP PLANE
@@ -573,6 +523,14 @@ void RenderEngine::CreatePlaneDataAndBuffers(){
 	transformbuffer2.Usage = D3D11_USAGE_DEFAULT;
 	transformbuffer2.ByteWidth = sizeof(World2);
 	BufferTest = gDevice->CreateBuffer(&transformbuffer2, NULL, &gWorld2);
+
+	//heightmap stuff, till splatmap
+	D3D11_BUFFER_DESC heightmapBuffer;
+	memset(&heightmapBuffer, 0, sizeof(heightmapBuffer));
+	heightmapBuffer.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	heightmapBuffer.Usage = D3D11_USAGE_DEFAULT;
+	heightmapBuffer.ByteWidth = sizeof(heightmapInfo);
+	BufferTest = gDevice->CreateBuffer(&heightmapBuffer, NULL, &heightmapInfoConstant);
 
 	
 	// Rotatation And transform World Buffer
@@ -868,34 +826,8 @@ void RenderEngine::Render(){
 	ViewP.pad = 0;
 	fpsCamLook = XMMatrixLookAtLH(camPosition, camTarget, camUp);
 
-	
-
 	//Update cam
 	fpsCam.UpdateViewMatrix();
-	//WORLD
-	// Sets camera pos and angle
-	CamView = fpsCamLook;
-	CamProjection = fpsCam.Proj();
-	XMMATRIX CamViewProjection = fpsCam.ViewProj();
-	XMMATRIX identityM = XMMatrixIdentity();
-	XMMATRIX WorldInv = XMMatrixInverse(nullptr, identityM);
-	XMMATRIX WorldGun = identityM;
-
-	//Matrix2 computation
-
-	camRotationMatrix2 = XMMatrixRotationRollPitchYaw(0, 0, 0);
-
-	camTarget2 = XMVector3TransformCoord(DefaultForward2, camRotationMatrix2);
-	camTarget2 = XMVector3Normalize(camTarget2);
-
-	camRight2 = XMVector3TransformCoord(DefaultRight2, camRotationMatrix2);
-	camForward2 = XMVector3TransformCoord(DefaultForward2, camRotationMatrix2);
-	camUp2 = XMVector3Cross(camForward2, camRight2);
-
-	camTarget2 = Vector4(0.0f, 0.0f, 1.0f, 0.0f);// camPosition2 + camTarget2;
-
-	fpsCamLook2 = XMMatrixLookAtLH(camPosition2, camTarget2, camUp2);
-
 
 	// KEYBOARD AND MOUSE STUFF
 	DIMOUSESTATE mouseCurrState;
@@ -938,6 +870,14 @@ void RenderEngine::Render(){
 	shadowMap->DrawDepthMap(renderObjects, gDeviceContext);
 	shadowTexture = shadowMap->GetSRV();
 
+
+	//SET MATRIXES FOR NORMAL RENDER
+	CamView = fpsCamLook;
+	CamProjection = fpsCam.Proj();
+
+
+	quadTree->StartFrustumTest(CamProjection, CamView);
+
 	//NORMAL RENDER PASS FROM EYE POS 
 	gDeviceContext->OMSetRenderTargets(1, &gBackRufferRenderTargetView, gDepthStencilView);
 	gDeviceContext->RSSetViewports(1, &vp);
@@ -956,6 +896,12 @@ void RenderEngine::Render(){
 
 	gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
 	gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
+
+	//wireframe constantbuffer or ?????????????????
+	XMStoreFloat4x4(&WorldMatrixWF.View, XMMatrixTranspose(CamView));
+	XMStoreFloat4x4(&WorldMatrixWF.Projection, XMMatrixTranspose(CamProjection));
+	XMStoreFloat4x4(&WorldMatrixWF.WorldSpace, XMMatrixTranspose(identityM));
+
 
 	//LIGHT MATRIXS
 	XMStoreFloat4x4(&LightMatrix1.lightView, XMMatrixTranspose(shadowMap->GetLightView()));
@@ -992,22 +938,138 @@ void RenderEngine::Render(){
 	gDeviceContext->PSSetShaderResources(2, 1, &ddsTex3);
 	for (int i = 0; i < renderObjects.size(); i++)
 	{
-		if (i == 4){
-			gDeviceContext->PSSetShaderResources(2, 1, &normalMap);
-		}
-		tex = intArrayTex[renderObjects[i]->indexT];
-		gDeviceContext->PSSetShaderResources(0, 1, &RSWArray[tex]);
+		/*if (renderObjects[i]->GetActive() == true && renderObjects[i]->isTransparent == false){
+			renderObjects[i]->CalculateWorld();*/
 
-		gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->vertexBuffer, &vertexSize2, &offset2);
-		gDeviceContext->Draw(renderObjects[i]->nrElements * 3, 0);
+			if (i == 4){
+				gDeviceContext->PSSetShaderResources(2, 1, &normalMap);
+			}
+			tex = intArrayTex[renderObjects[i]->indexT];
+			gDeviceContext->PSSetShaderResources(0, 1, &RSWArray[tex]);
+
+			gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->vertexBuffer, &vertexSize2, &offset2);
+			gDeviceContext->Draw(renderObjects[i]->nrElements * 3, 0);
+		
 	}
+	//           GLOW RENDER
+
+	//rendera alla objecten på glowmapen, endast ljusa färger kommer med på denna map!
+	//glow->DrawToGlowMap();
+	//for (int i = 0; i < renderObjects.size(); i++) //objekten i scenen
+	//{
+
+	//	XMStoreFloat4x4(&WorldMatrix1.WorldSpace, XMMatrixTranspose(renderObjects[i]->world));
+	//	gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
+	//	gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
+
+	//	tex = intArrayTex[renderObjects[i]->indexT];
+	//	gDeviceContext->PSSetShaderResources(0, 1, &RSWArray[tex]);
+	//	gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->vertexBuffer, &vertexSize2, &offset2);
+
+	//	gDeviceContext->Draw(renderObjects[i]->nrElements * 3, 0);
+
+	//}
+	//kör om med blur här!!!!!!!!!
+	//geviceContext->UpdateSuaderResourceView); //inte tempShader sen
+	////gDeviceContext->IASetVertexBuffers(0, 1, &glow->planeVertexBuffer, &vertexPosTex, &offset2);
+	////gDeviceContext->Draw(4, 0);
+	////*************************************************************************************************************
+
+	//for (int i = 0; i < transparentObjects.size(); i++){
+	//	if (transparentObjects[i]->GetActive() == true){
+
+	//		XMStoreFloat4x4(&WorldMatrix1.WorldSpace, XMMatrixTranspose(transparentObjects[i]->world));
+	//		gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
+	//		gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
+
+	//		tex = intArrayTex[transparentObjects[i]->indexT];
+	//		gDeviceContext->PSSetShaderResources(0, 1, &RSWArray[tex]);
+	//		gDeviceContext->IASetVertexBuffers(0, 1, &transparentObjects[i]->vertexBuffer, &vertexSize2, &offset2);
+
+	//		gDeviceContext->Draw(transparentObjects[i]->nrElements * 3, 0);
+	//	}
+	//}
+
+	//gDeviceContext->OMSetBlendState(0, 0, 0xffffffff); //ingen blending, denna ändras sen i slutet till transparenta objekt (y)
+
+	//Render Heightmap´s
+	//for (int i = 0; i < heightMapObjects.size(); i++)
+	//{
+	//	UINT32 vertexSize = sizeof(float)* 10;
+	//	UINT32 offset = 0;
+
+	//	XMStoreFloat4x4(&WorldMatrixWF.WorldSpace, XMMatrixTranspose(identityM));
+	//	gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
+	//	gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
+
+	//	gDeviceContext->UpdateSubresource(heightmapInfoConstant, 0, NULL, &heightMapObjects[i]->HMInfoConstant, 0, 0);
+	//	gDeviceContext->PSSetConstantBuffers(3, 1, &heightmapInfoConstant);
+
+
+	//	gDeviceContext->IASetInputLayout(gSplatmapLayout);
+	//	gDeviceContext->IASetVertexBuffers(0, 1, &heightMapObjects[i]->gVertexBuffer, &vertexSize, &offset);
+	//	gDeviceContext->IASetIndexBuffer(heightMapObjects[i]->gIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	//	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	//	gDeviceContext->VSSetShader(splatMapVertexShader, nullptr, 0);
+	//	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
+	//	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
+	//	gDeviceContext->GSSetShader(nullptr, nullptr, 0);
+	//	//gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
+	//	gDeviceContext->PSSetShader(splatMapPixelShader, nullptr, 0);
+	//	gDeviceContext->PSSetSamplers(8, 1, &sampState2); //clamp 
+	//	gDeviceContext->PSSetSamplers(9, 1, &sampState1); //wrap samp
+	//	//Bind texture to object
+	//	//gDeviceContext->PSSetShaderResources(0, 1, &ddsTex1);
+	//	gDeviceContext->PSSetShaderResources(0, 1, &heightMapObjects[i]->tex1shaderResourceView);
+	//	gDeviceContext->PSSetShaderResources(1, 1, &heightMapObjects[i]->tex2shaderResourceView);
+	//	gDeviceContext->PSSetShaderResources(2, 1, &heightMapObjects[i]->tex3shaderResourceView);
+	//	gDeviceContext->PSSetShaderResources(3, 1, &heightMapObjects[i]->splatshaderResourceView);
+
+	//	//gDeviceContext->PSSetShaderResources(0, 1, &var.splatshaderResourceView);
+
+	//	gDeviceContext->DrawIndexed((heightMapObjects[i]->nmrElement), 0, 0);
+	//}
+
+	////WIREFRAME!!!
+	//gDeviceContext->PSSetSamplers(8, 1, &sampState2);
+	//gDeviceContext->VSSetShader(gWireFrameVertexShader, nullptr, 0);
+	//gDeviceContext->PSSetShader(gWireFramePixelShader, nullptr, 0);
+	//gDeviceContext->IASetInputLayout(gWireFrameLayout);
+	//gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
+	//UINT32 vertexWireFrameSize = sizeof(float)* 3;
+
+	//for (int i = 0; i < renderObjects.size(); i++)
+	//{
+	//	XMStoreFloat4x4(&WorldMatrixWF.WorldSpace, XMMatrixTranspose(renderObjects[i]->world)); //använder wireframe matrisen istället här
+	//	gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrixWF, 0, 0);
+	//	gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
+
+	//	gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->boundingBoxVertexBuffer, &vertexWireFrameSize, &offset2);
+
+	//	gDeviceContext->Draw(16, 0);
+	//}
+
+
+	////quadträdet
+	//XMStoreFloat4x4(&WorldMatrixWF.WorldSpace, XMMatrixTranspose(identityM)); //använder wireframe matrisen istället här
+	//gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrixWF, 0, 0);
+	//gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
+
+	//for (int i = 0; i < quadTree->quadTreeBranches.size(); i++)
+	//{
+	//	if (quadTree->quadTreeBranches[i]->isInFrustum == true){
+	//		gDeviceContext->IASetVertexBuffers(0, 1, &quadTree->quadTreeBranches[i]->boxBuffer, &vertexWireFrameSize, &offset2);
+	//		gDeviceContext->Draw(16, 0);
+	//	}
+	//}
 
 	//RENDER TEST PLANES
 	TurnZBufferOff();
 	UINT32 vertexSize = sizeof(float)* 8;
 	UINT32 offset = 0;
-	WorldGun = XMMatrixScaling(0.25f, 0.25f, 0.0f) * XMMatrixTranslation(0.75f, -0.75f, 0.0f);
-	XMStoreFloat4x4(&WorldMatrix2.WVP, XMMatrixTranspose(WorldGun));
+	quadMatrix = XMMatrixScaling(0.25f, 0.25f, 0.0f) * XMMatrixTranslation(0.75f, -0.75f, 0.0f);
+	XMStoreFloat4x4(&WorldMatrix2.WVP, XMMatrixTranspose(quadMatrix));
 	gDeviceContext->UpdateSubresource(gWorld2, 0, NULL, &WorldMatrix2, 0, 0);
 	gDeviceContext->VSSetConstantBuffers(3, 1, &gWorld2);
 
@@ -1025,8 +1087,8 @@ void RenderEngine::Render(){
 
 	gDeviceContext->Draw(4, 0);
 
-	WorldGun = XMMatrixScaling(0.25f, 0.25f, 0.0f) * XMMatrixTranslation(0.75f, -0.25f, 0.0f);
-	XMStoreFloat4x4(&WorldMatrix2.WVP, XMMatrixTranspose(WorldGun));
+	quadMatrix = XMMatrixScaling(0.25f, 0.25f, 0.0f) * XMMatrixTranslation(0.75f, -0.25f, 0.0f);
+	XMStoreFloat4x4(&WorldMatrix2.WVP, XMMatrixTranspose(quadMatrix));
 	gDeviceContext->UpdateSubresource(gWorld2, 0, NULL, &WorldMatrix2, 0, 0);
 	gDeviceContext->VSSetConstantBuffers(3, 1, &gWorld2);
 
@@ -1049,7 +1111,6 @@ void RenderEngine::Render(){
 	gSwapChain->Present(0, 0); 
 }
 
-//SubRender that renders only, calls twice when shadows are rendered
 
 // UPDATES
 
@@ -1077,6 +1138,14 @@ void RenderEngine::Release(){
 	gDeviceContext->Release();
 	NoBcull->Release();
 	PrimaryLightBuffer->Release();
+	delete quadTree;
+	quadTree = NULL;
+
+	delete glow;
+	glow = NULL;
+	counterCWCullmode->Release();
+	transparency->Release();
+	gDevice->Release();
 	
 }
 
@@ -1117,29 +1186,30 @@ void RenderEngine::ImportObj(char* geometryFileName, char* materialFileName, ID3
 
 //IMPORT HEIGHTMAPS
 
-//void RenderEngine::ImportHeightmap(char* HeightMapFileName, wstring tex1File, wstring tex2File, wstring tex3File, wstring texSplatFile){
-//	HeightMap ImportedHM(gDevice, gDeviceContext);
-//
-//	ImportedHM.LoadHeightMap(HeightMapFileName);
-//	ImportedHM.LoadSplatMap(tex1File, tex2File, tex3File, texSplatFile);
-//
-//	HeightMapObject cHeightMap;
-//
-//	cHeightMap.gIndexBuffer = ImportedHM.GetIndexBuffer();
-//	cHeightMap.gVertexBuffer = ImportedHM.GetVertexBuffer();
-//	cHeightMap.nmrElement = ImportedHM.GetNrElements();
-//	cHeightMap.gridSize = ImportedHM.GetGridSize();
-//	cHeightMap.vertexHeights = ImportedHM.GetHeights();
-//	cHeightMap.tex1shaderResourceView = ImportedHM.GetTex1();
-//	cHeightMap.tex2shaderResourceView = ImportedHM.GetTex2();
-//	cHeightMap.tex3shaderResourceView = ImportedHM.GetTex3();
-//	cHeightMap.splatshaderResourceView = ImportedHM.GetSplatTex();
-//
-//	HeightMapObjects.push_back(cHeightMap);
-//
-//
-//
-//}
+void RenderEngine::ImportHeightmap(char* HeightMapFileName, wstring tex1File, wstring tex2File, wstring tex3File, wstring texSplatFile){
+	HeightMap ImportedHM(gDevice, gDeviceContext);
+
+	ImportedHM.LoadHeightMap(HeightMapFileName);
+	ImportedHM.LoadSplatMap(tex1File, tex2File, tex3File, texSplatFile);
+
+	HeightMapObject *cHeightMap = new HeightMapObject;
+
+	cHeightMap->gIndexBuffer = ImportedHM.GetIndexBuffer();
+	cHeightMap->gVertexBuffer = ImportedHM.GetVertexBuffer();
+	cHeightMap->nmrElement = ImportedHM.GetNrElements();
+	//cHeightMap->gridSize = ImportedHM.GetGridSize();
+	//cHeightMap->vertexHeights = ImportedHM.GetHeights();
+	cHeightMap->HMInfoConstant.heightElements = ImportedHM.heightElements;
+	cHeightMap->tex1shaderResourceView = ImportedHM.GetTex1();
+	cHeightMap->tex2shaderResourceView = ImportedHM.GetTex2();
+	cHeightMap->tex3shaderResourceView = ImportedHM.GetTex3();
+	cHeightMap->splatshaderResourceView = ImportedHM.GetSplatTex();
+
+	heightMapObjects.push_back(cHeightMap);
+
+
+
+}
 
 //PICKING FUNCTIONS
 
@@ -1294,7 +1364,6 @@ float RenderEngine::pick(Vector4 pickRayInWorldSpacePos, Vector4 pickRayInWorldS
 }
 
 //Input handler for Mouse and Keyboard
-
 bool RenderEngine::InitDirectInput(HINSTANCE hInstance)
 {
 	HRESULT hr;
@@ -1322,7 +1391,6 @@ bool RenderEngine::InitDirectInput(HINSTANCE hInstance)
 }
 
 //INPUT HANDLER
-
 void RenderEngine::InputHandler()
 {
 	//Keyboard and mouse handlers
@@ -1417,6 +1485,7 @@ void RenderEngine::InputHandler()
 	}
 	if (keyboardState[DIK_F5] & 0x80)
 	{
+		
 		optionStruct.option5 = 1;
 	}
 	if (keyboardState[DIK_F6] & 0x80)
@@ -1429,6 +1498,7 @@ void RenderEngine::InputHandler()
 	}
 	if (keyboardState[DIK_F8] & 0x80)
 	{
+		camPosition = Vector4(0, 15, -15, 1);
 		optionStruct.option8 = 1;
 	}
 
@@ -1436,90 +1506,54 @@ void RenderEngine::InputHandler()
 
 }
 
-// Quad Tree
-
-void RenderEngine::ListQuadTree(int nrSplits, XMFLOAT3 center, XMFLOAT3 extents){
-
-	BoundingBox b(center, extents);
-
-	QuadTreeInstance lB;
-	lB.SetValues(b, gDevice);
-	if (nrSplits <= 0) //om det är längst ner i trädet så innebär det att denne ska innehålla gameobjects (förutsatt att det finns några där :- ))
-		lB.TestContains(gameObjects); //testa endast mot de längst ner ifall det finns några gameobjects i dem
-
-	quadTree.push_back(lB);
-	//quads.push_back(lB);
-
-	BoundingBox children[4];
-
-	if (nrSplits > 0){
-		//CENTER ÄR JU 0!!!? FIXA DETTA
-		children[0].Center = XMFLOAT3(center.x + -extents.x * 0.5f, center.y, center.z + -extents.z * 0.5);
-		children[1].Center = XMFLOAT3(center.x + extents.x * 0.5f, center.y, center.z + -extents.z * 0.5f);
-		children[2].Center = XMFLOAT3(center.x + -extents.x * 0.5f, center.y, center.z + extents.z *0.5f);
-		children[3].Center = XMFLOAT3(center.x + extents.x * 0.5f, center.y, center.z + extents.z * 0.5f);
-
-		children[0].Extents = XMFLOAT3(extents.x / 2, extents.y, extents.z / 2);
-		children[1].Extents = XMFLOAT3(extents.x / 2, extents.y, extents.z / 2);
-		children[2].Extents = XMFLOAT3(extents.x / 2, extents.y, extents.z / 2);
-		children[3].Extents = XMFLOAT3(extents.x / 2, extents.y, extents.z / 2);
-	}
-
-	int newNrSplits = nrSplits - 1;
-	if (nrSplits > 0){
-		for each (BoundingBox child in children)
-		{
-			ListQuadTree(newNrSplits, child.Center, child.Extents);
-		}
-	}
-}
-
-//Check Frustum
-
-void RenderEngine::CheckFrustumContains(int nrSplits, int index){
-	ContainmentType test = frustum.Contains(quadTree[index].box);
-	if (test == 2 || test == 1){ //hit på boxen, contains ELLER intersects
-		if (nrSplits > 0){
-			int newNrSplits = nrSplits - 1;
-			for (int i = 0; i < 4; i++){
-				index += 1;
-				CheckFrustumContains(newNrSplits, index);
-			}
-		}
-		else{ //botten på trädet
-			int objectIndex = 0;
-			for each (GameObject var in quadTree[index].gameObjectsToRender)//vad skall göras ifall den ena boxen säger att objektet ska renderas men den andra inte?
-			{
-				test = frustum.Contains(var.bbox);
-				if (test == 2 || test == 1){ //hit på objektets box
-					//var.render = true; //RENDERA!
-					//var.visibleThisFrame = true; //ÄR "var" BARA EN TEMPORÄR VARIABEL?????????
-					//quadTree[index].gameObjectsToRender[objectIndex].render = true;
-					//quadTree[index].gameObjectsToRender[objectIndex].visibleThisFrame = true;
-					gameObjects[var.gameObjectIndex].visibleThisFrame = true;
-					gameObjects[var.gameObjectIndex].render = true;
-				}
-				else if (gameObjects[var.gameObjectIndex].visibleThisFrame == false){ //om ingen annan box har sagt att denna ska renderas denna framen
-					//var.render = false; //LIGGER INTE I FRUSTUMET
-					gameObjects[var.gameObjectIndex].render = false;
-					//quadTree[index].gameObjectsToRender[objectIndex].render = false;
-				}
-				objectIndex++;
-			}
-		}
-	}
-}
-
-
+//ENABLE DEPTH
 void RenderEngine::TurnZBufferOn()
 {
 	gDeviceContext->OMSetDepthStencilState(m_depthStencilState, 1);
 	return;
 }
 
-
+//DISABLE DEPTH
 void RenderEngine::TurnZBufferOff()
 {
 	gDeviceContext->OMSetDepthStencilState(m_depthDisabledStencilState, 1);
 	return;
+}
+
+//BLENDSTATES FOR TRANSPARENCY
+void RenderEngine::BlendStates(){
+	HRESULT hr;
+
+	D3D11_BLEND_DESC bDesc;
+	ZeroMemory(&bDesc, sizeof(bDesc));
+
+	D3D11_RENDER_TARGET_BLEND_DESC rtbDesc;
+	ZeroMemory(&rtbDesc, sizeof(rtbDesc));
+
+	rtbDesc.BlendEnable = true;
+	rtbDesc.SrcBlend = D3D11_BLEND_SRC_COLOR;
+	rtbDesc.DestBlend = D3D11_BLEND_BLEND_FACTOR;
+	rtbDesc.BlendOp = D3D11_BLEND_OP_ADD;
+	rtbDesc.SrcBlendAlpha = D3D11_BLEND_ONE;
+	rtbDesc.DestBlendAlpha = D3D11_BLEND_ZERO;
+	rtbDesc.BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	rtbDesc.RenderTargetWriteMask = D3D10_COLOR_WRITE_ENABLE_ALL;
+
+	bDesc.AlphaToCoverageEnable = false;
+	bDesc.RenderTarget[0] = rtbDesc;
+
+	gDevice->CreateBlendState(&bDesc, &transparency);
+
+	//cull counter/clockwise
+	D3D11_RASTERIZER_DESC cmdesc;
+	ZeroMemory(&cmdesc, sizeof(D3D11_RASTERIZER_DESC));
+
+	cmdesc.FillMode = D3D11_FILL_SOLID;
+	cmdesc.CullMode = D3D11_CULL_BACK;
+
+	cmdesc.FrontCounterClockwise = true;
+	hr = gDevice->CreateRasterizerState(&cmdesc, &counterCWCullmode);
+
+	cmdesc.FrontCounterClockwise = false;
+	hr = gDevice->CreateRasterizerState(&cmdesc, &CWCullmode);
 }
