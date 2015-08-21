@@ -936,21 +936,22 @@ void RenderEngine::Render(){
 
 	gDeviceContext->PSSetShaderResources(1, 1, &shadowTexture);
 	gDeviceContext->PSSetShaderResources(2, 1, &ddsTex3);
-	//for (int i = 0; i < renderObjects.size(); i++)
-	//{
-	//	/*if (renderObjects[i]->GetActive() == true && renderObjects[i]->isTransparent == false){
-	//		renderObjects[i]->CalculateWorld();*/
 
-	//		if (i == 4){
-	//			gDeviceContext->PSSetShaderResources(2, 1, &normalMap);
-	//		}
-	//		tex = intArrayTex[renderObjects[i]->indexT];
-	//		gDeviceContext->PSSetShaderResources(0, 1, &RSWArray[tex]);
+	for (int i = 0; i < renderObjects.size(); i++)
+	{
+		/*if (renderObjects[i]->GetActive() == true && renderObjects[i]->isTransparent == false){
+			renderObjects[i]->CalculateWorld();*/
 
-	//		gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->vertexBuffer, &vertexSize2, &offset2);
-	//		gDeviceContext->Draw(renderObjects[i]->nrElements * 3, 0);
-	//	
-	//}
+			if (i == 4){
+				gDeviceContext->PSSetShaderResources(2, 1, &normalMap);
+			}
+			tex = intArrayTex[renderObjects[i]->indexT];
+			gDeviceContext->PSSetShaderResources(0, 1, &RSWArray[tex]);
+
+			gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->vertexBuffer, &vertexSize2, &offset2);
+			gDeviceContext->Draw(renderObjects[i]->nrElements * 3, 0);
+		
+	}
 	//
 	//float clearColor[] = { 0.0f, 0.3f, 0.7f, 1.0f };
 	UINT32 vertexPosTex = sizeof(float)* 5;
@@ -983,12 +984,11 @@ void RenderEngine::Render(){
 	glow->ApplyBlurOnGlowVertical(verticalBlurVertexShader, verticalBlurPixelShader);
 	
 
-
 	gDeviceContext->RSSetViewports(1, &vp);
 	//Set BackGround Color
 	//float clearColor[] = { 0, 0.3, 0.7f, 1.0f };
-	gDeviceContext->ClearRenderTargetView(gBackRufferRenderTargetView, clearColor);
-	gDeviceContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+	//gDeviceContext->ClearRenderTargetView(gBackRufferRenderTargetView, clearColor);
+	//gDeviceContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 	gDeviceContext->OMSetRenderTargets(1, &gBackRufferRenderTargetView, gDepthStencilView);
 
 	tex = 0;
