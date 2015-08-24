@@ -87,7 +87,7 @@ bool RenderEngine::Init(){
 	//Set Camera values
 	//fpsCam.SetPosition(0.0f, 0.4f, -6.0f);
 	camPosition = Vector4(0.0f, 10.70f, 0.0f, 0.0f);
-	fpsCam.SetLens(0.25f*3.14f, screen_Width / screen_Height, 1.0f, 100.0f);
+	fpsCam.SetLens(0.25f*3.14f, screen_Width / screen_Height, 1.0f, 200.0f);
 
 	//Shadow map init
 	shadowMap = new ShadowMap;
@@ -110,11 +110,12 @@ bool RenderEngine::Init(){
 		renderObjects[i]->CreateBBOXVertexBuffer(gDevice);
 	}
 
-	quadTree = new QuadTree(renderObjects, 2, gDevice, XMFLOAT3(10, 10, 10));
+	quadTree = new QuadTree(renderObjects, 2, gDevice, XMFLOAT3(30, 30, 30));
 	glow = new Glow(gDevice, gDeviceContext, screen_Width, screen_Height, glowVertexShader, glowPixelShader, glowBlob);
 
 	
-	ImportHeightmap("Textures/JäkligtFinHeightmap.bmp", L"Textures/stone_texture1.dds", L"Textures/happy-smug-sloth.dds", L"Textures/sky_textureball.dds", L"Textures/splatmap_texture.png");
+	//ImportHeightmap("Textures/JäkligtFinHeightmap.bmp", L"Textures/stone_texture1.dds", L"Textures/happy-smug-sloth.dds", L"Textures/sky_textureball.dds", L"Textures/splatmap_texture.png");
+	ImportHeightmap("Textures/JäkligtFinHeightmap2.bmp", L"Textures/stone_texture1.dds", L"Textures/happy-smug-sloth.dds", L"Textures/sky_textureball.dds", L"Textures/splatmap_texture.png");
 
 	// CREATE INPUT OBJECT
 	inputtest = m_Input->Initialize(hInstance, hWindow, screen_Width, screen_Height);
@@ -941,7 +942,7 @@ void RenderEngine::Render(){
 	{
 		/*if (renderObjects[i]->GetActive() == true && renderObjects[i]->isTransparent == false){
 			renderObjects[i]->CalculateWorld();*/
-
+		if (renderObjects[i]->GetActive() == true){
 			if (i == 4){
 				gDeviceContext->PSSetShaderResources(2, 1, &normalMap);
 			}
@@ -950,165 +951,13 @@ void RenderEngine::Render(){
 
 			gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->vertexBuffer, &vertexSize2, &offset2);
 			gDeviceContext->Draw(renderObjects[i]->nrElements * 3, 0);
-		
+		}
 	}
-	//
-	//float clearColor[] = { 0.0f, 0.3f, 0.7f, 1.0f };
-	UINT32 vertexPosTex = sizeof(float)* 5;
-	//GLOWTEST!!!!!!!!!
-	tex = 0;
-
-	gDeviceContext->PSSetSamplers(0, 1, &sampState1);
-	gDeviceContext->PSSetSamplers(1, 1, &sampState2);
-
-	//rendera alla objecten på glowmapen, endast ljusa färger kommer med på denna map!
-	glow->DrawToGlowMap();
-	for (int i = 0; i < renderObjects.size(); i++) //objekten i scenen
-	{
-		renderObjects[i]->CalculateWorld();
-		XMStoreFloat4x4(&WorldMatrix1.WorldSpace, XMMatrixTranspose(renderObjects[i]->world));
-		gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
-		gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
-
-		tex = intArrayTex[renderObjects[i]->indexT];
-		gDeviceContext->PSSetShaderResources(0, 1, &RSWArray[tex]);
-		gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->vertexBuffer, &vertexSize2, &offset2);
-
-		gDeviceContext->Draw(renderObjects[i]->nrElements * 3, 0);
-
-	}
-	//kör om med blur här!!!!!!!!!
-	gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
-	//BÅDA DESSA MÅSTE VARA MED!!!!
-	glow->ApplyBlurOnGlowHorizontal(horizontalBlurVertexShader, horizontalBlurPixelShader);
-	glow->ApplyBlurOnGlowVertical(verticalBlurVertexShader, verticalBlurPixelShader);
-	
-
-	gDeviceContext->RSSetViewports(1, &vp);
-	//Set BackGround Color
-	//float clearColor[] = { 0, 0.3, 0.7f, 1.0f };
-	//gDeviceContext->ClearRenderTargetView(gBackRufferRenderTargetView, clearColor);
-	//gDeviceContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
-	gDeviceContext->OMSetRenderTargets(1, &gBackRufferRenderTargetView, gDepthStencilView);
-
-	tex = 0;
-
-	TurnZBufferOn();
-	//transparent objects
-	float blendFactor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	gDeviceContext->OMSetBlendState(transparency, blendFactor, 0xffffffff);
-
-	////rita ut glowen**********************************************************************************************
-	//gDeviceContext->IASetInputLayout(gVertexLayout);
-	glow->SetPosTexVertexLayout();
-	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-	//TurnZBufferOff();
-	gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
-	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
-	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
-	gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
-
-	gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
-	gDeviceContext->PSSetShaderResources(0, 1, &glow->shaderResourceView); //inte tempShader sen
-	gDeviceContext->IASetVertexBuffers(0, 1, &glow->planeVertexBuffer, &vertexPosTex, &offset2);
-	gDeviceContext->Draw(4, 0);
-	//*************************************************************************************************************
-
-
-	//for (int i = 0; i < transparentObjects.size(); i++){
-	//	if (transparentObjects[i]->GetActive() == true){
-
-	//		XMStoreFloat4x4(&WorldMatrix1.WorldSpace, XMMatrixTranspose(transparentObjects[i]->world));
-	//		gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
-	//		gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
-
-	//		tex = intArrayTex[transparentObjects[i]->indexT];
-	//		gDeviceContext->PSSetShaderResources(0, 1, &RSWArray[tex]);
-	//		gDeviceContext->IASetVertexBuffers(0, 1, &transparentObjects[i]->vertexBuffer, &vertexSize2, &offset2);
-
-	//		gDeviceContext->Draw(transparentObjects[i]->nrElements * 3, 0);
-	//	}
-	//}
-
-	gDeviceContext->OMSetBlendState(0, 0, 0xffffffff); //ingen blending, denna ändras sen i slutet till transparenta objekt (y)
-
+	RenderWireFrame();
 	//Render Heightmap´s
-	//for (int i = 0; i < heightMapObjects.size(); i++)
-	//{
-	//	UINT32 vertexSize = sizeof(float)* 10;
-	//	UINT32 offset = 0;
-
-	//	XMStoreFloat4x4(&WorldMatrixWF.WorldSpace, XMMatrixTranspose(identityM));
-	//	gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
-	//	gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
-
-	//	gDeviceContext->UpdateSubresource(heightmapInfoConstant, 0, NULL, &heightMapObjects[i]->HMInfoConstant, 0, 0);
-	//	gDeviceContext->PSSetConstantBuffers(3, 1, &heightmapInfoConstant);
-
-
-	//	gDeviceContext->IASetInputLayout(gSplatmapLayout);
-	//	gDeviceContext->IASetVertexBuffers(0, 1, &heightMapObjects[i]->gVertexBuffer, &vertexSize, &offset);
-	//	gDeviceContext->IASetIndexBuffer(heightMapObjects[i]->gIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-	//	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	//	gDeviceContext->VSSetShader(splatMapVertexShader, nullptr, 0);
-	//	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
-	//	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
-	//	gDeviceContext->GSSetShader(nullptr, nullptr, 0);
-	//	//gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
-	//	gDeviceContext->PSSetShader(splatMapPixelShader, nullptr, 0);
-	//	gDeviceContext->PSSetSamplers(8, 1, &sampState2); //clamp 
-	//	gDeviceContext->PSSetSamplers(9, 1, &sampState1); //wrap samp
-	//	//Bind texture to object
-	//	//gDeviceContext->PSSetShaderResources(0, 1, &ddsTex1);
-	//	gDeviceContext->PSSetShaderResources(0, 1, &heightMapObjects[i]->tex1shaderResourceView);
-	//	gDeviceContext->PSSetShaderResources(1, 1, &heightMapObjects[i]->tex2shaderResourceView);
-	//	gDeviceContext->PSSetShaderResources(2, 1, &heightMapObjects[i]->tex3shaderResourceView);
-	//	gDeviceContext->PSSetShaderResources(3, 1, &heightMapObjects[i]->splatshaderResourceView);
-
-	//	//gDeviceContext->PSSetShaderResources(0, 1, &var.splatshaderResourceView);
-
-	//	gDeviceContext->DrawIndexed((heightMapObjects[i]->nmrElement), 0, 0);
-	//}
-
-	////WIREFRAME!!!
-	//gDeviceContext->PSSetSamplers(8, 1, &sampState2);
-	//gDeviceContext->VSSetShader(gWireFrameVertexShader, nullptr, 0);
-	//gDeviceContext->PSSetShader(gWireFramePixelShader, nullptr, 0);
-	//gDeviceContext->IASetInputLayout(gWireFrameLayout);
-	//gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
-	//UINT32 vertexWireFrameSize = sizeof(float)* 3;
-
-	//for (int i = 0; i < renderObjects.size(); i++)
-	//{
-	//	XMStoreFloat4x4(&WorldMatrixWF.WorldSpace, XMMatrixTranspose(renderObjects[i]->world)); //använder wireframe matrisen istället här
-	//	gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrixWF, 0, 0);
-	//	gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
-
-	//	gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->boundingBoxVertexBuffer, &vertexWireFrameSize, &offset2);
-
-	//	gDeviceContext->Draw(16, 0);
-	//}
-
-
-	////quadträdet
-	//XMStoreFloat4x4(&WorldMatrixWF.WorldSpace, XMMatrixTranspose(identityM)); //använder wireframe matrisen istället här
-	//gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrixWF, 0, 0);
-	//gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
-
-	//for (int i = 0; i < quadTree->quadTreeBranches.size(); i++)
-	//{
-	//	if (quadTree->quadTreeBranches[i]->isInFrustum == true){
-	//		gDeviceContext->IASetVertexBuffers(0, 1, &quadTree->quadTreeBranches[i]->boxBuffer, &vertexWireFrameSize, &offset2);
-	//		gDeviceContext->Draw(16, 0);
-	//	}
-	//}
-
-
-
-
-	//******************************************************************************************************
-
+	RenderHeightmap();
+	
+	RenderGlow(); //RENDERA ALLA GLOW
 
 
 	
@@ -1603,4 +1452,165 @@ void RenderEngine::BlendStates(){
 
 	cmdesc.FrontCounterClockwise = false;
 	hr = gDevice->CreateRasterizerState(&cmdesc, &CWCullmode);
+}
+
+
+void RenderEngine::RenderGlow(){
+	UINT32 vertexPosTex = sizeof(float) * 5;
+	UINT32 vertexSize2 = sizeof(float) * 11;
+	UINT32 offset2 = 0;
+	int tex = 0;
+
+	//GLOWTEST!!!!!!!!!
+	//tex = 0;
+
+	gDeviceContext->PSSetSamplers(0, 1, &sampState1);
+	gDeviceContext->PSSetSamplers(1, 1, &sampState2);
+
+	//rendera alla objecten på glowmapen, endast ljusa färger kommer med på denna map!
+	glow->DrawToGlowMap();
+	for (int i = 0; i < renderObjects.size(); i++) //objekten i scenen
+	{
+		renderObjects[i]->CalculateWorld();
+		XMStoreFloat4x4(&WorldMatrix1.WorldSpace, XMMatrixTranspose(renderObjects[i]->world));
+		gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
+		gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
+
+		tex = intArrayTex[renderObjects[i]->indexT];
+		gDeviceContext->PSSetShaderResources(0, 1, &RSWArray[tex]);
+		gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->vertexBuffer, &vertexSize2, &offset2);
+
+		gDeviceContext->Draw(renderObjects[i]->nrElements * 3, 0);
+
+	}
+	//kör om med blur här!!!!!!!!!
+	gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
+	//BÅDA DESSA MÅSTE VARA MED!!!!
+	glow->ApplyBlurOnGlowHorizontal(horizontalBlurVertexShader, horizontalBlurPixelShader);
+	glow->ApplyBlurOnGlowVertical(verticalBlurVertexShader, verticalBlurPixelShader);
+
+
+	gDeviceContext->RSSetViewports(1, &vp);
+	//Set BackGround Color
+	//float clearColor[] = { 0, 0.3, 0.7f, 1.0f };
+	//gDeviceContext->ClearRenderTargetView(gBackRufferRenderTargetView, clearColor);
+	//gDeviceContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+	gDeviceContext->OMSetRenderTargets(1, &gBackRufferRenderTargetView, gDepthStencilView);
+
+	TurnZBufferOn();
+	//transparent objects
+	float blendFactor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	gDeviceContext->OMSetBlendState(transparency, blendFactor, 0xffffffff);
+
+	////rita ut glowen**********************************************************************************************
+	//gDeviceContext->IASetInputLayout(gVertexLayout);
+	glow->SetPosTexVertexLayout();
+	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	//TurnZBufferOff();
+	gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
+	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
+	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
+	gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
+
+	gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
+	gDeviceContext->PSSetShaderResources(0, 1, &glow->shaderResourceView); //inte tempShader sen
+	gDeviceContext->IASetVertexBuffers(0, 1, &glow->planeVertexBuffer, &vertexPosTex, &offset2);
+	gDeviceContext->Draw(4, 0);
+	//*************************************************************************************************************
+
+
+	//for (int i = 0; i < transparentObjects.size(); i++){
+	//	if (transparentObjects[i]->GetActive() == true){
+
+	//		XMStoreFloat4x4(&WorldMatrix1.WorldSpace, XMMatrixTranspose(transparentObjects[i]->world));
+	//		gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
+	//		gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
+
+	//		tex = intArrayTex[transparentObjects[i]->indexT];
+	//		gDeviceContext->PSSetShaderResources(0, 1, &RSWArray[tex]);
+	//		gDeviceContext->IASetVertexBuffers(0, 1, &transparentObjects[i]->vertexBuffer, &vertexSize2, &offset2);
+
+	//		gDeviceContext->Draw(transparentObjects[i]->nrElements * 3, 0);
+	//	}
+	//}
+
+	gDeviceContext->OMSetBlendState(0, 0, 0xffffffff); //ingen blending, denna ändras sen i slutet till transparenta objekt (y)
+
+}
+
+
+void RenderEngine::RenderWireFrame(){
+	//WIREFRAME!!!
+	UINT32 offset2 = 0;
+	gDeviceContext->PSSetSamplers(8, 1, &sampState2);
+	gDeviceContext->VSSetShader(gWireFrameVertexShader, nullptr, 0);
+	gDeviceContext->PSSetShader(gWireFramePixelShader, nullptr, 0);
+	gDeviceContext->IASetInputLayout(gWireFrameLayout);
+	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
+	UINT32 vertexWireFrameSize = sizeof(float)* 3;
+
+	for (int i = 0; i < renderObjects.size(); i++)
+	{
+		XMStoreFloat4x4(&WorldMatrixWF.WorldSpace, XMMatrixTranspose(renderObjects[i]->world)); //använder wireframe matrisen istället här
+		gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrixWF, 0, 0);
+		gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
+
+		gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->boundingBoxVertexBuffer, &vertexWireFrameSize, &offset2);
+
+		gDeviceContext->Draw(16, 0);
+	}
+
+
+	//quadträdet
+	XMStoreFloat4x4(&WorldMatrixWF.WorldSpace, XMMatrixTranspose(identityM)); //använder wireframe matrisen istället här
+	gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrixWF, 0, 0);
+	gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
+
+	for (int i = 0; i < quadTree->quadTreeBranches.size(); i++)
+	{
+		if (quadTree->quadTreeBranches[i]->isInFrustum == true){
+			gDeviceContext->IASetVertexBuffers(0, 1, &quadTree->quadTreeBranches[i]->boxBuffer, &vertexWireFrameSize, &offset2);
+			gDeviceContext->Draw(16, 0);
+		}
+	}
+}
+
+void RenderEngine::RenderHeightmap(){
+	for (int i = 0; i < heightMapObjects.size(); i++)
+	{
+		UINT32 vertexSize = sizeof(float) * 10;
+		UINT32 offset = 0;
+
+		XMStoreFloat4x4(&WorldMatrixWF.WorldSpace, XMMatrixTranspose(identityM));
+		gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
+		gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
+
+		gDeviceContext->UpdateSubresource(heightmapInfoConstant, 0, NULL, &heightMapObjects[i]->HMInfoConstant, 0, 0);
+		gDeviceContext->PSSetConstantBuffers(3, 1, &heightmapInfoConstant);
+
+
+		gDeviceContext->IASetInputLayout(gSplatmapLayout);
+		gDeviceContext->IASetVertexBuffers(0, 1, &heightMapObjects[i]->gVertexBuffer, &vertexSize, &offset);
+		gDeviceContext->IASetIndexBuffer(heightMapObjects[i]->gIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+		gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		gDeviceContext->VSSetShader(splatMapVertexShader, nullptr, 0);
+		gDeviceContext->HSSetShader(nullptr, nullptr, 0);
+		gDeviceContext->DSSetShader(nullptr, nullptr, 0);
+		gDeviceContext->GSSetShader(nullptr, nullptr, 0);
+		//gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
+		gDeviceContext->PSSetShader(splatMapPixelShader, nullptr, 0);
+		gDeviceContext->PSSetSamplers(8, 1, &sampState2); //clamp 
+		gDeviceContext->PSSetSamplers(9, 1, &sampState1); //wrap samp
+		//Bind texture to object
+		//gDeviceContext->PSSetShaderResources(0, 1, &ddsTex1);
+		gDeviceContext->PSSetShaderResources(0, 1, &heightMapObjects[i]->tex1shaderResourceView);
+		gDeviceContext->PSSetShaderResources(1, 1, &heightMapObjects[i]->tex2shaderResourceView);
+		gDeviceContext->PSSetShaderResources(2, 1, &heightMapObjects[i]->tex3shaderResourceView);
+		gDeviceContext->PSSetShaderResources(3, 1, &heightMapObjects[i]->splatshaderResourceView);
+
+		//gDeviceContext->PSSetShaderResources(0, 1, &var.splatshaderResourceView);
+
+		gDeviceContext->DrawIndexed((heightMapObjects[i]->nmrElement), 0, 0);
+	}
 }

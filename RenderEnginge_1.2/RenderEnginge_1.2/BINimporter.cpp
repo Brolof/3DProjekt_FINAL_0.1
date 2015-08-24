@@ -238,7 +238,7 @@ void BINimporter::ImportBIN(ID3D11Device* gDevice, char* fileName){
 		//adda dem på listorna
 		if (meshType == 0 || meshType < 0 || meshType == 1){ //static
 			BoundingBox bTemp;
-			bTemp.Center = XMFLOAT3(centerX, centerY, centerZ);
+			bTemp.Center = XMFLOAT3(centerX, centerY, -centerZ);
 			bTemp.Extents = XMFLOAT3(extentX, extentY, extentZ);
 
 			GameObjects* tempP = new GameObjects(meshVertexBuffer, bTemp, false, bTemp.Center, true, false);

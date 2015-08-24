@@ -94,7 +94,24 @@ public:
 		CreateViewPort();
 		CreateTextures();
 	}
-	~Glow(){}
+	~Glow(){
+		horizontalConstantBuffer->Release();
+		verticalConstantBuffer->Release();
+		glowConstantBuffer->Release();
+		renderTargetView->Release();
+		renderTargetTexture->Release();
+		shaderResourceView->Release();
+		depthStencilBuffer->Release();
+		depthStencilView->Release();
+
+		tempShaderResourceView->Release();
+		tempRenderTargetView->Release();
+		tempRenderTargetTexture->Release();
+
+		planeVertexBuffer->Release();
+		//glowBlob->Release(); releasas tidigare, så done!
+		glowInputLayout->Release();
+	}
 
 	void CreateViewPort();
 	void CreateTextures();

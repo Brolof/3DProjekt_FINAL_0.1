@@ -17,7 +17,11 @@ public:
 	struct QuadTreeInstance{
 		QuadTreeInstance(){}
 		~QuadTreeInstance(){
-			//boxBuffer->Release();
+			boxBuffer->Release();
+			/*for (int i = 0; i < children.size; i++){
+				delete children[i];
+			}*/
+			children.clear();
 		}
 
 		vector<GameObjects*> gameObjectsToRender;

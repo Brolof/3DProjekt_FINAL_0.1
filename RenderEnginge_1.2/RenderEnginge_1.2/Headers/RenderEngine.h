@@ -77,6 +77,9 @@ public:
 	int Run();
 	void Update(float dt);
 	void Render();
+	void RenderGlow(); //bara för att inte ha allt i render så flyttar jag denna delen till en egen funktion
+	void RenderWireFrame(); //denna oxå!!
+	void RenderHeightmap();
 	virtual void Release();
 	void InputHandler();
 

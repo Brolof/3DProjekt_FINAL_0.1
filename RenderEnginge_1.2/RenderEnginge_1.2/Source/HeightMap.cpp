@@ -102,13 +102,14 @@ bool HeightMap::LoadHeightMap(char* fileName){ //MAPPEN MÅSTE VARA LIKA STOR PÅ 
 		return false;
 
 	//fread - reads from a stream, (buffer, size, maxnrofitems, filestream)
-	fread(&bitmapFH, sizeof(BITMAPFILEHEADER), 1, pFile);
-	fread(&bitmapIH, sizeof(BITMAPINFOHEADER), 1, pFile);
+	fread(&bitmapFH, sizeof(BITMAPFILEHEADER), 1, pFile); //fileheadern håller information om själva filen
+	fread(&bitmapIH, sizeof(BITMAPINFOHEADER), 1, pFile); //infoheadern håller information om själva mapen, alltså texturen
 
 	hmI.terrainWidth = bitmapIH.biWidth;
 	hmI.terrainHeight = bitmapIH.biHeight;
 
-	int imageSize = hmI.terrainWidth * hmI.terrainHeight * 3; //rgb (*3)
+	int imageSize = hmI.terrainWidth * hmI.terrainHeight * 3; //rgb (*3) 24 bitars så alltså tre 3 byte per pixel
+	//int imageSize = bitmapIH.biSize;
 	heights = new unsigned char[imageSize]; //denna kommer hålla arrayen av chars kommer innehålla datan från bilden, 0-255 eller mer
 
 	int facesCount = (hmI.terrainWidth - 1) * (hmI.terrainHeight - 1) * 2;//*2 pga att man får antal quads, men vill ha i tris
@@ -117,8 +118,8 @@ bool HeightMap::LoadHeightMap(char* fileName){ //MAPPEN MÅSTE VARA LIKA STOR PÅ 
 	////SEEK_SET = Beginning of file, offset från beginning of file : bitmapFH.bfOffBits.    bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
 
 	//fread(heights, 1, imageSize, pFile); //store:a alla värden i heights
-	fseek(pFile, bitmapFH.bfOffBits, SEEK_SET);
-
+	fseek(pFile, bitmapFH.bfOffBits, SEEK_SET); //seek_set är början av filen, sen säger bitmapFH.bfOffBits hur stora headersen är, så den hoppas över dem
+	//fseek(pFile, sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER), SEEK_SET);
 	// Read in the bitmap image data.
 	fread(heights, 1, imageSize, pFile);
 

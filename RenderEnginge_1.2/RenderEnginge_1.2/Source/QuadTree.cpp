@@ -7,7 +7,7 @@ QuadTree::QuadTree(vector<GameObjects*> objectsInScene, int nrSplits, ID3D11Devi
 	CreateQuadTree(nrSplits, XMFLOAT3(0, 0, 0), XMFLOAT3(boxSize.x, boxSize.y, boxSize.z), gDevice);
 }
 
-void QuadTree::CreateQuadTree(int nrSplits, XMFLOAT3 center, XMFLOAT3 extents, ID3D11Device* gDevice){
+void QuadTree::CreateQuadTree(int nrSplits, XMFLOAT3 center, XMFLOAT3 extents, ID3D11Device* gDevice){ //roten
 
 	BoundingBox b(center, extents);
 
@@ -52,7 +52,7 @@ void QuadTree::CreateQuadTree(int nrSplits, XMFLOAT3 center, XMFLOAT3 extents, I
 	if (nrSplits <= 0) //om det är längst ner i trädet så innebär det att denne ska innehålla gameobjects (förutsatt att det finns några där :- ))
 		lB->TestContains(objectsInScene); //testa endast mot de längst ner ifall det finns några gameobjects i dem
 
-	thisBranch->children.push_back(lB); //släng in detta barnet i thisBranchen
+	thisBranch->children.push_back(lB); //släng in detta barnet i thisBranchen (som är parentet)
 	quadTreeBranches.push_back(lB);
 	//quads.push_back(lB);
 
