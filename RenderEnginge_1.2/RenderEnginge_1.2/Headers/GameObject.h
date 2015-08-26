@@ -95,8 +95,9 @@ public:
 	GameObjects(){}
 
 	~GameObjects(){
-		//vertexBuffer->Release();
-		//indexBuffer->Release();
+		vertexBuffer->Release();
+		boundingBoxVertexBuffer->Release();
+		indexBuffer->Release();
 	}
 
 	ID3D11Buffer* GetVertexBuffer(){
