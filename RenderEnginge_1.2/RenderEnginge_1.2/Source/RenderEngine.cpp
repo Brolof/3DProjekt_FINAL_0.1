@@ -938,22 +938,22 @@ void RenderEngine::Render(){
 	gDeviceContext->PSSetShaderResources(1, 1, &shadowTexture);
 	gDeviceContext->PSSetShaderResources(2, 1, &ddsTex3);
 
-	//for (int i = 0; i < renderObjects.size(); i++)
-	//{
-	//	/*if (renderObjects[i]->GetActive() == true && renderObjects[i]->isTransparent == false){
-	//		renderObjects[i]->CalculateWorld();*/
-	//	if (renderObjects[i]->GetActive() == true){
-	//		if (i == 4){
-	//			gDeviceContext->PSSetShaderResources(2, 1, &normalMap);
-	//		}
-	//		tex = intArrayTex[renderObjects[i]->indexT];
-	//		gDeviceContext->PSSetShaderResources(0, 1, &RSWArray[tex]);
+	for (int i = 0; i < renderObjects.size(); i++)
+	{
+		/*if (renderObjects[i]->GetActive() == true && renderObjects[i]->isTransparent == false){
+			renderObjects[i]->CalculateWorld();*/
+		if (renderObjects[i]->GetActive() == true){
+			if (i == 4){
+				gDeviceContext->PSSetShaderResources(2, 1, &normalMap);
+			}
+			tex = intArrayTex[renderObjects[i]->indexT];
+			gDeviceContext->PSSetShaderResources(0, 1, &RSWArray[tex]);
 
-	//		gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->vertexBuffer, &vertexSize2, &offset2);
-	//		gDeviceContext->Draw(renderObjects[i]->nrElements * 3, 0);
-	//	}
-	//}
-	//RenderWireFrame();
+			gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->vertexBuffer, &vertexSize2, &offset2);
+			gDeviceContext->Draw(renderObjects[i]->nrElements * 3, 0);
+		}
+	}
+	RenderWireFrame();
 	//Render Heightmap´s
 	RenderHeightmap();
 	

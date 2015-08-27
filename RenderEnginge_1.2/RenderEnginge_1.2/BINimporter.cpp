@@ -239,18 +239,18 @@ void BINimporter::ImportBIN(ID3D11Device* gDevice, char* fileName){
 		if (meshType == 0 || meshType < 0 || meshType == 1){ //static
 			BoundingBox bTemp;
 			bTemp.Center = XMFLOAT3(centerX, centerY, -centerZ);
-			bTemp.Extents = XMFLOAT3(extentX, extentY, extentZ);
-
-			GameObjects* tempP = new GameObjects(meshVertexBuffer, bTemp, false, bTemp.Center, true, false);
+			bTemp.Extents = XMFLOAT3(extentX/10, extentY/10, extentZ/10); //denna är bara för att kunna visa enklare
+			//bTemp.Extents = XMFLOAT3(extentX, extentY, extentZ);
+			GameObjects* tempP = new GameObjects(meshVertexBuffer, bTemp, false, bTemp.Center, true, true);
 			//TEST MED FRUSTUM CULLING
-			if (centerX < -1.2f){
-				tempP->SetStatic(true);
-				//tempP->isTransparent = true;
-			}
-			else{
-				tempP->SetStatic(false);
-				tempP->isTransparent = true; //bara för att testa och separera objekt, ta bort detta sen och ersätt med en import där man kan välja vad det ska va i maya
-			}
+			//if (centerX < -1.2f){
+			//	tempP->SetStatic(true);
+			//	//tempP->isTransparent = true;
+			//}
+			//else{
+			//	tempP->SetStatic(false);
+			//	tempP->isTransparent = true; //bara för att testa och separera objekt, ta bort detta sen och ersätt med en import där man kan välja vad det ska va i maya
+			//}
 			//****************************
 
 			tempP->material.Diffuse = KD;

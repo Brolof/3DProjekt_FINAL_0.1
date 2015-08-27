@@ -101,8 +101,8 @@ public:
 
 	//int frustumCheckIndex;
 	void StartFrustumTest(XMMATRIX proj, XMMATRIX view);
-	void CheckFrustumCollision(int nrSplits, int splitIndex, XMMATRIX proj, XMMATRIX view); //kollar vilka branches respektive objekt som befinner sig i frustumet, sätter objekten till active = true/false
-	void CheckFrustumCollision(int nrSplits, int splitIndex, XMMATRIX proj, XMMATRIX view, QuadTreeInstance *parent);
+	void CheckFrustumCollision(int nrSplits, XMMATRIX proj, XMMATRIX view); //kollar vilka branches respektive objekt som befinner sig i frustumet, sätter objekten till active = true/false
+	void CheckFrustumCollision(int nrSplits, QuadTreeInstance *parent);
 
 private:
 

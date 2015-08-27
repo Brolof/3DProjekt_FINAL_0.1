@@ -42,7 +42,7 @@ void QuadTree::CreateQuadTree(int nrSplits, XMFLOAT3 center, XMFLOAT3 extents, I
 	}
 }
 
-void QuadTree::CreateQuadTree(int nrSplits, XMFLOAT3 center, XMFLOAT3 extents, ID3D11Device* gDevice, QuadTreeInstance *thisBranch){
+void QuadTree::CreateQuadTree(int nrSplits, XMFLOAT3 center, XMFLOAT3 extents, ID3D11Device* gDevice, QuadTreeInstance *parent){
 
 	BoundingBox b(center, extents);
 
@@ -52,7 +52,7 @@ void QuadTree::CreateQuadTree(int nrSplits, XMFLOAT3 center, XMFLOAT3 extents, I
 	if (nrSplits <= 0) //om det är längst ner i trädet så innebär det att denne ska innehålla gameobjects (förutsatt att det finns några där :- ))
 		lB->TestContains(objectsInScene); //testa endast mot de längst ner ifall det finns några gameobjects i dem
 
-	thisBranch->children.push_back(lB); //släng in detta barnet i thisBranchen (som är parentet)
+	parent->children.push_back(lB); //släng in detta barnet i thisBranchen (som är parentet)
 	quadTreeBranches.push_back(lB);
 	//quads.push_back(lB);
 
@@ -90,7 +90,43 @@ void QuadTree::StartFrustumTest(XMMATRIX proj, XMMATRIX view){
 			objectsInScene[i]->visibleThisFrame = false;
 		}
 	}
-	CheckFrustumCollision(nrSplits, 0, proj, view);
+
+
+	BoundingFrustum f(proj);
+	//f.CreateFromMatrix(f, proj);
+	//f.Transform(f, view);
+	f.Transform(f, XMMatrixInverse(NULL, view));
+
+	frustum = f;
+
+	//testar mot rooten i trädet
+	ContainmentType test = frustum.Contains(quadTreeBranches[0]->bbox);
+	if (test == 2 || test == 1){ //hit på boxen, contains ELLER intersects	
+		quadTreeBranches[0]->isInFrustum = true;
+		if (nrSplits > 1){ //ska nog vara 0
+			int newNrSplits = nrSplits - 1; //vilket steg av branches man är på
+			//frustumCheckIndex += 4;
+			for (int i = 0; i < 4; i++){
+				CheckFrustumCollision(newNrSplits, quadTreeBranches[0]->children[i]);
+			}
+		}
+		else{ //botten på trädet			
+			for (int y = 0; y < quadTreeBranches[0]->gameObjectsToRender.size(); y++)//vad skall göras ifall den ena boxen säger att objektet ska renderas men den andra inte?
+			{
+				test = frustum.Contains(quadTreeBranches[0]->gameObjectsToRender[y]->bbox); //kan sätta index noll här för det ändå bara finns en branch i quadträdet om denna else satsen går igenom
+				if (test == 2 || test == 1){ //hit på objektets box
+					quadTreeBranches[0]->gameObjectsToRender[y]->visibleThisFrame = true;
+					quadTreeBranches[0]->gameObjectsToRender[y]->SetActive(true);
+				}				
+			}
+		}
+	}
+	else
+		quadTreeBranches[0]->isInFrustum = false;
+
+
+
+	//CheckFrustumCollision(nrSplits, proj, view);
 }
 
 //void QuadTree::CheckFrustumCollision(int nrSplits, int splitIndex, XMMATRIX proj, XMMATRIX view){
@@ -139,52 +175,13 @@ void QuadTree::StartFrustumTest(XMMATRIX proj, XMMATRIX view){
 //
 //}
 
-void QuadTree::CheckFrustumCollision(int nrSplits, int splitIndex, XMMATRIX proj, XMMATRIX view){
-	BoundingFrustum f;
-	f.CreateFromMatrix(f, proj);
-	f.Transform(f, view);
 
-	frustum = f;
+void QuadTree::CheckFrustumCollision(int nrSplits, QuadTreeInstance *thisBranch){
+	//BoundingFrustum f(proj);
+	////f.CreateFromMatrix(f, proj);
+	//f.Transform(f, view);
 
-	ContainmentType test = frustum.Contains(quadTreeBranches[0]->bbox);
-	if (test == 2 || test == 1){ //hit på boxen, contains ELLER intersects	
-		quadTreeBranches[0]->isInFrustum = true;
-		if (nrSplits > 1){ //ska nog vara 0
-			int newNrSplits = nrSplits - 1; //vilket steg av branches man är på
-			//frustumCheckIndex += 4;
-			for (int i = 0; i < 4; i++){
-				CheckFrustumCollision(newNrSplits, splitIndex, proj, view, quadTreeBranches[0]->children[i]);
-			}
-		}
-		else{ //botten på trädet			
-			for (int y = 0; y < quadTreeBranches[0]->gameObjectsToRender.size(); y++)//vad skall göras ifall den ena boxen säger att objektet ska renderas men den andra inte?
-			{
-				test = frustum.Contains(quadTreeBranches[0]->gameObjectsToRender[y]->bbox);
-				if (test == 2 || test == 1){ //hit på objektets box
-					quadTreeBranches[0]->gameObjectsToRender[y]->visibleThisFrame = true;
-					quadTreeBranches[0]->gameObjectsToRender[y]->SetActive(true);
-				}
-				else if (quadTreeBranches[0]->gameObjectsToRender[y]->visibleThisFrame == false){ //om ingen annan box har sagt att denna ska renderas denna framen
-
-					quadTreeBranches[0]->gameObjectsToRender[y]->SetActive(false);
-
-				}
-			}
-		}
-	}
-	else
-		quadTreeBranches[splitIndex]->isInFrustum = false;
-
-
-
-}
-
-void QuadTree::CheckFrustumCollision(int nrSplits, int splitIndex, XMMATRIX proj, XMMATRIX view, QuadTreeInstance *thisBranch){
-	BoundingFrustum f;
-	f.CreateFromMatrix(f, proj);
-	f.Transform(f, view);
-
-	frustum = f;
+	//frustum = f;
 
 	ContainmentType test = frustum.Contains(thisBranch->bbox);
 	if (test == 2 || test == 1){ //hit på boxen, contains ELLER intersects	
@@ -193,22 +190,18 @@ void QuadTree::CheckFrustumCollision(int nrSplits, int splitIndex, XMMATRIX proj
 			int newNrSplits = nrSplits - 1; //vilket steg av branches man är på
 			//frustumCheckIndex += 4;
 			for (int i = 0; i < 4; i++){
-				CheckFrustumCollision(newNrSplits, splitIndex, proj, view, thisBranch->children[i]);
+				CheckFrustumCollision(newNrSplits, thisBranch->children[i]);
 			}
 		}
 		else{ //botten på trädet			
 			for (int y = 0; y < thisBranch->gameObjectsToRender.size(); y++)//vad skall göras ifall den ena boxen säger att objektet ska renderas men den andra inte?
 			{
 				test = frustum.Contains(thisBranch->gameObjectsToRender[y]->bbox);
-				//if (test == 2 || test == 1){ //hit på objektets box
-				thisBranch->gameObjectsToRender[y]->visibleThisFrame = true;
-				thisBranch->gameObjectsToRender[y]->SetActive(true);
-				//}
-				//else if (thisBranch->gameObjectsToRender[y].visibleThisFrame == false){ //om ingen annan box har sagt att denna ska renderas denna framen
-
-				//thisBranch->gameObjectsToRender[y].SetActive(false);
-
-				//}
+				if (test == 2 || test == 1){ //hit på objektets box
+					thisBranch->gameObjectsToRender[y]->visibleThisFrame = true;
+					thisBranch->gameObjectsToRender[y]->SetActive(true);
+				}
+				
 
 			}
 		}
