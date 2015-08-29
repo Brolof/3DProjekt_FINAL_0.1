@@ -51,6 +51,7 @@ public:
 	// Get View/Proj matrices.
 	XMMATRIX View()const;
 	XMMATRIX Proj()const;
+	XMMATRIX ProjFrustum()const;
 	XMMATRIX ViewProj()const;
 
 	// Strafe/Walk the camera a distance d.
@@ -83,4 +84,5 @@ private:
 	// Cache View/Proj matrices.
 	XMFLOAT4X4 mView;
 	XMFLOAT4X4 mProj;
+	XMFLOAT4X4 mProjFrustum;
 };

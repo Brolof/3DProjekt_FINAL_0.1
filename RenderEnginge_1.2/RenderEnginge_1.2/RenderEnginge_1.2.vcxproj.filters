@@ -169,9 +169,6 @@
     <ClInclude Include="Headers\depthClass.h">
       <Filter>Header Files\Visual</Filter>
     </ClInclude>
-    <ClInclude Include="Headers\Cam.h">
-      <Filter>Header Files\Visual</Filter>
-    </ClInclude>
     <ClInclude Include="Headers\BINimporter.h">
       <Filter>Header Files\Main</Filter>
     </ClInclude>
@@ -200,6 +197,9 @@
       <Filter>Header Files\Visual</Filter>
     </ClInclude>
     <ClInclude Include="Headers\ShadowMap.h">
+      <Filter>Header Files\Visual</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Cam.h">
       <Filter>Header Files\Visual</Filter>
     </ClInclude>
   </ItemGroup>

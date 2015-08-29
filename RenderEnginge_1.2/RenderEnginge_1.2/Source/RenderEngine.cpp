@@ -877,7 +877,7 @@ void RenderEngine::Render(){
 	CamProjection = fpsCam.Proj();
 
 
-	quadTree->StartFrustumTest(CamProjection, CamView);
+	quadTree->StartFrustumTest(fpsCam.ProjFrustum(), CamView);
 
 	//NORMAL RENDER PASS FROM EYE POS 
 	gDeviceContext->OMSetRenderTargets(1, &gBackRufferRenderTargetView, gDepthStencilView);

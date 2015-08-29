@@ -123,6 +123,9 @@ void Camera::SetLens(float fovY, float aspect, float zn, float zf)
 
 	XMMATRIX P = XMMatrixPerspectiveFovLH(mFovY, mAspect, mNearZ, mFarZ);
 	XMStoreFloat4x4(&mProj, P);
+
+	XMMATRIX PFrustum = XMMatrixPerspectiveFovLH(mFovY/3.0f, mAspect, mNearZ, mFarZ);
+	XMStoreFloat4x4(&mProjFrustum, PFrustum);
 }
 
 void Camera::LookAt(FXMVECTOR pos, FXMVECTOR target, FXMVECTOR worldUp)
@@ -154,6 +157,11 @@ XMMATRIX Camera::View()const
 XMMATRIX Camera::Proj()const
 {
 	return XMLoadFloat4x4(&mProj);
+}
+
+XMMATRIX Camera::ProjFrustum()const
+{
+	return XMLoadFloat4x4(&mProjFrustum);
 }
 
 XMMATRIX Camera::ViewProj()const
