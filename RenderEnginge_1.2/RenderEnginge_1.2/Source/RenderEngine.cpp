@@ -110,11 +110,11 @@ bool RenderEngine::Init(){
 		renderObjects[i]->CreateBBOXVertexBuffer(gDevice);
 	}
 
-	quadTree = new QuadTree(renderObjects, 2, gDevice, XMFLOAT3(30, 30, 30));
+	quadTree = new QuadTree(renderObjects, 2, gDevice, XMFLOAT3(80, 80, 80));
 	glow = new Glow(gDevice, gDeviceContext, screen_Width, screen_Height, glowVertexShader, glowPixelShader, glowBlob);
 
 	
-	//ImportHeightmap("Textures/JäkligtFinHeightmap.bmp", L"Textures/stone_texture1.dds", L"Textures/happy-smug-sloth.dds", L"Textures/sky_textureball.dds", L"Textures/splatmap_texture.png");
+	//("Textures/JäkligtFinHeightmap3.bmp", L"Textures/stone_texture1.dds", L"Textures/happy-smug-sloth.dds", L"Textures/sky_textureball.dds", L"Textures/splatmap_texture.png");
 	ImportHeightmap("Textures/JäkligtFinHeightmap2.bmp", L"Textures/stone_texture1.dds", L"Textures/happy-smug-sloth.dds", L"Textures/sky_textureball.dds", L"Textures/splatmap_texture.png");
 
 	// CREATE INPUT OBJECT
@@ -817,6 +817,9 @@ void RenderEngine::Render(){
 	camPosition += moveLeftRight*camRight;
 	camPosition += moveBackForward*camForward;
 
+	heightMapObjects.at(0)->hm->GetHeightOnPosition(camPosition.x, camPosition.z, camPosition.y); //sätter camPosition.y till heightmap värdet om det finns något vid den positionen!!!!
+	
+
 	moveLeftRight = 0.0f;
 	moveBackForward = 0.0f;
 
@@ -954,10 +957,10 @@ void RenderEngine::Render(){
 		}
 	}
 	RenderWireFrame();
-	//Render Heightmap´s
+	
 	RenderHeightmap();
 	
-	//RenderGlow(); //RENDERA ALLA GLOW
+	RenderGlow(); //RENDERA ALLA GLOW
 
 
 	
@@ -1096,23 +1099,24 @@ void RenderEngine::ImportObj(char* geometryFileName, char* materialFileName, ID3
 //IMPORT HEIGHTMAPS
 
 void RenderEngine::ImportHeightmap(char* HeightMapFileName, wstring tex1File, wstring tex2File, wstring tex3File, wstring texSplatFile){
-	HeightMap ImportedHM(gDevice, gDeviceContext);
+	HeightMap *ImportedHM = new HeightMap(gDevice, gDeviceContext);
 
-	ImportedHM.LoadHeightMap(HeightMapFileName);
-	ImportedHM.LoadSplatMap(tex1File, tex2File, tex3File, texSplatFile);
+	ImportedHM->LoadHeightMap(HeightMapFileName);
+	ImportedHM->LoadSplatMap(tex1File, tex2File, tex3File, texSplatFile);
 
 	HeightMapObject *cHeightMap = new HeightMapObject;
 
-	cHeightMap->gIndexBuffer = ImportedHM.GetIndexBuffer();
-	cHeightMap->gVertexBuffer = ImportedHM.GetVertexBuffer();
-	cHeightMap->nmrElement = ImportedHM.GetNrElements();
+	cHeightMap->hm = ImportedHM;
+	cHeightMap->gIndexBuffer = ImportedHM->GetIndexBuffer();
+	cHeightMap->gVertexBuffer = ImportedHM->GetVertexBuffer();
+	cHeightMap->nmrElement = ImportedHM->GetNrElements();
 	//cHeightMap->gridSize = ImportedHM.GetGridSize();
 	//cHeightMap->vertexHeights = ImportedHM.GetHeights();
-	cHeightMap->HMInfoConstant.heightElements = ImportedHM.heightElements;
-	cHeightMap->tex1shaderResourceView = ImportedHM.GetTex1();
-	cHeightMap->tex2shaderResourceView = ImportedHM.GetTex2();
-	cHeightMap->tex3shaderResourceView = ImportedHM.GetTex3();
-	cHeightMap->splatshaderResourceView = ImportedHM.GetSplatTex();
+	cHeightMap->HMInfoConstant.heightElements = ImportedHM->heightElements;
+	cHeightMap->tex1shaderResourceView = ImportedHM->GetTex1();
+	cHeightMap->tex2shaderResourceView = ImportedHM->GetTex2();
+	cHeightMap->tex3shaderResourceView = ImportedHM->GetTex3();
+	cHeightMap->splatshaderResourceView = ImportedHM->GetSplatTex();
 
 	heightMapObjects.push_back(cHeightMap);
 
@@ -1474,8 +1478,7 @@ void RenderEngine::RenderGlow(){
 	int tex = 0;
 
 	//GLOWTEST!!!!!!!!!
-	//tex = 0;
-
+	
 	gDeviceContext->PSSetSamplers(0, 1, &sampState1);
 	gDeviceContext->PSSetSamplers(1, 1, &sampState2);
 
@@ -1483,10 +1486,7 @@ void RenderEngine::RenderGlow(){
 	glow->DrawToGlowMap();
 	for (int i = 0; i < renderObjects.size(); i++) //objekten i scenen
 	{
-		renderObjects[i]->CalculateWorld();
-		XMStoreFloat4x4(&WorldMatrix1.WorldSpace, XMMatrixTranspose(renderObjects[i]->world));
-		gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrix1, 0, 0);
-		gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
+		
 
 		tex = intArrayTex[renderObjects[i]->indexT];
 		gDeviceContext->PSSetShaderResources(0, 1, &RSWArray[tex]);
@@ -1563,8 +1563,8 @@ void RenderEngine::RenderWireFrame(){
 
 	for (int i = 0; i < renderObjects.size(); i++)
 	{
-		XMStoreFloat4x4(&WorldMatrixWF.WorldSpace, XMMatrixTranspose(renderObjects[i]->world)); //använder wireframe matrisen istället här
-		gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrixWF, 0, 0);
+		//XMStoreFloat4x4(&WorldMatrixWF.WorldSpace, XMMatrixTranspose(renderObjects[i]->world)); //använder wireframe matrisen istället här
+		//gDeviceContext->UpdateSubresource(gWorld, 0, NULL, &WorldMatrixWF, 0, 0);
 		gDeviceContext->VSSetConstantBuffers(0, 1, &gWorld);
 
 		gDeviceContext->IASetVertexBuffers(0, 1, &renderObjects[i]->boundingBoxVertexBuffer, &vertexWireFrameSize, &offset2);

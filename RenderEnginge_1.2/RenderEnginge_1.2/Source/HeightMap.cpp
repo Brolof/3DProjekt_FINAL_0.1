@@ -108,7 +108,13 @@ bool HeightMap::LoadHeightMap(char* fileName){ //MAPPEN MÅSTE VARA LIKA STOR PÅ 
 	hmI.terrainWidth = bitmapIH.biWidth;
 	hmI.terrainHeight = bitmapIH.biHeight;
 
-	int imageSize = hmI.terrainWidth * hmI.terrainHeight * 3; //rgb (*3) 24 bitars så alltså tre 3 byte per pixel
+	//int stride = hmI.terrainWidth*bitmapIH.biBitCount;  // bits per row
+	//stride += 31;            // round up to next 32-bit boundary
+	//stride /= 32;            // DWORDs per row
+	//stride *= 4;
+	//int stridePerRow = stride / hmI.terrainHeight;
+
+	DWORD imageSize = hmI.terrainWidth * hmI.terrainHeight * 3; //rgb (*3) 24 bitars så alltså tre 3 byte per pixel
 	//int imageSize = bitmapIH.biSize;
 	heights = new unsigned char[imageSize]; //denna kommer hålla arrayen av chars kommer innehålla datan från bilden, 0-255 eller mer
 
@@ -121,11 +127,11 @@ bool HeightMap::LoadHeightMap(char* fileName){ //MAPPEN MÅSTE VARA LIKA STOR PÅ 
 	fseek(pFile, bitmapFH.bfOffBits, SEEK_SET); //seek_set är början av filen, sen säger bitmapFH.bfOffBits hur stora headersen är, så den hoppas över dem
 	//fseek(pFile, sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER), SEEK_SET);
 	// Read in the bitmap image data.
-	fread(heights, 1, imageSize, pFile);
+	fread(heights, 1, imageSize, pFile); //extra bytes per rad
 
 	fclose(pFile);
 
-	std::vector<Vertex> vertecies;
+	
 	vertexHeightsArray.resize((hmI.terrainHeight * hmI.terrainWidth)); //den man går på!
 
 
@@ -134,20 +140,22 @@ bool HeightMap::LoadHeightMap(char* fileName){ //MAPPEN MÅSTE VARA LIKA STOR PÅ 
 
 	int offsetColors = 0; //används för att kunna hoppa över GB
 
-	int widthWhole = (int)hmI.terrainWidth, heightWhole = (int)hmI.terrainHeight; //terrain values in nr verts
+	widthWhole = (int)hmI.terrainWidth, heightWhole = (int)hmI.terrainHeight; //terrain values in nr verts
 	for (int h = 0; h < hmI.terrainHeight; h++){ //kanske inte -1
 		for (int w = 0; w < hmI.terrainWidth; w++){
 			Vertex tempV;
 			tempV.x = w * gridSize;
 			tempV.y = (float)heights[offsetColors];
 			tempV.y = tempV.y * heightMultiplier; //höjden			
-			vertexHeightsArray[h * widthWhole + w] = tempV.y;//fyller denna med alla höjd värden för att sedan användas när man går på terrängen
+			vertexHeightsArray[h * widthWhole + w] = tempV.y * heightMultiplier * 1000000;//fyller denna med alla höjd värden för att sedan användas när man går på terrängen
 			tempV.z = -h * gridSize; //minus becuz LH och RH
 
 			tempV.ny = 1;
 
 			vertecies.push_back(tempV);
 			offsetColors = offsetColors + 3;
+			//if (((offsetColors/3)%(hmI.terrainWidth+stridePerRow)) == 0) //ignoring stride, fel
+			//	offsetColors = offsetColors + 3;
 		}
 	}
 
@@ -324,4 +332,37 @@ bool HeightMap::LoadHeightMap(char* fileName){ //MAPPEN MÅSTE VARA LIKA STOR PÅ 
 	delete[] heights;
 	return true;
 
+}
+
+void HeightMap::GetHeightOnPosition(float x, float z, float& y){
+	//x /= (float)gridSize, z /= (float)gridSize;
+	z = -1 * z;
+	
+	
+
+	if (x < vertecies.at(0).x || x > vertecies.at(vertecies.size() - 1).x)
+		return;
+	if (z < vertecies.at(0).z || z > -(vertecies.at(vertecies.size() - 1).z))
+		return;
+	
+	float xPos = x / gridSize * widthWhole;
+	float zPos = z / gridSize * heightWhole;
+
+	int xPosI = (int)(floorf(xPos));
+	int zPosI = (int)(floorf(zPos));
+
+	if ((zPosI * widthWhole + xPosI) > 60)
+		int mojs = 0;
+
+	float quadHeight1 = vertexHeightsArray[zPosI * widthWhole + xPosI];
+	y = quadHeight1 + 0.2f;
+	return;
+	//float quadHeight2 = vertexHeightsArray[zPos * widthWhole + (xPos + 1)];
+	//float quadHeight3 = vertexHeightsArray[(zPos + 1) * widthWhole + xPos];
+	//float quadHeight4 = vertexHeightsArray[(zPos + 1) * widthWhole + (xPos + 1)];
+
+
+	//y = (quadHeight1 * (1 - x) + quadHeight2 * x) * (1 - z) + (quadHeight3 * (1 - x) + quadHeight4 * x) * z;
+	y += 0.2f;
+	
 }

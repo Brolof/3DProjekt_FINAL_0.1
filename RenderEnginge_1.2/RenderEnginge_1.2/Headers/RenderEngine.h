@@ -304,6 +304,7 @@ public:
 	void ImportHeightmap(char* HeightMapFileName, wstring tex1File, wstring tex2File, wstring tex3File, wstring texSplatFile);
 	//Struct for HeightMap
 	struct HeightMapObject{
+		HeightMap* hm; //the heightmap
 		ID3D11Buffer* gIndexBuffer;
 		ID3D11Buffer* gVertexBuffer;
 		int nmrElement;
@@ -312,7 +313,7 @@ public:
 		ID3D11ShaderResourceView* tex3shaderResourceView = nullptr;
 		ID3D11ShaderResourceView* splatshaderResourceView = nullptr;
 
-		HeightmapInfo HMInfoConstant;
+		HeightmapInfo HMInfoConstant; //constant buffer mojs
 	};
 	std::vector<HeightMapObject*> heightMapObjects;
 

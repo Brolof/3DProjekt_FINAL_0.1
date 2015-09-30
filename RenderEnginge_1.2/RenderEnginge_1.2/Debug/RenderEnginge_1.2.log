@@ -1,39 +1,12 @@
-﻿Build started 30.06.2015 17:40:22.
-     1>Project "C:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\RenderEnginge_1.2.vcxproj" on node 2 (Build target(s)).
-     1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /IC:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\Headers /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Source\HeightMap.cpp Source\OBJ.cpp Source\RenderEngine.cpp Source\Winmain.cpp Source\debugwindowclass.cpp Source\depthClass.cpp
-         depthClass.cpp
-     1>c:\oskar\3dprojectet_1.2\renderenginge_1.2\renderenginge_1.2\headers\depthclass.h(32): error C2719: 'unnamed-parameter': formal parameter with __declspec(align('16')) won't be aligned
-     1>c:\oskar\3dprojectet_1.2\renderenginge_1.2\renderenginge_1.2\headers\depthclass.h(39): error C2719: 'unnamed-parameter': formal parameter with __declspec(align('16')) won't be aligned
-     1>c:\oskar\3dprojectet_1.2\renderenginge_1.2\renderenginge_1.2\source\depthclass.cpp(96): error C2719: 'worldMatrix': formal parameter with __declspec(align('16')) won't be aligned
-     1>c:\oskar\3dprojectet_1.2\renderenginge_1.2\renderenginge_1.2\source\depthclass.cpp(96): error C2719: 'viewMatrix': formal parameter with __declspec(align('16')) won't be aligned
-     1>c:\oskar\3dprojectet_1.2\renderenginge_1.2\renderenginge_1.2\source\depthclass.cpp(96): error C2719: 'projectionMatrix': formal parameter with __declspec(align('16')) won't be aligned
-     1>c:\oskar\3dprojectet_1.2\renderenginge_1.2\renderenginge_1.2\source\depthclass.cpp(209): error C2719: 'worldMatrix': formal parameter with __declspec(align('16')) won't be aligned
-     1>c:\oskar\3dprojectet_1.2\renderenginge_1.2\renderenginge_1.2\source\depthclass.cpp(209): error C2719: 'viewMatrix': formal parameter with __declspec(align('16')) won't be aligned
-     1>c:\oskar\3dprojectet_1.2\renderenginge_1.2\renderenginge_1.2\source\depthclass.cpp(209): error C2719: 'projectionMatrix': formal parameter with __declspec(align('16')) won't be aligned
-         debugwindowclass.cpp
-     1>c:\oskar\3dprojectet_1.2\renderenginge_1.2\renderenginge_1.2\headers\debugwindowclass.h(14): fatal error C1083: Cannot open include file: 'SimpleMath.h': No such file or directory
-         Winmain.cpp
-     1>c:\oskar\3dprojectet_1.2\renderenginge_1.2\renderenginge_1.2\headers\heightmap.h(8): fatal error C1083: Cannot open include file: 'WICTextureLoader.h': No such file or directory
-         RenderEngine.cpp
-     1>c:\oskar\3dprojectet_1.2\renderenginge_1.2\renderenginge_1.2\headers\heightmap.h(8): fatal error C1083: Cannot open include file: 'WICTextureLoader.h': No such file or directory
-         HeightMap.cpp
-     1>c:\oskar\3dprojectet_1.2\renderenginge_1.2\renderenginge_1.2\headers\heightmap.h(8): fatal error C1083: Cannot open include file: 'WICTextureLoader.h': No such file or directory
-         Generating Code...
-         Compiling...
-         OBJ.cpp
-     1>c:\oskar\3dprojectet_1.2\renderenginge_1.2\renderenginge_1.2\source\obj.cpp(195): warning C4056: overflow in floating-point constant arithmetic
-         Generating Code...
-     1>c:\oskar\3dprojectet_1.2\renderenginge_1.2\renderenginge_1.2\source\obj.cpp(194): warning C4756: overflow in constant arithmetic
-     1>c:\oskar\3dprojectet_1.2\renderenginge_1.2\renderenginge_1.2\source\obj.cpp(194): warning C4756: overflow in constant arithmetic
-     1>c:\oskar\3dprojectet_1.2\renderenginge_1.2\renderenginge_1.2\source\obj.cpp(194): warning C4756: overflow in constant arithmetic
-     1>c:\oskar\3dprojectet_1.2\renderenginge_1.2\renderenginge_1.2\source\obj.cpp(195): warning C4756: overflow in constant arithmetic
-     1>c:\oskar\3dprojectet_1.2\renderenginge_1.2\renderenginge_1.2\source\obj.cpp(195): warning C4756: overflow in constant arithmetic
-     1>c:\oskar\3dprojectet_1.2\renderenginge_1.2\renderenginge_1.2\source\obj.cpp(195): warning C4756: overflow in constant arithmetic
-     1>c:\oskar\3dprojectet_1.2\renderenginge_1.2\renderenginge_1.2\source\obj.cpp(194): warning C4756: overflow in constant arithmetic
-     1>c:\oskar\3dprojectet_1.2\renderenginge_1.2\renderenginge_1.2\source\obj.cpp(195): warning C4756: overflow in constant arithmetic
-     1>Done Building Project "C:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\RenderEnginge_1.2.vcxproj" (Build target(s)) -- FAILED.
+﻿Build started 2015-09-01 12:15:25.
+     1>Project "C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\RenderEnginge_1.2.vcxproj" on node 2 (Build target(s)).
+     1>FxCompile:
+         C:\Program Files (x86)\Windows Kits\8.1\bin\x86\fxc.exe /nologo /E"main" /Fo "C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\Debug\GlowPS.cso" /Od /Zi FX_HLSL\GlowPS.hlsl 
+     1>C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\FX_HLSL\GlowPS.hlsl(22,27-37): error X4502: invalid vs_2_0 output semantic 'SV_TARGET'
+         
+         compilation failed; no code produced
+     1>Done Building Project "C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\RenderEnginge_1.2.vcxproj" (Build target(s)) -- FAILED.
 
 Build FAILED.
 
-Time Elapsed 00:00:06.59
+Time Elapsed 00:00:00.52

@@ -56,7 +56,7 @@ void gs_main(triangle GS_IN vertexInput[3], inout TriangleStream<GS_OUT> Triangl
 		float3 ViewDir = normalize(float3(vertexInput[0].pos.xyz) - float3(ViewPoint));
 
 
-		float NormalPointer = dot(ViewDir, NormalDir);
+		float NormalPointer = dot(ViewDir, NormalDir); //lika med 0 när de är 90
 	if(NormalPointer < 0){
 
 	for (int i = 0; i<3; i++)
