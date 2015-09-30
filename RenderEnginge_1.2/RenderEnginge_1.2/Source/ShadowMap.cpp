@@ -36,8 +36,8 @@ void ShadowMap::CreateShadowMap(ID3D11Device* gDevice,DirLight light,XMFLOAT4 li
 	// Viewport description
 	depthVP.Width = (float)SHADOWMAP_WIDTH;
 	depthVP.Height = (float)SHADOWMAP_HEIGHT;
-	depthVP.MinDepth = SHADOWMAP_NEAR;
-	depthVP.MaxDepth = SHADOWMAP_DEPTH;
+	depthVP.MinDepth = 0;
+	depthVP.MaxDepth = 1;
 	depthVP.TopLeftX = 0;
 	depthVP.TopLeftY = 0;
 

@@ -4,10 +4,17 @@
 
 struct VS_OUT
 {
-	float3 Pos		: POSITION;
+	float4 Pos		: POSITION;
 	float2 Tex		: TEXCOORD;
-	float4 tunormal : NORMAL;
+	float3 normals	: NORMAL;
+	float3 tangent : TANGENT;
+
+
+	//LightViewPos for shadow calc
 	float4 wPos		: SV_POSITION;
+	float4 lightViewPos : TEXCOORD1;
+	float3 lightPos : TEXCOORD2;
+	float3 viewDir : TEXCOORD3;
 };
 
 float4 PS_main(VS_OUT input) : SV_Target

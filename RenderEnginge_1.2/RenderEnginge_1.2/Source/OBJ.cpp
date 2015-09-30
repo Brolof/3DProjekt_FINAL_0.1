@@ -47,7 +47,7 @@ void OBJ::LoadObject(char* geometryFileName, char* materialFileName){
 			}
 
 			else if (line[0] == 'v' && line[1] == 'n' && line[2] == ' '){
-				sscanf_s(&line[0], "vn %f %f %f", &nx, &ny, &nz);
+				sscanf_s(&line[0], "vn %f %f %f", &nx, &ny, &nz); 
 				verteciesNor.push_back({ nx, ny, nz  });
 			}
 

@@ -22,8 +22,8 @@
 #include "OBJ.h"
 #include "Input.h"
 #include "HeightMap.h"
+#include "HeightMap2.h"
 #include "GameObject.h"
-#include "RenderToTexture.h"
 #include "debugwindowclass.h"
 #include "DDSTextureLoader.h"
 #include "WICTextureLoader.h"
@@ -33,7 +33,7 @@
 #include "ShadowMap.h"
 #include "QuadTree.h"
 #include "Glow.h"
-
+#include "Defered.h"
 //SIMPLIFIERS
 #include "SimpleMath.h"
 #include "SpriteFont.h"
@@ -62,9 +62,14 @@ public:
 	LPDIRECTINPUT8 DirectInput;
 
 	bool hit;
-
-
+	int renderBool = 0;
+	bool highttest = 0;
 	std::wostringstream outs;
+	float hTest = 0;
+	//FONTS AND BATCHES
+	std::unique_ptr<DirectX::SpriteFont> spritefont;
+	std::unique_ptr<DirectX::SpriteBatch> spriteBatch;
+
 public:
 	//Window Constructor
 	RenderEngine(HINSTANCE hInstance, std::string name, UINT scrW, UINT scrH);
@@ -79,7 +84,7 @@ public:
 	void Render();
 	virtual void Release();
 	void InputHandler();
-
+	void makelights();
 	// MESH IMPORTER
 	BINimporter theCustomImporter;
 	vector<int> intArrayTex;
@@ -100,6 +105,11 @@ public:
 	ShadowMap* shadowMap;
 	ID3D11ShaderResourceView* shadowTexture = nullptr;
 	
+	//DEFERED
+	DeferedRenderer* DeferedRender;
+
+	//NEW HEIGHTMAP
+	heightMap2* HeightMap2;
 
 public:
 	void AddObject(GameObjects gObj);
@@ -146,10 +156,6 @@ public:
 
 
 	HRESULT CompileShader(_In_ LPCWSTR srcFile, _In_ LPCSTR entryPoint, _In_ LPCSTR profile, _Outptr_ ID3DBlob** blob);
-	//Picking
-	void TestInterSection(float mouseX, float mouseY, Vector4& pickRayInWorldSpacePos, Vector4& pickRayInWorldSpaceDir);
-	float pick(Vector4 pickRayInWorldSpacePos, Vector4 pickRayInWorldSpaceDir, std::vector<XMFLOAT3>& vertPosArray, std::vector<int>& indexPosArray, XMMATRIX& worldSpace);
-	bool PointInTriangle(Vector4& triV1, Vector4& triV2, Vector4& triV3, Vector4& point);
 
 	//Message handler
 	LRESULT MsgProc(HWND hwindow, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -164,6 +170,7 @@ public:
 	struct World2
 	{
 		XMFLOAT4X4 WVP;
+		XMFLOAT4X4 World;
 	};
 	//Structs for cBuffers
 	struct World
@@ -188,6 +195,8 @@ public:
 	struct LightStruct{
 		
 		DirLight		lDir;
+		PointLight    pLights[200];
+		SpotLight spot;
 		//float	pad;
 
 	};
@@ -216,6 +225,7 @@ public:
 			pad1.z = 1;
 		}
 	};
+	HeightmapInfo hmapTest;
 	//ViewPoint struct
 	struct ViewBufferStruct{
 		XMFLOAT3 viewPoint;
@@ -324,7 +334,7 @@ public:
 	};
 
 
-	
+	void RenderHeightMap();
 	//Window handlers
 	HWND hWindow;
 	HINSTANCE hInstance;
@@ -379,7 +389,7 @@ public:
 	ID3D11ShaderResourceView* AdsResourceView = nullptr;
 	ID3D11ShaderResourceView* NpcRV = nullptr;
 	ID3D11ShaderResourceView** RSWArray = nullptr;
-
+	
 	//Vertex/geometry layout desc
 	ID3D11InputLayout* gVertexLayout = nullptr;
 	ID3D11InputLayout* gVertexLayout2 = nullptr;
@@ -392,6 +402,9 @@ public:
 	//Samplers
 	ID3D11SamplerState* sampState1 = nullptr;
 	ID3D11SamplerState* sampState2 = nullptr;
+	ID3D11BlendState* gBlendStateTransparency = nullptr;
+	ID3D11BlendState* gBlendStateDefault = nullptr;
+
 	//Shaders
 	ID3D11VertexShader* splatMapVertexShader = nullptr;
 	ID3D11VertexShader* gVertexShader = nullptr;
@@ -402,6 +415,8 @@ public:
 	ID3D11VertexShader* glowVertexShader = nullptr;
 	ID3D11VertexShader* horizontalBlurVertexShader = nullptr;
 	ID3D11VertexShader* verticalBlurVertexShader = nullptr;
+	ID3D11VertexShader* heightVertexShader = nullptr;
+
 
 	ID3D11GeometryShader* gGeometryShader = nullptr;
 	ID3D11GeometryShader* gBackFaceShader = nullptr;
@@ -417,8 +432,7 @@ public:
 	ID3D11PixelShader* glowPixelShader = nullptr;
 	ID3D11PixelShader* horizontalBlurPixelShader = nullptr;
 	ID3D11PixelShader* verticalBlurPixelShader = nullptr;
-
-
+	ID3D11PixelShader* heightPixelShader = nullptr;
 
 	//Render States
 	ID3D11RasterizerState* NoBcull;
@@ -437,7 +451,8 @@ public:
 	ID3D11DepthStencilState* m_depthStencilState;
 	void TurnZBufferOn();
 	void TurnZBufferOff();
-
+	void AlphaBlendOn();
+	void AlphaBlendOff();
 	// SHADER TESTER
 	ID3D11Buffer* shaderTest = nullptr;
 	//Structs for cBuffers
@@ -453,5 +468,22 @@ public:
 		int option8;
 	};
 	Options optionStruct;
+
+public:
+
+	int speedMultiplier=1;
+	void SetFonts();
+	float fps2;
+	//PICKING
+	BoundingBox testBox;
+	Ray testRay;
+	bool check ;
+	bool check2;
+	float tempDist;
+	bool picking;
+	//Picking
+	void TestInterSection(float mouseX, float mouseY, Vector4& pickRayInWorldSpacePos, Vector4& pickRayInWorldSpaceDir);
+	float pick(Vector4 pickRayInWorldSpacePos, Vector4 pickRayInWorldSpaceDir, std::vector<XMFLOAT3>& vertPosArray, std::vector<int>& indexPosArray, XMMATRIX& worldSpace);
+	bool PointInTriangle(Vector4& triV1, Vector4& triV2, Vector4& triV3, Vector4& point);
 
 };

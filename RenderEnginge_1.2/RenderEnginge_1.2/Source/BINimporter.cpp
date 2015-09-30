@@ -78,7 +78,9 @@ void BINimporter::ImportBIN(ID3D11Device* gDevice, char* fileName){
 			fbxFile.read((char*)&temp3.x, sizeof(float));
 			fbxFile.read((char*)&temp3.y, sizeof(float));
 			fbxFile.read((char*)&temp3.z, sizeof(float));
-			temp2.y = temp2.y*-1;
+				temp3.x = temp3.x*(1);
+				temp3.y = temp3.y*(1);
+				temp3.z = temp3.z*(-1);
 			verNor.push_back(temp3);
 		}
 
@@ -97,9 +99,7 @@ void BINimporter::ImportBIN(ID3D11Device* gDevice, char* fileName){
 			fbxFile.read((char*)&temp3.x, sizeof(float));
 			fbxFile.read((char*)&temp3.y, sizeof(float));
 			fbxFile.read((char*)&temp3.z, sizeof(float));
-			//temp3.x = temp3.x*(-1);
-		//	temp3.y = temp3.y*(-1);
-		//	temp3.z = temp3.z*(-1);
+		
 			verTangent.push_back(temp3);
 		}
 
@@ -238,7 +238,7 @@ void BINimporter::ImportBIN(ID3D11Device* gDevice, char* fileName){
 		//adda dem på listorna
 		if (meshType == 0 || meshType < 0 || meshType == 1){ //static
 			BoundingBox bTemp;
-			bTemp.Center = XMFLOAT3(centerX, centerY, centerZ);
+			bTemp.Center = XMFLOAT3(centerX, centerY, -centerZ);
 			bTemp.Extents = XMFLOAT3(extentX, extentY, extentZ);
 
 			GameObjects* tempP = new GameObjects(meshVertexBuffer, bTemp, false, bTemp.Center, true, false);
