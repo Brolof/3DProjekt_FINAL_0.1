@@ -21,13 +21,8 @@
 #include "GameTimer.h"
 #include "OBJ.h"
 #include "Input.h"
-#include "HeightMap.h"
-<<<<<<< HEAD
 #include "HeightMap2.h"
-=======
->>>>>>> Merged
 #include "GameObject.h"
-#include "debugwindowclass.h"
 #include "DDSTextureLoader.h"
 #include "WICTextureLoader.h"
 #include "BINimporter.h"
@@ -36,11 +31,8 @@
 #include "ShadowMap.h"
 #include "QuadTree.h"
 #include "Glow.h"
-<<<<<<< HEAD
 #include "Defered.h"
-=======
 
->>>>>>> Merged
 //SIMPLIFIERS
 #include "SimpleMath.h"
 #include "SpriteFont.h"
@@ -69,17 +61,14 @@ public:
 	LPDIRECTINPUT8 DirectInput;
 
 	bool hit;
-<<<<<<< HEAD
+
 	int renderBool = 0;
 	bool highttest = 0;
-	std::wostringstream outs;
 	float hTest = 0;
+
 	//FONTS AND BATCHES
 	std::unique_ptr<DirectX::SpriteFont> spritefont;
 	std::unique_ptr<DirectX::SpriteBatch> spriteBatch;
-=======
-
->>>>>>> Merged
 
 	std::wostringstream outs;
 public:
@@ -94,18 +83,18 @@ public:
 	int Run();
 	void Update(float dt);
 	void Render();
-<<<<<<< HEAD
-	virtual void Release();
-	void InputHandler();
+
 	void makelights();
-=======
+
+	//Render functions
 	void RenderGlow(); //bara för att inte ha allt i render så flyttar jag denna delen till en egen funktion
 	void RenderWireFrame(); //denna oxå!!
 	void RenderHeightmap();
 	virtual void Release();
 	void InputHandler();
+	void RenderHeightMap();
+	void SetFonts();
 
->>>>>>> Merged
 	// MESH IMPORTER
 	BINimporter theCustomImporter;
 	vector<int> intArrayTex;
@@ -177,13 +166,11 @@ public:
 
 
 	HRESULT CompileShader(_In_ LPCWSTR srcFile, _In_ LPCSTR entryPoint, _In_ LPCSTR profile, _Outptr_ ID3DBlob** blob);
-<<<<<<< HEAD
-=======
-	//Picking
-	void TestInterSection(float mouseX, float mouseY, Vector4& pickRayInWorldSpacePos, Vector4& pickRayInWorldSpaceDir);
-	float pick(Vector4 pickRayInWorldSpacePos, Vector4 pickRayInWorldSpaceDir, std::vector<XMFLOAT3>& vertPosArray, std::vector<int>& indexPosArray, XMMATRIX& worldSpace);
-	bool PointInTriangle(Vector4& triV1, Vector4& triV2, Vector4& triV3, Vector4& point);
->>>>>>> Merged
+
+	//Picking v2 ?????
+	//void TestInterSection(float mouseX, float mouseY, Vector4& pickRayInWorldSpacePos, Vector4& pickRayInWorldSpaceDir);
+	//float pick(Vector4 pickRayInWorldSpacePos, Vector4 pickRayInWorldSpaceDir, std::vector<XMFLOAT3>& vertPosArray, std::vector<int>& indexPosArray, XMMATRIX& worldSpace);
+	//bool PointInTriangle(Vector4& triV1, Vector4& triV2, Vector4& triV3, Vector4& point);
 
 	//Message handler
 	LRESULT MsgProc(HWND hwindow, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -195,14 +182,15 @@ public:
 	bool Bcullingcheck = FALSE;
 
 	////STRUCT DESCRIPTIONS FOR CBUFFERS
+
+	//Deffered cBuffer
 	struct World2
 	{
 		XMFLOAT4X4 WVP;
-<<<<<<< HEAD
 		XMFLOAT4X4 World;
-=======
->>>>>>> Merged
+
 	};
+
 	//Structs for cBuffers
 	struct World
 	{
@@ -256,10 +244,9 @@ public:
 			pad1.z = 1;
 		}
 	};
-<<<<<<< HEAD
+	//DONT TOUCH SOME KINDA HEIGHMAP STUFF ????
 	HeightmapInfo hmapTest;
-=======
->>>>>>> Merged
+
 	//ViewPoint struct
 	struct ViewBufferStruct{
 		XMFLOAT3 viewPoint;
@@ -268,8 +255,8 @@ public:
 
 	//STRUCTS FOR CBUFFERS
 	WorldWireFrame WorldMatrixWF;
-	HeightmapInfo heightmapInfo;
 	MatView MatBuffer1;
+	HeightmapInfo heightmapInfo;
 	World2 WorldMatrix2;
 	LightMatrix LightMatrix1;
 	LightStruct PrimaryLights;
@@ -345,10 +332,7 @@ public:
 	void ImportHeightmap(char* HeightMapFileName, wstring tex1File, wstring tex2File, wstring tex3File, wstring texSplatFile);
 	//Struct for HeightMap
 	struct HeightMapObject{
-<<<<<<< HEAD
-=======
-		HeightMap* hm; //the heightmap
->>>>>>> Merged
+
 		ID3D11Buffer* gIndexBuffer;
 		ID3D11Buffer* gVertexBuffer;
 		int nmrElement;
@@ -357,13 +341,13 @@ public:
 		ID3D11ShaderResourceView* tex3shaderResourceView = nullptr;
 		ID3D11ShaderResourceView* splatshaderResourceView = nullptr;
 
-<<<<<<< HEAD
+
 		HeightmapInfo HMInfoConstant;
-=======
-		HeightmapInfo HMInfoConstant; //constant buffer mojs
->>>>>>> Merged
+
+
 	};
 	std::vector<HeightMapObject*> heightMapObjects;
+
 
 	//quadtree!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	struct Float3{
@@ -376,11 +360,7 @@ public:
 	};
 
 
-<<<<<<< HEAD
-	void RenderHeightMap();
-=======
-	
->>>>>>> Merged
+
 	//Window handlers
 	HWND hWindow;
 	HINSTANCE hInstance;
@@ -461,11 +441,9 @@ public:
 	ID3D11VertexShader* glowVertexShader = nullptr;
 	ID3D11VertexShader* horizontalBlurVertexShader = nullptr;
 	ID3D11VertexShader* verticalBlurVertexShader = nullptr;
-<<<<<<< HEAD
+
 	ID3D11VertexShader* heightVertexShader = nullptr;
 
-=======
->>>>>>> Merged
 
 	ID3D11GeometryShader* gGeometryShader = nullptr;
 	ID3D11GeometryShader* gBackFaceShader = nullptr;
@@ -481,12 +459,8 @@ public:
 	ID3D11PixelShader* glowPixelShader = nullptr;
 	ID3D11PixelShader* horizontalBlurPixelShader = nullptr;
 	ID3D11PixelShader* verticalBlurPixelShader = nullptr;
-<<<<<<< HEAD
+
 	ID3D11PixelShader* heightPixelShader = nullptr;
-=======
-
-
->>>>>>> Merged
 
 	//Render States
 	ID3D11RasterizerState* NoBcull;
@@ -505,14 +479,13 @@ public:
 	ID3D11DepthStencilState* m_depthStencilState;
 	void TurnZBufferOn();
 	void TurnZBufferOff();
-<<<<<<< HEAD
+
 	void AlphaBlendOn();
 	void AlphaBlendOff();
-=======
 
->>>>>>> Merged
 	// SHADER TESTER
 	ID3D11Buffer* shaderTest = nullptr;
+
 	//Structs for cBuffers
 	struct Options
 	{
@@ -526,12 +499,11 @@ public:
 		int option8;
 	};
 	Options optionStruct;
-<<<<<<< HEAD
 
 public:
 
 	int speedMultiplier=1;
-	void SetFonts();
+	
 	float fps2;
 	//PICKING
 	BoundingBox testBox;
@@ -544,7 +516,5 @@ public:
 	void TestInterSection(float mouseX, float mouseY, Vector4& pickRayInWorldSpacePos, Vector4& pickRayInWorldSpaceDir);
 	float pick(Vector4 pickRayInWorldSpacePos, Vector4 pickRayInWorldSpaceDir, std::vector<XMFLOAT3>& vertPosArray, std::vector<int>& indexPosArray, XMMATRIX& worldSpace);
 	bool PointInTriangle(Vector4& triV1, Vector4& triV2, Vector4& triV3, Vector4& point);
-=======
->>>>>>> Merged
 
 };

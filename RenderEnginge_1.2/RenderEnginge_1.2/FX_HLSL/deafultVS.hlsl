@@ -15,12 +15,10 @@ struct VS_IN
 {
 	float3 Pos : POSITION;
 	float2 Tex : TEXCOORD;
-<<<<<<< HEAD
 	float3 normals : NORMAL;
 	float3 tangent : TANGENT;
-=======
 
->>>>>>> Merged
+
 };
 
 struct VS_OUT

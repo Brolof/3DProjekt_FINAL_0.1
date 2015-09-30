@@ -89,7 +89,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>F:\DirectX\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Fonts;D:\DirectX\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers;F:\DirectX\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers;D:\New3dProject\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers;C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers;F:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\Headers;C:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\Headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>F:\DirectX\3DProjektGitHub\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers;F:\DirectX\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Fonts;D:\DirectX\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers;F:\DirectX\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers;D:\New3dProject\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers;C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers;F:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\Headers;C:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\Headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -121,7 +121,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>D:\DirectX\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers;F:\DirectX\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers;D:\New3dProject\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers;C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers;F:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\Headers;C:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\Headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>F:\DirectX\3DProjektGitHub\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers;D:\DirectX\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers;F:\DirectX\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers;D:\New3dProject\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers;C:\Users\Simon\Downloads\Programmering\3DProjectFINAL\3DProjekt_FINAL_0.1\RenderEnginge_1.2\RenderEnginge_1.2\Headers;F:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\Headers;C:\OSKAR\3DProjectet_1.2\RenderEnginge_1.2\RenderEnginge_1.2\Headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -139,7 +139,6 @@
     <ClCompile Include="Source\Defered.cpp" />
     <ClCompile Include="Source\GameTimer.cpp" />
     <ClCompile Include="Source\Glow.cpp" />
-    <ClCompile Include="Source\HeightMap.cpp" />
     <ClCompile Include="Source\HeightMap2.cpp" />
     <ClCompile Include="Source\Input.cpp" />
     <ClCompile Include="Source\OBJ.cpp" />
@@ -255,6 +254,16 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
+    <FxCompile Include="FX_HLSL\GlowPS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\GlowVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="FX_HLSL\heightMapVertexShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -345,7 +354,6 @@
     <ClInclude Include="Headers\GameObject.h" />
     <ClInclude Include="Headers\GameTimer.h" />
     <ClInclude Include="Headers\Glow.h" />
-    <ClInclude Include="Headers\HeightMap.h" />
     <ClInclude Include="Headers\HeightMap2.h" />
     <ClInclude Include="Headers\Input.h" />
     <ClInclude Include="Headers\lights.h" />

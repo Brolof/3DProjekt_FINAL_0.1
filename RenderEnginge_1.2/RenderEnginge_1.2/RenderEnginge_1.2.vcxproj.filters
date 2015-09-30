@@ -42,16 +42,7 @@
     <ClCompile Include="Source\Cam.cpp">
       <Filter>Source Files\Visual</Filter>
     </ClCompile>
-    <ClCompile Include="Source\depthClass.cpp">
-      <Filter>Source Files\Visual</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\RenderToTexture.cpp">
-      <Filter>Source Files\Visual</Filter>
-    </ClCompile>
     <ClCompile Include="Source\GameTimer.cpp">
-      <Filter>Source Files\Main</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\HeightMap.cpp">
       <Filter>Source Files\Main</Filter>
     </ClCompile>
     <ClCompile Include="Source\Input.cpp">
@@ -80,6 +71,9 @@
     </ClCompile>
     <ClCompile Include="Source\Defered.cpp">
       <Filter>Source Files\Visual</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\HeightMap2.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -137,21 +131,33 @@
     <FxCompile Include="FX_HLSL\WireFrameVS.hlsl">
       <Filter>Resource Files\VertexShaders</Filter>
     </FxCompile>
+    <FxCompile Include="FX_HLSL\DeferedVertex.hlsl">
+      <Filter>Resource Files\VertexShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\DeferedFinalVS.hlsl">
+      <Filter>Resource Files\VertexShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\heightMapVertexShader.hlsl">
+      <Filter>Resource Files\VertexShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\DeferedFinalPS.hlsl">
+      <Filter>Resource Files\PixelShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\DeferedPixel.hlsl">
+      <Filter>Resource Files\PixelShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\heightMapPixelShader.hlsl">
+      <Filter>Resource Files\PixelShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\GlowVS.hlsl">
+      <Filter>Resource Files\VertexShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FX_HLSL\GlowPS.hlsl">
+      <Filter>Resource Files\PixelShaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Headers\RenderToTexture.h">
-      <Filter>Header Files\Visual</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\TextureLoader.h">
-      <Filter>Header Files\Visual</Filter>
-    </ClInclude>
     <ClInclude Include="Headers\lights.h">
-      <Filter>Header Files\Visual</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\HeightMap.h">
-      <Filter>Header Files\Visual</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\depthClass.h">
       <Filter>Header Files\Visual</Filter>
     </ClInclude>
     <ClInclude Include="Headers\Cam.h">
@@ -189,6 +195,9 @@
     </ClInclude>
     <ClInclude Include="Headers\Defered.h">
       <Filter>Header Files\Visual</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\HeightMap2.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

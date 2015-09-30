@@ -23,7 +23,7 @@ private:
 			blurAmount = 1.5f;
 			pad3[0] = 0.0f;
 			pad3[1] = 0.0f;
-			
+
 		}
 	};
 
@@ -41,19 +41,19 @@ private:
 		}
 	};
 	float glowThreshHold = 0.99f;
-	float glowValue = 0.0f;
-	
+	float glowValue = 1.0f;
+
 	BlurConstantStruct horizontalConstantStruct;
 	BlurConstantStruct verticalConstantStruct;
 	GlowConstantStruct glowConstantStruct;
 	ID3D11Buffer *horizontalConstantBuffer;
 	ID3D11Buffer *verticalConstantBuffer;
 	ID3D11Buffer *glowConstantBuffer;
-	
+
 	ID3D11Texture2D *renderTargetTexture; //texturen där glowen kommer ligga
 	ID3D11Texture2D *tempRenderTargetTexture;
 	ID3D11Texture2D *depthStencilBuffer;
-	
+
 
 	ID3D11InputLayout *glowInputLayout;
 	ID3DBlob* glowBlob;
@@ -61,7 +61,7 @@ private:
 	ID3D11Device *gDevice;
 	ID3D11DeviceContext *gDeviceContext;
 
-	
+
 
 public:
 	ID3D11RenderTargetView *renderTargetView; //det man ritar på
@@ -94,7 +94,24 @@ public:
 		CreateViewPort();
 		CreateTextures();
 	}
-	~Glow(){}
+	~Glow(){
+		horizontalConstantBuffer->Release();
+		verticalConstantBuffer->Release();
+		glowConstantBuffer->Release();
+		renderTargetView->Release();
+		renderTargetTexture->Release();
+		shaderResourceView->Release();
+		depthStencilBuffer->Release();
+		depthStencilView->Release();
+
+		tempShaderResourceView->Release();
+		tempRenderTargetView->Release();
+		tempRenderTargetTexture->Release();
+
+		planeVertexBuffer->Release();
+		//glowBlob->Release(); releasas tidigare, så done!
+		glowInputLayout->Release();
+	}
 
 	void CreateViewPort();
 	void CreateTextures();
@@ -102,4 +119,5 @@ public:
 	void DrawToGlowMap();
 	void ApplyBlurOnGlowHorizontal(ID3D11VertexShader *VS, ID3D11PixelShader *PS);
 	void ApplyBlurOnGlowVertical(ID3D11VertexShader *VS, ID3D11PixelShader *PS);
+	void SetPosTexVertexLayout();
 };

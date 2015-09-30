@@ -95,14 +95,11 @@ public:
 	GameObjects(){}
 
 	~GameObjects(){
-<<<<<<< HEAD
-		//vertexBuffer->Release();
-		//indexBuffer->Release();
-=======
+
 		vertexBuffer->Release();
 		boundingBoxVertexBuffer->Release();
 		indexBuffer->Release();
->>>>>>> Merged
+
 	}
 
 	ID3D11Buffer* GetVertexBuffer(){

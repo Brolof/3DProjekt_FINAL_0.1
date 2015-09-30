@@ -42,11 +42,9 @@ struct VS_OUT
 };
 
 
-<<<<<<< HEAD
-VS_OUT VS_main(VS_IN input)
-=======
+
 VS_OUT main(VS_IN input)
->>>>>>> Merged
+
 {
 	VS_OUT output;
 

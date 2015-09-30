@@ -1,16 +1,8 @@
 #include "LightHelper.fx"
 
-Texture2D RTexture : register(t0);
-Texture2D GTexture : register(t1);
-Texture2D BTexture : register(t2);
-Texture2D SplatTexture : register(t3);
-SamplerState normalSamState : register(s8);
-SamplerState wrapSamState : register(s9);
+Texture2D txDiffuse : register(t0);
+SamplerState sampAni: register(s0);
 
-cbuffer heightmapInfo : register(b5){
-	float heightElements;
-	float3 pad1;
-}
 
 
 struct GeoOutPut
@@ -23,22 +15,6 @@ struct GeoOutPut
 
 float4 PS_main(GeoOutPut input) : SV_Target
 {
-<<<<<<< HEAD
-	float4 diffuse = RTexture.Sample(normalSamState, input.Tex);
-	diffuse.a = 1.0f;
-
-	float4 rTex = RTexture.Sample(wrapSamState, input.Tex);
-		float4 gTex = GTexture.Sample(wrapSamState, input.Tex);
-		float4 bTex = BTexture.Sample(wrapSamState, input.Tex);
-		//float4 splatTex = SplatTexture.Sample(normalSamState, input.AlphaTex);
-		float4 splatTex = SplatTexture.Sample(normalSamState, input.Tex / heightElements); //heightelements är hur många vertiser det finns i ett led, uv delas alltså up mellan 0 och 1
-
-		//float4 finalTexture = (rTex * splatTex.r + gTex * splatTex.g + bTex * splatTex.b);
-
-		float4 finalTex = float4(rTex.x * splatTex.r + gTex.x * splatTex.g + bTex.x * splatTex.b, rTex.y * splatTex.r + gTex.y * splatTex.g + bTex.y * splatTex.b, rTex.z * splatTex.r + gTex.z * splatTex.g + bTex.z * splatTex.b, 1);
-		return float4(finalTex);
-=======
 	float4 diffuse = txDiffuse.Sample(sampAni, input.Tex);
 	return float4(diffuse);
->>>>>>> Merged
-}
+};

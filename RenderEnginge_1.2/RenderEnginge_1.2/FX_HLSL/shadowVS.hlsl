@@ -44,13 +44,13 @@ struct VS_OUT
 	float3 normals	: NORMAL;
 	float3 tangent : TANGENT;
 
-	
+
 	//LightViewPos for shadow calc
 	float4 wPos		: SV_POSITION;
 	float4 lightViewPos : TEXCOORD1;
 	float3 lightPos : TEXCOORD2;
 	float3 viewDir : TEXCOORD3;
-	
+
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -66,13 +66,13 @@ VS_OUT VS_main(VS_IN input)
 	float4 inputpos = float4(input.Pos, 1.0f);
 
 		float4 inputpos2 = float4(input.Pos, 1.0f);
-	// Change the position vector to be 4 units for proper matrix calculations.
-	
+		// Change the position vector to be 4 units for proper matrix calculations.
 
-	// Calculate the position of the vertex against the world, view, and projection matrices.
-	inputpos = mul(inputpos, WorldSpace);
+
+		// Calculate the position of the vertex against the world, view, and projection matrices.
+		inputpos = mul(inputpos, WorldSpace);
 	inputpos = mul(inputpos, View);
-	inputpos = mul(inputpos, Projection); 
+	inputpos = mul(inputpos, Projection);
 	output.wPos = inputpos;
 
 	output.Pos = mul(float4(input.Pos, 1.0f), WorldSpace);
@@ -97,11 +97,7 @@ VS_OUT VS_main(VS_IN input)
 	worldPosition = mul(input.Pos, WorldSpace);
 
 	// Determine the light position based on the position of the light and the position of the vertex in the world.
-<<<<<<< HEAD
 	output.lightPos = float3(0.0f, 20.0f, -10.0f);// -worldPosition.xyz;
-=======
-	output.lightPos = float3(0.0f, 8.0f, 0.0f);// -worldPosition.xyz;
->>>>>>> Merged
 	output.lightPos = normalize(output.lightPos);
 
 	// Determine the viewing direction based on the position of the camera and the position of the vertex in the world.
