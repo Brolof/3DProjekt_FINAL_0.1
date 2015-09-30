@@ -23,6 +23,7 @@ struct GeoOutPut
 
 float4 PS_main(GeoOutPut input) : SV_Target
 {
+<<<<<<< HEAD
 	float4 diffuse = RTexture.Sample(normalSamState, input.Tex);
 	diffuse.a = 1.0f;
 
@@ -36,4 +37,8 @@ float4 PS_main(GeoOutPut input) : SV_Target
 
 		float4 finalTex = float4(rTex.x * splatTex.r + gTex.x * splatTex.g + bTex.x * splatTex.b, rTex.y * splatTex.r + gTex.y * splatTex.g + bTex.y * splatTex.b, rTex.z * splatTex.r + gTex.z * splatTex.g + bTex.z * splatTex.b, 1);
 		return float4(finalTex);
+=======
+	float4 diffuse = txDiffuse.Sample(sampAni, input.Tex);
+	return float4(diffuse);
+>>>>>>> Merged
 }

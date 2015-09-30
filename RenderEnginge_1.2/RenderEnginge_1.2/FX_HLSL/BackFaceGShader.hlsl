@@ -38,6 +38,7 @@ struct GS_OUT
 void gs_main(triangle GS_IN vertexInput[3], inout TriangleStream<GS_OUT> TriangleOutput)
 {
 
+<<<<<<< HEAD
 
 	GS_OUT bthquads[3];
 
@@ -53,13 +54,31 @@ void gs_main(triangle GS_IN vertexInput[3], inout TriangleStream<GS_OUT> Triangl
 		float3 Vec1 = float3(vertexInput[1].pos.xyz) - float3(vertexInput[0].pos.xyz);
 		float3 Vec2 = float3(vertexInput[2].pos.xyz) - float3(vertexInput[0].pos.xyz);
 
+=======
 
+	GS_OUT bthquads[3];
+>>>>>>> Merged
+
+		//NORMAL MAPPING
+		float3 testTangent = float3(0, 0, 0);
+		float tangentTex1 = 0;
+		float tangentTex2 = 0;
+
+	    //	
+		float3 Vec1 = float3(vertexInput[1].pos.xyz) - float3(vertexInput[0].pos.xyz);
+		float3 Vec2 = float3(vertexInput[2].pos.xyz) - float3(vertexInput[0].pos.xyz);
+		tangentTex1 = (vertexInput[1].Tex.y) - (vertexInput[0].Tex.y);
+		tangentTex2 = (vertexInput[2].Tex.y) - (vertexInput[0].Tex.y);
+		testTangent = normalize(tangentTex2*Vec1 - tangentTex1*Vec2);
 		float3 NormalDir = normalize(cross(Vec1.xyz, Vec2.xyz));
+<<<<<<< HEAD
 
+=======
+>>>>>>> Merged
 		float3 ViewDir = normalize(float3(vertexInput[0].pos.xyz) - float3(ViewPoint));
 
 
-		float NormalPointer = dot(ViewDir, NormalDir);
+		float NormalPointer = dot(ViewDir, NormalDir); //lika med 0 när de är 90
 	if(NormalPointer < 0){
 
 	for (int i = 0; i<3; i++)
@@ -67,8 +86,13 @@ void gs_main(triangle GS_IN vertexInput[3], inout TriangleStream<GS_OUT> Triangl
 		
 		bthquads[i].pos = vertexInput[i].pos;
 		bthquads[i].Tex = vertexInput[i].Tex;
+<<<<<<< HEAD
 		bthquads[i].normals = float4(NormalDir, 1.0f);// vertexInput[i].normals;// (vertexInput[i].normals);
 		bthquads[i].tangent = (vertexInput[i].tangent);
+=======
+		bthquads[i].normals = vertexInput[i].normals;//float4(NormalDir, 1.0f);// (vertexInput[i].normals);
+		bthquads[i].tangent = testTangent;// (vertexInput[i].tangent);
+>>>>>>> Merged
 		bthquads[i].wpos = vertexInput[i].wpos;
 		bthquads[i].lightViewPos = vertexInput[i].lightViewPos;
 		bthquads[i].lightPos = vertexInput[i].lightPos;

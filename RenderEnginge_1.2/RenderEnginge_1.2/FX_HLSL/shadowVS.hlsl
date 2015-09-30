@@ -97,7 +97,11 @@ VS_OUT VS_main(VS_IN input)
 	worldPosition = mul(input.Pos, WorldSpace);
 
 	// Determine the light position based on the position of the light and the position of the vertex in the world.
+<<<<<<< HEAD
 	output.lightPos = float3(0.0f, 20.0f, -10.0f);// -worldPosition.xyz;
+=======
+	output.lightPos = float3(0.0f, 8.0f, 0.0f);// -worldPosition.xyz;
+>>>>>>> Merged
 	output.lightPos = normalize(output.lightPos);
 
 	// Determine the viewing direction based on the position of the camera and the position of the vertex in the world.

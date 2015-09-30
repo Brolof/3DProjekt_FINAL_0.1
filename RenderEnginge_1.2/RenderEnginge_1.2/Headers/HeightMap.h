@@ -1,5 +1,12 @@
 #pragma once
 
+<<<<<<< HEAD
+=======
+#ifndef HEIGHTMAP_H
+#define HEIGHTMAP_H
+#endif
+
+>>>>>>> Merged
 #include <vector>
 #include <DirectXMath.h>
 #include <DirectXMathMatrix.inl>
@@ -14,6 +21,7 @@
 #include <windowsx.h>
 #include <string>
 #include "RenderEngine.h"
+
 
 
 
@@ -70,9 +78,9 @@ protected:
 	};
 
 	struct HeightMapInfo{
-		int terrainWidth;
-		int terrainHeight;
-		Float3 *heightMap;
+		DWORD terrainWidth;
+		DWORD terrainHeight;
+		//Float3 *heightMap;
 	};
 
 	unsigned char* heights; //kommer innehålla ett värde (en char) för varje pixel på heightmappen, det behövs bara ett då det är gråskala - höjd
@@ -118,9 +126,11 @@ public:
 		return splatshaderResourceView;
 	}
 
-	std::vector<int> GetHeights(){
+	std::vector<float> GetHeights(){
 		return vertexHeightsArray;
 	}
+
+	void GetHeightOnPosition(float x, float z, float& y);
 
 	int GetGridSize(){
 		return gridSize;
@@ -132,10 +142,12 @@ protected:
 
 	int nrElements;
 
-	int gridSize;
+	int gridSize; //avståndet mellan två vertiser
+	int widthWhole, heightWhole;
 	float heightMultiplier;
 
-	std::vector<int> vertexHeightsArray;
+	std::vector<Vertex> vertecies; //all the vertices
+	std::vector<float> vertexHeightsArray; //all the vertexheights
 
 	ID3D11Buffer* vertexBuffer = nullptr;
 	ID3D11Buffer* indexBuffer = nullptr;
