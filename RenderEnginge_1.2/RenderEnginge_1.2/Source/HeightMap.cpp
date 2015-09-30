@@ -108,7 +108,7 @@ bool HeightMap::LoadHeightMap(char* fileName){ //MAPPEN MÅSTE VARA LIKA STOR PÅ 
 	hmI.terrainWidth = bitmapIH.biWidth;
 	hmI.terrainHeight = bitmapIH.biHeight;
 
-	int imageSize = hmI.terrainWidth * hmI.terrainHeight * 3; //rgb (*3)
+	int imageSize = hmI.terrainWidth * hmI.terrainHeight * 3+1; //rgb (*3)
 	heights = new unsigned char[imageSize]; //denna kommer hålla arrayen av chars kommer innehålla datan från bilden, 0-255 eller mer
 
 	int facesCount = (hmI.terrainWidth - 1) * (hmI.terrainHeight - 1) * 2;//*2 pga att man får antal quads, men vill ha i tris
@@ -132,13 +132,12 @@ bool HeightMap::LoadHeightMap(char* fileName){ //MAPPEN MÅSTE VARA LIKA STOR PÅ 
 	heightElements = hmI.terrainWidth;
 
 	int offsetColors = 0; //används för att kunna hoppa över GB
-
 	int widthWhole = (int)hmI.terrainWidth, heightWhole = (int)hmI.terrainHeight; //terrain values in nr verts
 	for (int h = 0; h < hmI.terrainHeight; h++){ //kanske inte -1
 		for (int w = 0; w < hmI.terrainWidth; w++){
 			Vertex tempV;
 			tempV.x = w * gridSize;
-			tempV.y = (float)heights[offsetColors];
+			tempV.y = (float)heights[offsetColors]+4000;
 			tempV.y = tempV.y * heightMultiplier; //höjden			
 			vertexHeightsArray[h * widthWhole + w] = tempV.y;//fyller denna med alla höjd värden för att sedan användas när man går på terrängen
 			tempV.z = -h * gridSize; //minus becuz LH och RH
